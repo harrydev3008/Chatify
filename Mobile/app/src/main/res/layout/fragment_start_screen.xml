@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.StartScreenFragment">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Zola"
+        android:fontFamily="@font/be_vietnam_medium"
+        android:padding="4dp"
+        android:textStyle="bold"
+        android:textColor="@color/primary_color"
+        android:textSize="50dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/vp_starter"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_title" />
+
+    <me.relex.circleindicator.CircleIndicator3
+        android:id="@+id/circle_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:ci_drawable="@drawable/indicator_bg"
+        app:layout_constraintStart_toStartOf="@+id/vp_starter"
+        app:layout_constraintTop_toBottomOf="@+id/vp_starter" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_login"
+        android:layout_width="300dp"
+        android:layout_marginTop="40dp"
+        app:cornerRadius="50dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="@string/login"
+        android:textStyle="bold"
+        android:padding="15dp"
+        android:backgroundTint="@color/primary_color"
+        android:fontFamily="@font/be_vietnam"
+        android:textSize="24dp"
+        app:layout_constraintTop_toBottomOf="@+id/circle_indicator" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_register"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/be_vietnam"
+        android:padding="10dp"
+        app:backgroundTint="@null"
+        android:background="@drawable/button_outline"
+        android:text="@string/register"
+        android:textColor="#023047"
+        android:textSize="24dp"
+        android:layout_marginTop="10dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_login" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

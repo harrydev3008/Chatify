@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Zola</string>
+    <string name="slogan">Kết nối mọi lúc mọi nơi!</string>
+    <string name="login">Đăng nhập</string>
+    <string name="register">Đăng ký</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
