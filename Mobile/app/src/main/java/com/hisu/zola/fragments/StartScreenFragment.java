@@ -28,7 +28,9 @@ public class StartScreenFragment extends Fragment {
 
         binding.vpStarter.setAdapter(
                 new StarterSliderAdapter(
-                        List.of(R.mipmap.ic_launcher, R.mipmap.launcher_icon, R.mipmap.ic_launcher_round)
+                        List.of(R.drawable.audio_call,
+                                R.drawable.chat,
+                                R.drawable.video_call)
                 )
         );
 

@@ -4,10 +4,12 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/button_outline.xml" value="0.189" />
+        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/edit_text_outline.xml" value="0.148" />
+        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/edit_text_outline_focus.xml" value="0.1" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/indicator_bg.xml" value="0.2355" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/activity_main.xml" value="0.22604166666666667" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_home.xml" value="0.20833333333333334" />
-        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_login.xml" value="0.22604166666666667" />
+        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_login.xml" value="0.2" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_register.xml" value="0.20833333333333334" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_splash_screen.xml" value="0.20833333333333334" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_start_screen.xml" value="0.22604166666666667" />
