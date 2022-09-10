@@ -6,27 +6,13 @@
     android:layout_height="match_parent"
     tools:context=".fragments.StartScreenFragment">
 
-    <TextView
-        android:id="@+id/tv_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Zola"
-        android:fontFamily="@font/be_vietnam_medium"
-        android:padding="4dp"
-        android:textStyle="bold"
-        android:textColor="@color/primary_color"
-        android:textSize="50dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/vp_starter"
         android:layout_width="match_parent"
-        android:layout_height="350dp"
+        android:layout_height="400dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_title" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <me.relex.circleindicator.CircleIndicator3
         android:id="@+id/circle_indicator"
@@ -41,7 +27,7 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_login"
         android:layout_width="300dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="60dp"
         app:cornerRadius="50dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"

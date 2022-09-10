@@ -13,4 +13,9 @@
     <string name="have_account">Đã có tài khoản?</string>
     <string name="login_now">Đăng nhập ngay!</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="chat_msg_hint">Tin nhắn</string>
+
+    <!-- Notification Channels -->
+    <string name="system_noty_channel_id">zola notification id</string>
+    <string name="system_noty_channel_name">zola notification</string>
 </resources>

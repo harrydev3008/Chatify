@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.ConversationFragment">
+
+    <LinearLayout
+        android:id="@+id/chat_toolbar_container"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:background="@drawable/border_bottom"
+        android:layout_alignParentTop="true"
+        android:paddingHorizontal="8dp"
+        android:elevation="4dp">
+
+        <ImageView
+            android:id="@+id/btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_back_white"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:id="@+id/tv_username"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:fontFamily="@font/be_vietnam"
+            android:layout_height="match_parent"
+            android:text="Harry"
+            android:textSize="20dp"
+            android:layout_marginStart="10dp"
+            android:gravity="center|start"
+            android:textColor="@color/white"/>
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_conversation"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/chat_toolbar_container"
+        android:background="@color/darkBlack"
+        android:paddingHorizontal="4dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="2dp" />
+
+    <LinearLayout
+        android:id="@+id/chat_container"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/border_top"
+        android:paddingHorizontal="8dp">
+
+        <ImageView
+            android:id="@+id/btn_emoji"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_emoji"
+            android:layout_gravity="center"/>
+
+        <EditText
+            android:id="@+id/edt_chat"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:elevation="2dp"
+            android:background="@android:color/transparent"
+            android:fontFamily="@font/be_vietnam"
+            android:hint="@string/chat_msg_hint"
+            android:inputType="text"
+            android:padding="8dp"
+            android:textColor="@color/white"
+            android:textColorHighlight="@color/white"
+            android:textColorHint="@color/white"
+            android:textCursorDrawable="@null"
+            android:textSize="18dp" />
+
+        <ImageView
+            android:id="@+id/btn_send"
+            android:visibility="invisible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_send_msg"
+            android:layout_gravity="center"/>
+    </LinearLayout>
+
+</RelativeLayout>

@@ -32,6 +32,10 @@ public class LoginFragment extends Fragment {
         addToggleShowPasswordEvent();
         addSwitchToRegisterEvent();
 
+        binding.btnLogin.setOnClickListener(view -> {
+            addLoginEvent();
+        });
+
         return binding.getRoot();
     }
 
@@ -93,8 +97,9 @@ public class LoginFragment extends Fragment {
         String username = binding.edtUsername.getText().toString();
         String password = binding.edtPassword.getText().toString();
 
-        if (validateUserAccount(username, password))
-            mainActivity.setFragment(new HomeFragment());
+        if (validateUserAccount(username, password)) {
+            mainActivity.setFragment(new ConversationFragment());
+        }
     }
 
     /*
