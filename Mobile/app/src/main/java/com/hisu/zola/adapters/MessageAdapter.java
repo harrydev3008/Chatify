@@ -15,8 +15,11 @@ import java.util.List;
 
 public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private List<Message> messages;
-    private Context context;
+    public static final int MSG_SEND_TYPE = 0;
+    public static final int MSG_RECEIVE_TYPE = 1;
+
+    private final List<Message> messages;
+    private final Context context;
 
     public MessageAdapter(List<Message> messages, Context context) {
         this.messages = messages;
@@ -26,7 +29,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        if (viewType == 1)
+        if (viewType == MSG_SEND_TYPE)
             return new MessageSendViewHolder(LayoutChatSendBinding.inflate(
                     LayoutInflater.from(parent.getContext()), parent, false
             ));
@@ -41,7 +44,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         Message message = messages.get(position);
 
-        if(holder.getItemViewType() == 1) {
+        if(holder.getItemViewType() == MSG_SEND_TYPE) {
             ((MessageSendViewHolder) holder).binding.tvMsgSend.setText(message.getContent());
         }
         else {
@@ -51,7 +54,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public int getItemViewType(int position) {
-        return messages.get(position).getSender().equalsIgnoreCase("harry") ? 1 : 0;
+        return messages.get(position).getFrom().equalsIgnoreCase("1") ?
+                MSG_SEND_TYPE : MSG_RECEIVE_TYPE;
     }
 
     @Override
@@ -59,9 +63,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         return messages != null ? messages.size() : 0;
     }
 
-    public class MessageSendViewHolder extends RecyclerView.ViewHolder {
+    private static class MessageSendViewHolder extends RecyclerView.ViewHolder {
 
-        private LayoutChatSendBinding binding;
+        private final LayoutChatSendBinding binding;
 
         public MessageSendViewHolder(LayoutChatSendBinding binding) {
             super(binding.getRoot());
@@ -69,9 +73,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
-    public class MessageReceiveViewHolder extends RecyclerView.ViewHolder {
+    private static class MessageReceiveViewHolder extends RecyclerView.ViewHolder {
 
-        private LayoutChatReceiveBinding binding;
+        private final LayoutChatReceiveBinding binding;
 
         public MessageReceiveViewHolder(LayoutChatReceiveBinding binding) {
             super(binding.getRoot());
