@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:title="Message"
+        android:id="@+id/action_message"
+        android:icon="@drawable/ic_message"
+        />
+
+    <item
+        android:title="Contact"
+        android:id="@+id/action_contact"
+        android:icon="@drawable/ic_contact"
+        />
+
+    <item
+        android:title="Profile"
+        android:id="@+id/action_profile"
+        android:icon="@drawable/ic_profile"
+        />
+</menu>

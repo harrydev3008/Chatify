@@ -18,4 +18,9 @@
     <!-- Notification Channels -->
     <string name="system_noty_channel_id">zola notification id</string>
     <string name="system_noty_channel_name">zola notification</string>
+
+    <!-- Bottom navigation titles-->
+    <string name="action_message">Tin nhắn</string>
+    <string name="action_contact">Danh bạ</string>
+    <string name="action_profile">Cá nhân</string>
 </resources>

@@ -98,7 +98,7 @@ public class LoginFragment extends Fragment {
         String password = binding.edtPassword.getText().toString();
 
         if (validateUserAccount(username, password)) {
-            mainActivity.setFragment(new ConversationFragment());
+            mainActivity.setFragment(new HomeFragment());
         }
     }
 

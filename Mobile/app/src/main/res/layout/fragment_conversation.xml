@@ -9,9 +9,9 @@
         android:id="@+id/chat_toolbar_container"
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
-        android:background="@drawable/border_bottom"
+        android:background="@color/primary_color"
         android:layout_alignParentTop="true"
-        android:paddingHorizontal="8dp"
+        android:paddingHorizontal="12dp"
         android:elevation="4dp">
 
         <ImageView
@@ -19,19 +19,57 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_back_white"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            tools:ignore="ContentDescription"/>
 
-        <TextView
-            android:id="@+id/tv_username"
+        <LinearLayout
             android:layout_width="0dp"
-            android:layout_weight="1"
-            android:fontFamily="@font/be_vietnam"
             android:layout_height="match_parent"
-            android:text="Harry"
-            android:textSize="20dp"
-            android:layout_marginStart="10dp"
-            android:gravity="center|start"
-            android:textColor="@color/white"/>
+            android:layout_weight="1"
+            android:paddingEnd="16dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_username"
+                android:layout_width="match_parent"
+                android:fontFamily="@font/be_vietnam_medium"
+                android:layout_height="wrap_content"
+                android:text="Harry"
+                android:textSize="22dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:layout_marginStart="10dp"
+                android:gravity="center|start"
+                android:textColor="@color/white"/>
+
+            <TextView
+                android:id="@+id/tv_last_active"
+                android:layout_width="match_parent"
+                android:fontFamily="@font/be_vietnam"
+                android:layout_height="wrap_content"
+                android:text="Truy cập 37 phút trước"
+                android:textSize="14dp"
+                android:layout_marginStart="10dp"
+                android:gravity="center|start"
+                android:textColor="@color/gray_e5"/>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/btn_audio_call"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_audio_call"
+            android:layout_gravity="center"
+            tools:ignore="ContentDescription"/>
+
+        <ImageView
+            android:id="@+id/btn_video_call"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_video_call"
+            android:layout_marginStart="16dp"
+            android:layout_gravity="center"
+            tools:ignore="ContentDescription" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -39,10 +77,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/chat_toolbar_container"
-        android:background="@color/darkBlack"
-        android:paddingHorizontal="4dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="2dp" />
+        android:background="@color/chat_bg"
+        android:paddingHorizontal="6dp"
+        android:paddingVertical="4dp" />
 
     <LinearLayout
         android:id="@+id/chat_container"
@@ -50,7 +87,7 @@
         android:layout_height="50dp"
         android:orientation="horizontal"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/border_top"
+        android:background="@color/chat_msg_box_bg"
         android:paddingHorizontal="8dp">
 
         <ImageView
@@ -71,9 +108,9 @@
             android:hint="@string/chat_msg_hint"
             android:inputType="text"
             android:padding="8dp"
-            android:textColor="@color/white"
-            android:textColorHighlight="@color/white"
-            android:textColorHint="@color/white"
+            android:textColor="@color/chat_text_color"
+            android:textColorHighlight="@color/chat_text_hint_color"
+            android:textColorHint="@color/chat_text_hint_color"
             android:textCursorDrawable="@null"
             android:textSize="18dp" />
 
