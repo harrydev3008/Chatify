@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/conversation_parent"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginBottom="4dp"
+    android:gravity="center">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/iv_conversation_cover_photo"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@mipmap/app_launcher_icon"
+        app:civ_border_color="@color/gray"
+        app:civ_border_width="1dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/temp_container"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_marginStart="8dp"
+        android:layout_height="70dp"
+        android:paddingVertical="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/iv_conversation_cover_photo"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tv_conversation_name"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:fontFamily="@font/be_vietnam"
+            android:maxLines="1"
+            android:text="Harry Nguyen"
+            android:textColor="@color/darkBlack"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/temp_container"
+            app:layout_constraintTop_toTopOf="@+id/temp_container" />
+
+        <TextView
+            android:id="@+id/tv_conversation_active_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="59 phút"
+            android:fontFamily="@font/be_vietnam"
+            android:textSize="14dp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_conversation_name"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_conversation_name" />
+
+        <TextView
+            android:id="@+id/tv_last_msg"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:fontFamily="@font/be_vietnam"
+            android:text="Em ăn cơm chưa?"
+            android:textSize="18dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/tv_conversation_name" />
+
+        <TextView
+            android:id="@+id/tv_unread_msg_quantity"
+            android:layout_width="30dp"
+            android:layout_height="25dp"
+            android:text="1"
+            android:gravity="center"
+            android:fontFamily="@font/roboto"
+            android:textStyle="bold"
+            android:textSize="12dp"
+            android:visibility="invisible"
+            android:textColor="@color/white"
+            android:background="@drawable/unread_msg_badge"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_last_msg"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_last_msg" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>

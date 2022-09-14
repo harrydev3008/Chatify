@@ -6,27 +6,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.HomeFragment">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/app_bar_layout"
-        android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        android:background="@color/primary_color">
-
-        <androidx.appcompat.widget.SearchView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:searchIcon="@drawable/ic_search"/>
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_conversation_list"
+    <FrameLayout
+        android:id="@+id/home_view_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/navigation_menu"
-        android:layout_below="@+id/app_bar_layout"
-        android:paddingHorizontal="6dp"
-        android:paddingTop="6dp" />
+        android:layout_above="@+id/navigation_menu"/>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navigation_menu"

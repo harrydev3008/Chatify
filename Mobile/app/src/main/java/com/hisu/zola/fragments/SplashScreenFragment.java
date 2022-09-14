@@ -1,7 +1,9 @@
 package com.hisu.zola.fragments;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
@@ -11,33 +13,33 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.hisu.zola.MainActivity;
-import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentSplashScreenBinding;
 
+@SuppressLint("CustomSplashScreen")
 public class SplashScreenFragment extends Fragment {
 
-    private FragmentSplashScreenBinding binding;
-    private MainActivity mainActivity;
+    private FragmentSplashScreenBinding mBinding;
+    private MainActivity mMainActivity;
 
     public static final long DELAY_TIME = 2 * 1000; //2 secs
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mainActivity = (MainActivity) getActivity();
+        mMainActivity = (MainActivity) getActivity();
 
-        binding = FragmentSplashScreenBinding.inflate(inflater, container, false);
+        mBinding = FragmentSplashScreenBinding.inflate(inflater, container, false);
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
 
             if(isUserLoggedIn())
-                mainActivity.setFragment(new HomeFragment());
+                mMainActivity.setFragment(new HomeFragment());
             else
-                mainActivity.setFragment(new StartScreenFragment());
+                mMainActivity.setFragment(new StartScreenFragment());
 
         }, DELAY_TIME);
 
-        return binding.getRoot();
+        return mBinding.getRoot();
     }
 
 //  Todo: Write method to check user login/logout state

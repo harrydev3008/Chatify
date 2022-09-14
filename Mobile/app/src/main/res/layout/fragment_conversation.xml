@@ -76,16 +76,19 @@
         android:id="@+id/rv_conversation"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/chat_toolbar_container"
+        android:layout_above="@id/chat_container"
         android:background="@color/chat_bg"
+        android:clipToPadding="false"
         android:paddingHorizontal="6dp"
-        android:paddingVertical="4dp" />
+        android:paddingVertical="4dp"
+        android:paddingTop="?actionBarSize" />
 
     <LinearLayout
         android:id="@+id/chat_container"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:orientation="horizontal"
+        android:elevation="4dp"
         android:layout_alignParentBottom="true"
         android:background="@color/chat_msg_box_bg"
         android:paddingHorizontal="8dp">

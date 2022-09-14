@@ -2,6 +2,7 @@ package com.hisu.zola.fragments;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -17,16 +18,16 @@ import java.util.List;
 
 public class StartScreenFragment extends Fragment {
 
-    private FragmentStartScreenBinding binding;
-    private MainActivity mainActivity;
+    private FragmentStartScreenBinding mBinding;
+    private MainActivity mMainActivity;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = FragmentStartScreenBinding.inflate(inflater, container, false);
-        mainActivity = (MainActivity) getActivity();
+        mBinding = FragmentStartScreenBinding.inflate(inflater, container, false);
+        mMainActivity = (MainActivity) getActivity();
 
-        binding.vpStarter.setAdapter(
+        mBinding.vpStarter.setAdapter(
                 new StarterSliderAdapter(
                         List.of(R.drawable.audio_call,
                                 R.drawable.chat,
@@ -34,16 +35,16 @@ public class StartScreenFragment extends Fragment {
                 )
         );
 
-        binding.circleIndicator.setViewPager(binding.vpStarter);
+        mBinding.circleIndicator.setViewPager(mBinding.vpStarter);
 
-        binding.btnLogin.setOnClickListener(view -> {
-            mainActivity.setFragment(new LoginFragment());
+        mBinding.btnLogin.setOnClickListener(view -> {
+            mMainActivity.setFragment(new LoginFragment());
         });
 
-        binding.btnRegister.setOnClickListener(view -> {
-            mainActivity.setFragment(new RegisterFragment());
+        mBinding.btnRegister.setOnClickListener(view -> {
+            mMainActivity.setFragment(new RegisterFragment());
         });
 
-        return binding.getRoot();
+        return mBinding.getRoot();
     }
 }

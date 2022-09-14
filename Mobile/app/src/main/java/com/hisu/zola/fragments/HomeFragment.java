@@ -2,57 +2,64 @@ package com.hisu.zola.fragments;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
-
-import com.google.android.material.navigation.NavigationBarView;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentHomeBinding;
-import com.hisu.zola.util.NotificationUtil;
 
 public class HomeFragment extends Fragment {
 
-    private FragmentHomeBinding binding;
-    private MainActivity mainActivity;
+    private FragmentHomeBinding mBinding;
+    private MainActivity mMainActivity;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        mainActivity = (MainActivity) getActivity();
-        binding = FragmentHomeBinding.inflate(inflater, container, false);
+        mMainActivity = (MainActivity) getActivity();
+        mBinding = FragmentHomeBinding.inflate(inflater, container, false);
+
+        setChildrenFragment(new ConversationListFragment(), "Conversation");
 
         addSelectedActionForNavItem();
 
-        return binding.getRoot();
+        return mBinding.getRoot();
     }
 
     @SuppressLint("NonConstantResourceId")
     private void addSelectedActionForNavItem() {
-        binding.navigationMenu.setOnItemSelectedListener(item -> {
+        mBinding.navigationMenu.setOnItemSelectedListener(item -> {
             switch(item.getItemId()) {
                 case R.id.action_message: {
-                    Toast.makeText(mainActivity, "Message", Toast.LENGTH_SHORT).show();
+                    setChildrenFragment(new ConversationListFragment(), "Conversation");
+                    break;
                 }
 
                 case R.id.action_contact: {
-                    Toast.makeText(mainActivity, "Contacts", Toast.LENGTH_SHORT).show();
+                    setChildrenFragment(new ContactsFragment(), "Contacts");
+                    break;
                 }
 
                 case R.id.action_profile: {
-                    Toast.makeText(mainActivity, "Profile", Toast.LENGTH_SHORT).show();
+                    setChildrenFragment(new ProfileFragment(), "Profile");
+                    break;
                 }
             }
 
             return true;
         });
+    }
+
+    private void setChildrenFragment(Fragment fragment, String backStackName) {
+        getChildFragmentManager().beginTransaction()
+                .replace(mBinding.homeViewContainer.getId(), fragment)
+                .addToBackStack(backStackName)
+                .commit();
     }
 }

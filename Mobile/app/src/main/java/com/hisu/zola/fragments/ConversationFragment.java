@@ -15,7 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.hisu.zola.BuildConfig;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.adapters.MessageAdapter;
 import com.hisu.zola.databinding.FragmentConversationBinding;
@@ -23,7 +22,6 @@ import com.hisu.zola.entity.Conversation;
 import com.hisu.zola.entity.Message;
 import com.hisu.zola.util.ApiService;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,16 +31,26 @@ import retrofit2.Response;
 
 public class ConversationFragment extends Fragment {
 
-    private FragmentConversationBinding binding;
-    private MainActivity mainActivity;
-    private List<Message> messages;
+    private FragmentConversationBinding mBinding;
+    private MainActivity mMainActivity;
+    private List<Message> mMessages;
+
+    public static ConversationFragment newInstance(String conversationID) {
+        Bundle args = new Bundle();
+        args.putString("conversationID", conversationID);
+
+        ConversationFragment fragment = new ConversationFragment();
+        fragment.setArguments(args);
+
+        return fragment;
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        mainActivity = (MainActivity) getActivity();
-        binding = FragmentConversationBinding.inflate(inflater, container, false);
+        mMainActivity = (MainActivity) getActivity();
+        mBinding = FragmentConversationBinding.inflate(inflater, container, false);
 
         initRecyclerView();
 
@@ -54,72 +62,74 @@ public class ConversationFragment extends Fragment {
         addActionForSendMessageBtn();
         addToggleShowSendIcon();
 
-        loadConversation("1");
+        String conversationID = getArguments() != null ?
+                getArguments().getString("conversationID") : "";
 
-        return binding.getRoot();
+        loadConversation(conversationID);
+
+        return mBinding.getRoot();
     }
 
     private void initRecyclerView() {
-        binding.rvConversation.setLayoutManager(
+        mBinding.rvConversation.setLayoutManager(
                 new LinearLayoutManager(
-                        mainActivity, LinearLayoutManager.VERTICAL, false
+                        mMainActivity, LinearLayoutManager.VERTICAL, false
                 )
         );
 
-        messages = new ArrayList<>();
+        mMessages = new ArrayList<>();
     }
 
 //  Todo: fake conversation info
     private void getConversationInfo() {
-        binding.tvUsername.setText("Harry");
-        binding.tvLastActive.setText("Vừa mới truy cập");
+        mBinding.tvUsername.setText("Harry");
+        mBinding.tvLastActive.setText("Vừa mới truy cập");
     }
 
-//  Todo: will change later to go back to prev page
     private void addActionForBackBtn() {
-        binding.btnBack.setOnClickListener(view -> {
-            Toast.makeText(mainActivity, "Back to previous", Toast.LENGTH_SHORT).show();
+        mBinding.btnBack.setOnClickListener(view -> {
+            mMainActivity.getSupportFragmentManager().popBackStack();
         });
     }
 
     private void addActionForAudioCallBtn() {
-        binding.btnAudioCall.setOnClickListener(view -> {
-            Toast.makeText(mainActivity, "Audio call", Toast.LENGTH_SHORT).show();
+        mBinding.btnAudioCall.setOnClickListener(view -> {
+            Toast.makeText(mMainActivity, "Audio call", Toast.LENGTH_SHORT).show();
         });
     }
 
     private void addActionForVideoCallBtn() {
-        binding.btnVideoCall.setOnClickListener(view -> {
-            Toast.makeText(mainActivity, "Video call", Toast.LENGTH_SHORT).show();
+        mBinding.btnVideoCall.setOnClickListener(view -> {
+            Toast.makeText(mMainActivity, "Video call", Toast.LENGTH_SHORT).show();
         });
     }
 
     private void addActionForSendMessageBtn() {
-        binding.btnSend.setOnClickListener(view -> {
+        mBinding.btnSend.setOnClickListener(view -> {
             sendMessage(null);
         });
     }
 
     private void sendMessage(Message message) {
-        if(binding.btnSend.getVisibility() != View.VISIBLE) return;
+        if(mBinding.btnSend.getVisibility() != View.VISIBLE) return;
 
 //      Todo: send msg flow goes here
 
-        binding.edtChat.setText("");
+        mBinding.edtChat.setText("");
         closeSoftKeyboard();
-        binding.rvConversation.smoothScrollToPosition(messages.size() -1);
+        mBinding.rvConversation.smoothScrollToPosition(mMessages.size() -1);
     }
 
     private void closeSoftKeyboard() {
-        InputMethodManager manager = (InputMethodManager) mainActivity.getSystemService(
+        InputMethodManager manager = (InputMethodManager) mMainActivity.getSystemService(
                 Context.INPUT_METHOD_SERVICE
         );
 
-        manager.hideSoftInputFromWindow(binding.edtChat.getWindowToken(), 0);
+        manager.hideSoftInputFromWindow(mBinding.edtChat.getWindowToken(), 0);
     }
 
     private void addToggleShowSendIcon() {
-        binding.edtChat.addTextChangedListener(new TextWatcher() {
+        mBinding.edtChat.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
             }
@@ -133,9 +143,9 @@ public class ConversationFragment extends Fragment {
                 int textLength = editable.length();
 
                 if (textLength > 0)
-                    binding.btnSend.setVisibility(View.VISIBLE);
+                    mBinding.btnSend.setVisibility(View.VISIBLE);
                 else
-                    binding.btnSend.setVisibility(View.INVISIBLE);
+                    mBinding.btnSend.setVisibility(View.INVISIBLE);
             }
         });
     }
@@ -145,10 +155,11 @@ public class ConversationFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<Conversation> call, @NonNull Response<Conversation> response) {
                 if(response.isSuccessful()) {
-                    messages = response.body() != null ?
+                    mMessages = response.body() != null ?
                             response.body().getMessages() : new ArrayList<>();
 
-                    binding.rvConversation.setAdapter(new MessageAdapter(messages, mainActivity));
+                    mBinding.rvConversation.setAdapter(new MessageAdapter(mMessages, mMainActivity));
+                    mBinding.rvConversation.scrollToPosition(mMessages.size() - 1);
                 }
             }
 

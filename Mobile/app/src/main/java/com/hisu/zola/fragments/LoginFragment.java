@@ -16,15 +16,15 @@ import com.hisu.zola.databinding.FragmentLoginBinding;
 
 public class LoginFragment extends Fragment {
 
-    private FragmentLoginBinding binding;
-    private MainActivity mainActivity;
+    private FragmentLoginBinding mBinding;
+    private MainActivity mMainActivity;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        binding = FragmentLoginBinding.inflate(inflater, container, false);
-        mainActivity = (MainActivity) getActivity();
+        mBinding = FragmentLoginBinding.inflate(inflater, container, false);
+        mMainActivity = (MainActivity) getActivity();
 
         addChangeBackgroundColorOnFocusForUserNameEditText();
         addChangeBackgroundColorOnFocusForPasswordEditText();
@@ -32,35 +32,35 @@ public class LoginFragment extends Fragment {
         addToggleShowPasswordEvent();
         addSwitchToRegisterEvent();
 
-        binding.btnLogin.setOnClickListener(view -> {
+        mBinding.btnLogin.setOnClickListener(view -> {
             addLoginEvent();
         });
 
-        return binding.getRoot();
+        return mBinding.getRoot();
     }
 
     private void addChangeBackgroundColorOnFocusForUserNameEditText() {
-        binding.edtUsername.setOnFocusChangeListener((view, isFocus) -> {
+        mBinding.edtUsername.setOnFocusChangeListener((view, isFocus) -> {
             if (isFocus)
-                binding.edtUsername.setBackground(
-                        ContextCompat.getDrawable(mainActivity.getApplicationContext(),
+                mBinding.edtUsername.setBackground(
+                        ContextCompat.getDrawable(mMainActivity.getApplicationContext(),
                                 R.drawable.edit_text_outline_focus));
             else
-                binding.edtUsername.setBackground(
-                        ContextCompat.getDrawable(mainActivity.getApplicationContext(),
+                mBinding.edtUsername.setBackground(
+                        ContextCompat.getDrawable(mMainActivity.getApplicationContext(),
                                 R.drawable.edit_text_outline));
         });
     }
 
     private void addChangeBackgroundColorOnFocusForPasswordEditText() {
-        binding.edtPassword.setOnFocusChangeListener((view, isFocus) -> {
+        mBinding.edtPassword.setOnFocusChangeListener((view, isFocus) -> {
             if (isFocus)
-                binding.linearLayout.setBackground(
-                        ContextCompat.getDrawable(mainActivity.getApplicationContext(),
+                mBinding.linearLayout.setBackground(
+                        ContextCompat.getDrawable(mMainActivity.getApplicationContext(),
                                 R.drawable.edit_text_outline_focus));
             else
-                binding.linearLayout.setBackground(
-                        ContextCompat.getDrawable(mainActivity.getApplicationContext(),
+                mBinding.linearLayout.setBackground(
+                        ContextCompat.getDrawable(mMainActivity.getApplicationContext(),
                                 R.drawable.edit_text_outline));
         });
     }
@@ -69,36 +69,36 @@ public class LoginFragment extends Fragment {
         String showText = getString(R.string.show);
         String hideText = getString(R.string.hide);
 
-        binding.tvTogglePassword.setOnClickListener(view -> {
+        mBinding.tvTogglePassword.setOnClickListener(view -> {
 
-            if (binding.tvTogglePassword.getText().toString().equalsIgnoreCase(showText)) {
-                binding.tvTogglePassword.setText(hideText);
-                binding.edtPassword.setTransformationMethod(null);
+            if (mBinding.tvTogglePassword.getText().toString().equalsIgnoreCase(showText)) {
+                mBinding.tvTogglePassword.setText(hideText);
+                mBinding.edtPassword.setTransformationMethod(null);
             } else {
-                binding.tvTogglePassword.setText(showText);
-                binding.edtPassword.setTransformationMethod(new PasswordTransformationMethod());
+                mBinding.tvTogglePassword.setText(showText);
+                mBinding.edtPassword.setTransformationMethod(new PasswordTransformationMethod());
             }
 
-            binding.edtPassword.setSelection(binding.edtPassword.getText().length());
+            mBinding.edtPassword.setSelection(mBinding.edtPassword.getText().length());
         });
     }
 
     private void addSwitchToRegisterEvent() {
-        binding.tvSwitchToRegister.setOnClickListener(view -> {
-            mainActivity.getSupportFragmentManager()
+        mBinding.tvSwitchToRegister.setOnClickListener(view -> {
+            mMainActivity.getSupportFragmentManager()
                     .beginTransaction()
                     .setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left)
-                    .replace(mainActivity.getViewContainerID(), new RegisterFragment())
+                    .replace(mMainActivity.getViewContainerID(), new RegisterFragment())
                     .commit();
         });
     }
 
     private void addLoginEvent() {
-        String username = binding.edtUsername.getText().toString();
-        String password = binding.edtPassword.getText().toString();
+        String username = mBinding.edtUsername.getText().toString();
+        String password = mBinding.edtPassword.getText().toString();
 
         if (validateUserAccount(username, password)) {
-            mainActivity.setFragment(new HomeFragment());
+            mMainActivity.setFragment(new HomeFragment());
         }
     }
 

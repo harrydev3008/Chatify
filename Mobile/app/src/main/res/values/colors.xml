@@ -18,6 +18,7 @@
 
 <!-- chat ui colors   -->
     <color name="chat_bg">#e5e7f6</color>
+    <color name="chat_badge_bg">#f14f4a</color>
     <color name="chat_text_color">#22223b</color>
     <color name="chat_text_hint_color">#686868</color>
     <color name="chat_msg_box_bg">#fefefe</color>

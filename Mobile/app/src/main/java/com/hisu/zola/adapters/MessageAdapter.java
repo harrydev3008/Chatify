@@ -18,12 +18,12 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public static final int MSG_SEND_TYPE = 0;
     public static final int MSG_RECEIVE_TYPE = 1;
 
-    private final List<Message> messages;
-    private final Context context;
+    private final List<Message> mMessages;
+    private final Context mContext;
 
     public MessageAdapter(List<Message> messages, Context context) {
-        this.messages = messages;
-        this.context = context;
+        this.mMessages = messages;
+        this.mContext = context;
     }
 
     @NonNull
@@ -42,7 +42,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
-        Message message = messages.get(position);
+        Message message = mMessages.get(position);
 
         if(holder.getItemViewType() == MSG_SEND_TYPE) {
             ((MessageSendViewHolder) holder).binding.tvMsgSend.setText(message.getContent());
@@ -54,13 +54,13 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public int getItemViewType(int position) {
-        return messages.get(position).getFrom().equalsIgnoreCase("1") ?
+        return mMessages.get(position).getFrom().equalsIgnoreCase("1") ?
                 MSG_SEND_TYPE : MSG_RECEIVE_TYPE;
     }
 
     @Override
     public int getItemCount() {
-        return messages != null ? messages.size() : 0;
+        return mMessages != null ? mMessages.size() : 0;
     }
 
     private static class MessageSendViewHolder extends RecyclerView.ViewHolder {
