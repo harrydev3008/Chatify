@@ -33,7 +33,8 @@ public class ConversationFragment extends Fragment {
 
     private FragmentConversationBinding mBinding;
     private MainActivity mMainActivity;
-    private List<Message> mMessages;
+    private List<Message> messages;
+    private MessageAdapter messageAdapter;
 
     public static ConversationFragment newInstance(String conversationID) {
         Bundle args = new Bundle();
@@ -77,7 +78,7 @@ public class ConversationFragment extends Fragment {
                 )
         );
 
-        mMessages = new ArrayList<>();
+        messages = new ArrayList<>();
     }
 
 //  Todo: fake conversation info
@@ -106,18 +107,33 @@ public class ConversationFragment extends Fragment {
 
     private void addActionForSendMessageBtn() {
         mBinding.btnSend.setOnClickListener(view -> {
-            sendMessage(null);
+            sendMessage(new Message("1", mBinding.edtChat.getText().toString().trim()));
         });
     }
 
     private void sendMessage(Message message) {
         if(mBinding.btnSend.getVisibility() != View.VISIBLE) return;
 
-//      Todo: send msg flow goes here
+        ApiService.apiService.sendMessage("1",
+                message).enqueue(new Callback<Message>() {
+            @Override
+            public void onResponse(Call<Message> call, Response<Message> response) {
+                messages.add(message);
+                messageAdapter.setMessages(messages);
 
-        mBinding.edtChat.setText("");
-        closeSoftKeyboard();
-        mBinding.rvConversation.smoothScrollToPosition(mMessages.size() -1);
+                closeSoftKeyboard();
+
+                mBinding.edtChat.setText("");
+                mBinding.edtChat.requestFocus();
+
+                mBinding.rvConversation.smoothScrollToPosition(messages.size() -1);
+            }
+
+            @Override
+            public void onFailure(Call<Message> call, Throwable t) {
+                Toast.makeText(mMainActivity, t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void closeSoftKeyboard() {
@@ -140,7 +156,7 @@ public class ConversationFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                int textLength = editable.length();
+                int textLength = editable.toString().trim().length();
 
                 if (textLength > 0)
                     mBinding.btnSend.setVisibility(View.VISIBLE);
@@ -155,11 +171,13 @@ public class ConversationFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<Conversation> call, @NonNull Response<Conversation> response) {
                 if(response.isSuccessful()) {
-                    mMessages = response.body() != null ?
+                    messages = response.body() != null ?
                             response.body().getMessages() : new ArrayList<>();
 
-                    mBinding.rvConversation.setAdapter(new MessageAdapter(mMessages, mMainActivity));
-                    mBinding.rvConversation.scrollToPosition(mMessages.size() - 1);
+                    messageAdapter = new MessageAdapter(messages, mMainActivity);
+
+                    mBinding.rvConversation.setAdapter(messageAdapter);
+                    mBinding.rvConversation.scrollToPosition(messages.size() - 1);
                 }
             }
 

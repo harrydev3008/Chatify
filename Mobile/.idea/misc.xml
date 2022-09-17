@@ -3,6 +3,8 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1" />
+        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable-v24/search_view_outline.xml" value="0.127" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/border_bottom.xml" value="0.1455" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/border_top.xml" value="0.1455" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/border_top_bottom.xml" value="0.2285" />
@@ -10,11 +12,16 @@
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/edit_chat_outline.xml" value="0.158" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/edit_text_outline.xml" value="0.148" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/edit_text_outline_focus.xml" value="0.1" />
+        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/edt_cursor.xml" value="0.1485" />
+        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/ic_app_laucncher.xml" value="0.1" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/ic_audio_call.xml" value="0.2365" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/ic_back_white.xml" value="0.2365" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/ic_emoji.xml" value="0.1" />
+        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.1095" />
+        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/ic_left_arrow.xml" value="0.21" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/ic_noty.xml" value="0.1055" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/ic_send_msg.xml" value="0.1505" />
+        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/ic_sticker.xml" value="0.21" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/ic_video_call.xml" value="0.193" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/indicator_bg.xml" value="0.2355" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/drawable/message_receive.xml" value="0.1455" />
@@ -23,14 +30,14 @@
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/activity_main.xml" value="0.22604166666666667" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_contacts.xml" value="0.1" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_conversation.xml" value="0.25" />
-        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_conversation_list.xml" value="0.1" />
+        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_conversation_list.xml" value="0.264" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_home.xml" value="0.20833333333333334" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_login.xml" value="0.2" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_profile.xml" value="0.22604166666666667" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_register.xml" value="0.20833333333333334" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_splash_screen.xml" value="0.20833333333333334" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_start_screen.xml" value="0.22604166666666667" />
-        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/layout_chat_receive.xml" value="0.4" />
+        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/layout_chat_receive.xml" value="0.2" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/layout_chat_send.xml" value="0.2" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/layout_chat_sender.xml" value="0.22604166666666667" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/layout_conversation.xml" value="0.2" />

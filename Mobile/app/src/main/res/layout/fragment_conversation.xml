@@ -67,7 +67,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_video_call"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="20dp"
             android:layout_gravity="center"
             tools:ignore="ContentDescription" />
     </LinearLayout>
@@ -97,7 +97,7 @@
             android:id="@+id/btn_emoji"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_emoji"
+            android:src="@drawable/ic_sticker"
             android:layout_gravity="center"/>
 
         <EditText
@@ -114,7 +114,7 @@
             android:textColor="@color/chat_text_color"
             android:textColorHighlight="@color/chat_text_hint_color"
             android:textColorHint="@color/chat_text_hint_color"
-            android:textCursorDrawable="@null"
+            android:textCursorDrawable="@drawable/edt_cursor"
             android:textSize="18dp" />
 
         <ImageView

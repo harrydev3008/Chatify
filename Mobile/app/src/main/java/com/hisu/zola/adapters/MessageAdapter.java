@@ -2,6 +2,7 @@ package com.hisu.zola.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -18,12 +19,21 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public static final int MSG_SEND_TYPE = 0;
     public static final int MSG_RECEIVE_TYPE = 1;
 
-    private final List<Message> mMessages;
+    private List<Message> messages;
     private final Context mContext;
 
     public MessageAdapter(List<Message> messages, Context context) {
-        this.mMessages = messages;
+        this.messages = messages;
         this.mContext = context;
+    }
+
+    public List<Message> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(List<Message> mMessages) {
+        this.messages = mMessages;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -42,25 +52,30 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
-        Message message = mMessages.get(position);
+        Message message = messages.get(position);
 
-        if(holder.getItemViewType() == MSG_SEND_TYPE) {
+        if(holder.getItemViewType() == MSG_SEND_TYPE)
             ((MessageSendViewHolder) holder).binding.tvMsgSend.setText(message.getContent());
-        }
         else {
+//          If multiple messages were from the same user then display cover photo only once
+            if(position != 0) {
+                if(messages.get(position - 1).getFrom().equalsIgnoreCase(message.getFrom()))
+                    ((MessageReceiveViewHolder) holder).binding.ivUserPfp.setVisibility(View.INVISIBLE);
+            }
+
             ((MessageReceiveViewHolder) holder).binding.tvMsgReceive.setText(message.getContent());
         }
     }
 
     @Override
     public int getItemViewType(int position) {
-        return mMessages.get(position).getFrom().equalsIgnoreCase("1") ?
+        return messages.get(position).getFrom().equalsIgnoreCase("1") ?
                 MSG_SEND_TYPE : MSG_RECEIVE_TYPE;
     }
 
     @Override
     public int getItemCount() {
-        return mMessages != null ? mMessages.size() : 0;
+        return messages != null ? messages.size() : 0;
     }
 
     private static class MessageSendViewHolder extends RecyclerView.ViewHolder {

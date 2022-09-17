@@ -18,7 +18,7 @@ import java.util.List;
 
 public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapter.ConversationViewHolder> {
 
-    private List<ConversationHolder> mConversations;
+    private List<ConversationHolder> conversations;
     private Context mContext;
     private IOnConversationItemSelectedListener onConversationItemSelectedListener;
 
@@ -26,8 +26,8 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         this.onConversationItemSelectedListener = onConversationItemSelectedListener;
     }
 
-    public ConversationAdapter(List<ConversationHolder> mConversations, Context mContext) {
-        this.mConversations = mConversations;
+    public ConversationAdapter(List<ConversationHolder> conversations, Context mContext) {
+        this.conversations = conversations;
         this.mContext = mContext;
     }
 
@@ -43,7 +43,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ConversationViewHolder holder, int position) {
-        ConversationHolder conversation = mConversations.get(position);
+        ConversationHolder conversation = conversations.get(position);
 
         holder.binding.ivConversationCoverPhoto.setImageResource(conversation.getCoverPhoto());
         holder.binding.tvConversationName.setText(conversation.getName());
@@ -69,7 +69,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
 
     @Override
     public int getItemCount() {
-        return mConversations != null ? mConversations.size() : 0;
+        return conversations != null ? conversations.size() : 0;
     }
 
     public static class ConversationViewHolder extends RecyclerView.ViewHolder {
