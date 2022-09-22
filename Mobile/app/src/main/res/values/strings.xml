@@ -3,10 +3,12 @@
     <string name="slogan">Nhắn gửi yêu thương!</string>
     <string name="login">Đăng nhập</string>
     <string name="register">Đăng ký</string>
+    <string name="register_num">Số điện thoại đăng ký</string>
     <string name="show">Hiện</string>
     <string name="hide">Ẩn</string>
     <string name="username">Số điện thoại đăng nhập</string>
     <string name="password">Mật khẩu</string>
+    <string name="confirm_password">Xác nhận lại mật khẩu</string>
     <string name="forgot_password">Quên mật khẩu?</string>
     <string name="no_account">Chưa có tài khoản?</string>
     <string name="register_now">Đăng ký ngay!</string>

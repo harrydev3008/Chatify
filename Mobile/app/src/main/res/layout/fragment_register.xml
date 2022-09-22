@@ -1,14 +1,196 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.RegisterFragment">
+    tools:context=".fragments.RegisterFragment"
+    android:background="@color/white">
 
-    <!-- TODO: Update blank fragment layout -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="8dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="8dp" />
+
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="wrap_content"
+        android:layout_height="300dp"
+        android:src="@drawable/bg_register"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/be_vietnam"
+        android:text="@string/register"
+        android:textColor="@color/primary_color"
+        android:textSize="30dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/guideline3"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/guideline2"
+        app:layout_constraintTop_toBottomOf="@+id/imageView3" />
 
-</FrameLayout>
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="8dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="8dp" />
+
+    <EditText
+        android:id="@+id/edt_username"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/edit_text_outline"
+        android:paddingVertical="10dp"
+        android:paddingHorizontal="8dp"
+        android:inputType="number"
+        android:textSize="20dp"
+        android:hint="@string/register_num"
+        app:layout_constraintEnd_toStartOf="@+id/guideline3"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/guideline2"
+        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/edit_text_outline"
+        android:paddingHorizontal="6dp"
+        android:paddingVertical="4dp"
+        app:layout_constraintEnd_toStartOf="@+id/guideline3"
+        app:layout_constraintStart_toStartOf="@+id/guideline2"
+        app:layout_constraintTop_toBottomOf="@+id/edt_username">
+
+        <EditText
+            android:id="@+id/edt_password"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:hint="@string/password"
+            android:inputType="textPassword"
+            android:paddingHorizontal="2dp"
+            android:paddingVertical="6dp"
+            android:textSize="20dp" />
+
+        <TextView
+            android:id="@+id/tv_toggle_password"
+            android:layout_width="45dp"
+            android:layout_height="match_parent"
+            android:gravity="end|center"
+            android:textSize="18dp"
+            android:textStyle="bold"
+            android:text="@string/show"
+            android:fontFamily="@font/be_vietnam"
+            android:textColor="@color/darkBlue" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout_confirm"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:background="@drawable/edit_text_outline"
+        android:paddingHorizontal="6dp"
+        android:layout_marginTop="8dp"
+        android:paddingVertical="4dp"
+        app:layout_constraintEnd_toStartOf="@+id/guideline3"
+        app:layout_constraintStart_toStartOf="@+id/guideline2"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+
+        <EditText
+            android:id="@+id/edt_confirm_password"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:hint="@string/confirm_password"
+            android:inputType="textPassword"
+            android:paddingHorizontal="2dp"
+            android:paddingVertical="6dp"
+            android:textSize="20dp" />
+
+        <TextView
+            android:id="@+id/tv_toggle_confirm_password"
+            android:layout_width="45dp"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/be_vietnam"
+            android:gravity="end|center"
+            android:text="@string/show"
+            android:textColor="@color/darkBlue"
+            android:textSize="18dp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_register"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:backgroundTint="@color/primary_color"
+        android:fontFamily="@font/be_vietnam"
+        android:padding="10dp"
+        android:layout_marginTop="24dp"
+        android:text="@string/register"
+        android:textSize="18dp"
+        android:textStyle="bold"
+        app:cornerRadius="6dp"
+        app:layout_constraintEnd_toStartOf="@+id/guideline3"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/guideline2"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout_confirm" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="24dp"
+        android:fontFamily="@font/be_vietnam"
+        android:text="@string/have_account"
+        android:textSize="18dp"
+        android:textColor="@color/gray"
+        app:layout_constraintStart_toStartOf="@+id/guideline2"
+        app:layout_constraintTop_toBottomOf="@+id/btn_register" />
+
+    <TextView
+        android:id="@+id/tv_switch_to_register"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:fontFamily="@font/be_vietnam"
+        android:text="@string/login_now"
+        android:textSize="18dp"
+        android:textColor="@color/secondaryColor"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/textView5"
+        app:layout_constraintEnd_toStartOf="@+id/guideline3"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/textView5"
+        app:layout_constraintTop_toTopOf="@+id/textView5"
+        app:layout_constraintVertical_bias="1.0" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

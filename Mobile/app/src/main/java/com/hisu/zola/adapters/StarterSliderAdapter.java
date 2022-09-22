@@ -6,16 +6,17 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.hisu.zola.databinding.LayoutStartScreenBinding;
+import com.hisu.zola.databinding.LayoutStarterSliderBinding;
+import com.hisu.zola.entity.StarterSliderItem;
 
 import java.util.List;
 
 public class StarterSliderAdapter extends
         RecyclerView.Adapter<StarterSliderAdapter.StartSliderViewHolder> {
 
-    private List<Integer> mImages;
+    private List<StarterSliderItem> mImages;
 
-    public StarterSliderAdapter(List<Integer> photos) {
+    public StarterSliderAdapter(List<StarterSliderItem> photos) {
         this.mImages = photos;
     }
 
@@ -23,7 +24,7 @@ public class StarterSliderAdapter extends
     @Override
     public StartSliderViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new StartSliderViewHolder(
-                LayoutStartScreenBinding.inflate(
+                LayoutStarterSliderBinding.inflate(
                         LayoutInflater.from(parent.getContext()), parent, false
                 )
         );
@@ -31,7 +32,10 @@ public class StarterSliderAdapter extends
 
     @Override
     public void onBindViewHolder(@NonNull StartSliderViewHolder holder, int position) {
-        holder.mBinding.ivSliderImage.setImageResource(mImages.get(position));
+        StarterSliderItem sliderItem = mImages.get(position);
+        holder.mBinding.ivCoverPhoto.setImageResource(sliderItem.getCoverImageID());
+        holder.mBinding.tvFeature.setText(sliderItem.getFeature());
+        holder.mBinding.tvFeatureDesc.setText(sliderItem.getFeatureDesc());
     }
 
     @Override
@@ -41,9 +45,9 @@ public class StarterSliderAdapter extends
 
     public static class StartSliderViewHolder extends RecyclerView.ViewHolder {
 
-        private LayoutStartScreenBinding mBinding;
+        private LayoutStarterSliderBinding mBinding;
 
-        public StartSliderViewHolder(@NonNull LayoutStartScreenBinding binding) {
+        public StartSliderViewHolder(@NonNull LayoutStarterSliderBinding binding) {
             super(binding.getRoot());
             this.mBinding = binding;
         }

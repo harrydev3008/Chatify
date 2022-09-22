@@ -4,13 +4,13 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="start"
-    android:layout_marginBottom="4dp"
+    android:layout_marginVertical="2dp"
     android:orientation="horizontal">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/iv_user_pfp"
-        android:layout_width="27dp"
-        android:layout_height="27dp"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
         android:src="@mipmap/app_launcher_icon"
         app:civ_border_width="1dp"
         app:civ_border_color="@color/gray_e5"/>

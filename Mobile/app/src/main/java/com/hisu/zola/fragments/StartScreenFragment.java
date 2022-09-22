@@ -13,6 +13,7 @@ import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.StarterSliderAdapter;
 import com.hisu.zola.databinding.FragmentStartScreenBinding;
+import com.hisu.zola.entity.StarterSliderItem;
 
 import java.util.List;
 
@@ -28,11 +29,20 @@ public class StartScreenFragment extends Fragment {
         mMainActivity = (MainActivity) getActivity();
 
         mBinding.vpStarter.setAdapter(
-                new StarterSliderAdapter(
-                        List.of(R.drawable.audio_call,
-                                R.drawable.chat,
-                                R.drawable.video_call)
-                )
+                new StarterSliderAdapter(List.of(
+                    new StarterSliderItem(
+                            R.drawable.bg_chat,
+                            "Nhắn tin dễ dàng",
+                            "Nhắn tin với bạn bè, người thân nhanh chóng, dễ dàng!"),
+                        new StarterSliderItem(
+                                R.drawable.bg_audio_call,
+                                "Trò chuyện thuận tiện",
+                                "Trò chuyện thuận tiện mọi lúc mọi nơi một cách ổn định nhất!"),
+                        new StarterSliderItem(
+                                R.drawable.bg_video_call,
+                                "Gọi video ổn định",
+                                "Tán gẫu thật đã với chất lượng video ổn định mọi lúc, mọi nơi!")
+                ))
         );
 
         mBinding.circleIndicator.setViewPager(mBinding.vpStarter);

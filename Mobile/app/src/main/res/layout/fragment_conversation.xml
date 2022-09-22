@@ -76,12 +76,12 @@
         android:id="@+id/rv_conversation"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/chat_container"
         android:background="@color/chat_bg"
+        android:layout_marginTop="4dp"
         android:clipToPadding="false"
         android:paddingHorizontal="6dp"
-        android:paddingVertical="4dp"
-        android:paddingTop="?actionBarSize" />
+        android:paddingVertical="?actionBarSize"
+        android:scrollbarStyle="outsideOverlay" />
 
     <LinearLayout
         android:id="@+id/chat_container"
@@ -118,8 +118,15 @@
             android:textSize="18dp" />
 
         <ImageView
+            android:id="@+id/btn_send_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_img_outline"
+            android:layout_gravity="center"/>
+
+        <ImageView
             android:id="@+id/btn_send"
-            android:visibility="invisible"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_send_msg"
