@@ -15,8 +15,22 @@ import com.hisu.zola.databinding.FragmentHomeBinding;
 
 public class HomeFragment extends Fragment {
 
+    public static final String BACK_FROM_EDIT_ARGS = "BACK_FROM_MODE";
+    public static final String NORMAL_ARGS = "NORMAL_MODE";
+    public static final String MODE = "MODE";
+
     private FragmentHomeBinding mBinding;
     private MainActivity mMainActivity;
+
+    public static HomeFragment newInstance(String mode) {
+        Bundle args = new Bundle();
+        args.putString(MODE, mode);
+
+        HomeFragment fragment = new HomeFragment();
+        fragment.setArguments(args);
+
+        return fragment;
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -25,7 +39,13 @@ public class HomeFragment extends Fragment {
         mMainActivity = (MainActivity) getActivity();
         mBinding = FragmentHomeBinding.inflate(inflater, container, false);
 
-        setChildrenFragment(new ConversationListFragment(), "Conversation");
+        if (getArguments().getString(MODE).equalsIgnoreCase(BACK_FROM_EDIT_ARGS)) {
+            setChildrenFragment(new ProfileFragment(), "Conversation");
+            mBinding.navigationMenu.setSelectedItemId(R.id.action_profile);
+        } else if (getArguments().getString(MODE).equalsIgnoreCase(NORMAL_ARGS)) {
+            setChildrenFragment(new ConversationListFragment(), "Conversation");
+            mBinding.navigationMenu.setSelectedItemId(R.id.action_message);
+        }
 
         addSelectedActionForNavItem();
 
@@ -35,7 +55,7 @@ public class HomeFragment extends Fragment {
     @SuppressLint("NonConstantResourceId")
     private void addSelectedActionForNavItem() {
         mBinding.navigationMenu.setOnItemSelectedListener(item -> {
-            switch(item.getItemId()) {
+            switch (item.getItemId()) {
                 case R.id.action_message: {
                     setChildrenFragment(new ConversationListFragment(), "Conversation");
                     break;

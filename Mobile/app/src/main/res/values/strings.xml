@@ -33,6 +33,18 @@
     <string name="search_hint">Tìm kiếm</string>
     <string name="chat_msg_hint">Tin nhắn</string>
     <string name="user_active">Đang hoạt động</string>
+    <string name="logout">Đăng xuất</string>
+    <string name="logout_confirm">Bạn có thực sự muốn đăng xuất không?!</string>
+    <string name="cancel">Huỷ</string>
+    <string name="edit_pf">Sửa hồ sơ</string>
+    <string name="user_info">Thông tin cá nhân</string>
+    <string name="gender">Giới tính</string>
+    <string name="gender_m">Nam</string>
+    <string name="gender_f">Nữ</string>
+    <string name="save">Lưu</string>
+    <string name="dob">Ngày sinh</string>
+    <string name="phone_no">Số điện thoại</string>
+    <string name="press_again_to_exit">Nhấn lần nữa để thoát</string>
 
     <!--Error Messages-->
     <string name="empty_phone_no_err">Bạn chưa điền số điện thoại!</string>

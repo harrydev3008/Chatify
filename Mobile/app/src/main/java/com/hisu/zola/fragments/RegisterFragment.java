@@ -58,7 +58,7 @@ public class RegisterFragment extends Fragment {
         String confirmPwd = mBinding.edtConfirmPassword.getText().toString().trim();
 
         if (validateUserRegisterAccount(phoneNo, pwd, confirmPwd)) {
-            mMainActivity.setFragment(new HomeFragment());
+            mMainActivity.setFragment(HomeFragment.newInstance(HomeFragment.NORMAL_ARGS));
         }
     }
 

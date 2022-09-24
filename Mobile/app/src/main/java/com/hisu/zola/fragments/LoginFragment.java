@@ -101,7 +101,7 @@ public class LoginFragment extends Fragment {
 
         if (validateUserAccount(username, password)) {
             LocalDataManager.setUserLoginState(true);
-            mMainActivity.setFragment(new HomeFragment());
+            mMainActivity.setFragment(HomeFragment.newInstance(HomeFragment.NORMAL_ARGS));
         }
     }
 

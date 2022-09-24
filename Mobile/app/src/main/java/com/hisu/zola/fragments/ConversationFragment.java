@@ -25,6 +25,8 @@ import java.util.List;
 
 public class ConversationFragment extends Fragment {
 
+    public static final String CONVERSATION_ID_ARGS = "CONVERSATION_ID";
+
     private FragmentConversationBinding mBinding;
     private MainActivity mMainActivity;
     private List<Message> messages;
@@ -32,7 +34,7 @@ public class ConversationFragment extends Fragment {
 
     public static ConversationFragment newInstance(String conversationID) {
         Bundle args = new Bundle();
-        args.putString("conversationID", conversationID);
+        args.putString(CONVERSATION_ID_ARGS, conversationID);
 
         ConversationFragment fragment = new ConversationFragment();
         fragment.setArguments(args);
@@ -58,7 +60,7 @@ public class ConversationFragment extends Fragment {
         addToggleShowSendIcon();
 
         String conversationID = getArguments() != null ?
-                getArguments().getString("conversationID") : "";
+                getArguments().getString(CONVERSATION_ID_ARGS) : "";
 
         loadConversation(conversationID);
 
@@ -86,6 +88,7 @@ public class ConversationFragment extends Fragment {
     private void addActionForBackBtn() {
         mBinding.btnBack.setOnClickListener(view -> {
             mMainActivity.getSupportFragmentManager().popBackStack();
+            mMainActivity.setFragment(HomeFragment.newInstance(HomeFragment.NORMAL_ARGS));
         });
     }
 

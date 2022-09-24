@@ -91,7 +91,7 @@ public class ConversationListFragment extends Fragment {
 
     private void backToPrevPage() {
         mBinding.mBtnCloseSearch.setOnClickListener(view -> {
-            mMainActivity.getSupportFragmentManager().popBackStack();
+            mMainActivity.onBackPressed();
         });
     }
 
@@ -107,7 +107,7 @@ public class ConversationListFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (editable.length() > 1)
+                if (editable.length() > 0)
                     mBinding.edtSearch.setCompoundDrawablesWithIntrinsicBounds(
                             null, null,
                             ContextCompat.getDrawable(
