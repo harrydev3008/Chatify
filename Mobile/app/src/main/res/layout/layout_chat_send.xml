@@ -10,7 +10,7 @@
         android:background="@drawable/message_send"
         android:padding="12dp"
         android:maxWidth="360dp"
-        android:text="hello! from sg with love"
+        android:text="@string/slogan"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/chat_text_color"

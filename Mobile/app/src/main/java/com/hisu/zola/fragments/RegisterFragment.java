@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -23,7 +24,7 @@ public class RegisterFragment extends Fragment {
     private MainActivity mMainActivity;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         mMainActivity = (MainActivity) getActivity();
@@ -64,25 +65,25 @@ public class RegisterFragment extends Fragment {
     private boolean validateUserRegisterAccount(String phoneNo, String pwd, String confirmPwd) {
 
         if (TextUtils.isEmpty(phoneNo)) {
-            mBinding.edtUsername.setError("Vui lòng điền sđt");
+            mBinding.edtUsername.setError(getString(R.string.empty_phone_no_err));
             mBinding.edtUsername.requestFocus();
             return false;
         }
 
         if (TextUtils.isEmpty(pwd)) {
-            mBinding.edtPassword.setError("Vui lòng điền mật khẩu");
+            mBinding.edtPassword.setError(getString(R.string.empty_pwd_err));
             mBinding.edtPassword.requestFocus();
             return false;
         }
 
         if (TextUtils.isEmpty(confirmPwd)) {
-            mBinding.edtConfirmPassword.setError("Vui lòng xác nhận lại mật khẩu");
+            mBinding.edtConfirmPassword.setError(getString(R.string.empty_confirm_pwd_err));
             mBinding.edtConfirmPassword.requestFocus();
             return false;
         }
 
         if (!pwd.equals(confirmPwd)) {
-            mBinding.edtConfirmPassword.setError("Mật khẩu không trùng khớp");
+            mBinding.edtConfirmPassword.setError(getString(R.string.not_match_confirm_pwd_err));
             mBinding.edtConfirmPassword.requestFocus();
             return false;
         }

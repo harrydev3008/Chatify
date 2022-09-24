@@ -1,6 +1,7 @@
 package com.hisu.zola.fragments;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.text.method.PasswordTransformationMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentLoginBinding;
+import com.hisu.zola.util.local.LocalDataManager;
 
 public class LoginFragment extends Fragment {
 
@@ -98,14 +100,27 @@ public class LoginFragment extends Fragment {
         String password = mBinding.edtPassword.getText().toString();
 
         if (validateUserAccount(username, password)) {
+            LocalDataManager.setUserLoginState(true);
             mMainActivity.setFragment(new HomeFragment());
         }
     }
 
-    /*
-        Todo: Write method to fetch user account info then validate before logging in
-     */
     private boolean validateUserAccount(String username, String password) {
+
+        if(TextUtils.isEmpty(username)) {
+            mBinding.edtUsername.setError(getString(R.string.empty_phone_no_err));
+            mBinding.edtUsername.requestFocus();
+            return false;
+        }
+
+        if(TextUtils.isEmpty(password)) {
+            mBinding.edtPassword.setError(getString(R.string.empty_pwd_err));
+            mBinding.edtPassword.requestFocus();
+            return false;
+        }
+
+//      Todo: Validate user info goes here
+
         return true;
     }
 }

@@ -1,12 +1,9 @@
 package com.hisu.zola.fragments;
 
-import android.app.Service;
 import android.content.Context;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,22 +15,13 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.hisu.zola.MainActivity;
+import com.hisu.zola.R;
 import com.hisu.zola.adapters.MessageAdapter;
 import com.hisu.zola.databinding.FragmentConversationBinding;
-import com.hisu.zola.entity.Conversation;
 import com.hisu.zola.entity.Message;
-import com.hisu.zola.util.ApiService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class ConversationFragment extends Fragment {
 
@@ -92,7 +80,7 @@ public class ConversationFragment extends Fragment {
     //  Todo: fake conversation info
     private void getConversationInfo() {
         mBinding.tvUsername.setText("Harry");
-        mBinding.tvLastActive.setText("Vừa mới truy cập");
+        mBinding.tvLastActive.setText(getString(R.string.user_active));
     }
 
     private void addActionForBackBtn() {
@@ -124,8 +112,6 @@ public class ConversationFragment extends Fragment {
 
         messages.add(message);
         messageAdapter.setMessages(messages);
-
-        Toast.makeText(mMainActivity, messageAdapter.getItemCount() + "!", Toast.LENGTH_SHORT).show();
 
         closeSoftKeyboard();
 

@@ -1,27 +1,52 @@
 <resources>
+
+    <!--App-->
     <string name="app_name">Zola</string>
     <string name="slogan">Nhắn gửi yêu thương!</string>
+
+    <!--Starter Desc-->
+    <string name="feature_chat">Nhắn tin dễ dàng</string>
+    <string name="feature_chat_desc">Nhắn tin với bạn bè, người thân nhanh chóng, dễ dàng!</string>
+    <string name="feature_audio_call">Trò chuyện thuận tiện</string>
+    <string name="feature_audio_call_desc">Trò chuyện thuận tiện mọi lúc mọi nơi một cách ổn định nhất!</string>
+    <string name="feature_video_call">Gọi video ổn định</string>
+    <string name="feature_video_call_desc">Tán gẫu thật đã với chất lượng video ổn định mọi lúc, mọi nơi!</string>
+
+    <!--Login & forgot pwd-->
     <string name="login">Đăng nhập</string>
+    <string name="username">Số điện thoại đăng nhập</string>
+    <string name="password">Mật khẩu</string>
+    <string name="forgot_password">Quên mật khẩu?</string>
+    <string name="no_account">Chưa có tài khoản?</string>
+    <string name="register_now">Đăng ký ngay!</string>
+
+    <!--Register-->
     <string name="register">Đăng ký</string>
     <string name="register_num">Số điện thoại đăng ký</string>
     <string name="show">Hiện</string>
     <string name="hide">Ẩn</string>
-    <string name="username">Số điện thoại đăng nhập</string>
-    <string name="password">Mật khẩu</string>
     <string name="confirm_password">Xác nhận lại mật khẩu</string>
-    <string name="forgot_password">Quên mật khẩu?</string>
-    <string name="no_account">Chưa có tài khoản?</string>
-    <string name="register_now">Đăng ký ngay!</string>
     <string name="have_account">Đã có tài khoản?</string>
     <string name="login_now">Đăng nhập ngay!</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="chat_msg_hint">Tin nhắn</string>
 
-    <!-- Notification Channels -->
+    <!--Others Hint-->
+    <string name="search_hint">Tìm kiếm</string>
+    <string name="chat_msg_hint">Tin nhắn</string>
+    <string name="user_active">Đang hoạt động</string>
+
+    <!--Error Messages-->
+    <string name="empty_phone_no_err">Bạn chưa điền số điện thoại!</string>
+    <string name="invalid_phone_format_err">Số điện thoại sai định dạng!</string>
+    <string name="empty_pwd_err">Bạn chưa nhập mật khẩu!</string>
+    <string name="invalid_pwd_format_err">Mật khẩu phải chứa ký tự hoa và số!</string>
+    <string name="empty_confirm_pwd_err">Vui lòng xác nhận lại mật khẩu!</string>
+    <string name="not_match_confirm_pwd_err">Mật khẩu không trùng khớp!</string>
+
+    <!--Notification Channels-->
     <string name="system_noty_channel_id">zola notification id</string>
     <string name="system_noty_channel_name">zola notification</string>
 
-    <!-- Bottom navigation titles-->
+    <!--Bottom navigation titles-->
     <string name="action_message">Tin nhắn</string>
     <string name="action_contact">Danh bạ</string>
     <string name="action_profile">Cá nhân</string>

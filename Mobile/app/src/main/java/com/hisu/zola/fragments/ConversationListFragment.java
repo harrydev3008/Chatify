@@ -1,11 +1,17 @@
 package com.hisu.zola.fragments;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -34,6 +40,12 @@ public class ConversationListFragment extends Fragment {
 
         initConversationListRecyclerView();
         loadConversationList();
+
+        backToPrevPage();
+
+        toggleShowClearIconOnSearchEditText();
+        clearTextOnSearchEditText();
+        addMoreFriendEvent();
 
         return mBinding.getRoot();
     }
@@ -66,19 +78,76 @@ public class ConversationListFragment extends Fragment {
                 ), mMainActivity
         );
 
-        adapter.setOnConversationItemSelectedListener(new IOnConversationItemSelectedListener() {
-            @Override
-            public void openConversation(String conversationID) {
-                mMainActivity.getSupportFragmentManager().beginTransaction()
-                        .replace(
-                                mMainActivity.getViewContainerID(),
-                                ConversationFragment.newInstance(conversationID)
-                        )
-                        .addToBackStack("Single_Conversation")
-                        .commit();
-            }
-        });
+        adapter.setOnConversationItemSelectedListener(conversationID -> mMainActivity.getSupportFragmentManager().beginTransaction()
+                .replace(
+                        mMainActivity.getViewContainerID(),
+                        ConversationFragment.newInstance(conversationID)
+                )
+                .addToBackStack("Single_Conversation")
+                .commit());
 
         mBinding.rvConversationList.setAdapter(adapter);
+    }
+
+    private void backToPrevPage() {
+        mBinding.mBtnCloseSearch.setOnClickListener(view -> {
+            mMainActivity.getSupportFragmentManager().popBackStack();
+        });
+    }
+
+    private void toggleShowClearIconOnSearchEditText() {
+        mBinding.edtSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (editable.length() > 1)
+                    mBinding.edtSearch.setCompoundDrawablesWithIntrinsicBounds(
+                            null, null,
+                            ContextCompat.getDrawable(
+                                    mMainActivity, R.drawable.ic_close), null
+                    );
+                else
+                    mBinding.edtSearch.setCompoundDrawablesWithIntrinsicBounds(
+                            null, null, null, null
+                    );
+            }
+        });
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void clearTextOnSearchEditText() {
+        mBinding.edtSearch.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (mBinding.edtSearch.getCompoundDrawables()[2] == null) return false;
+
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if (event.getRawX() >= (mBinding.edtSearch.getRight() -
+                            mBinding.edtSearch.getCompoundDrawables()[2]
+                                    .getBounds().width())) {
+
+                        mBinding.edtSearch.setText("");
+
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        });
+    }
+
+    private void addMoreFriendEvent() {
+        mBinding.mBtnAddFriend.setOnClickListener(view -> {
+            //Todo: add method allow user to add more friend by phone number or username, etc..
+            Toast.makeText(mMainActivity, "Function not available right now!", Toast.LENGTH_SHORT).show();
+        });
     }
 }

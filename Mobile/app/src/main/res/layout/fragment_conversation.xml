@@ -11,7 +11,7 @@
         android:layout_height="?actionBarSize"
         android:background="@color/primary_color"
         android:layout_alignParentTop="true"
-        android:paddingHorizontal="12dp"
+        android:paddingHorizontal="10dp"
         android:elevation="4dp">
 
         <ImageView
@@ -68,6 +68,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_video_call"
             android:layout_marginStart="20dp"
+            android:layout_marginEnd="10dp"
             android:layout_gravity="center"
             tools:ignore="ContentDescription" />
     </LinearLayout>
@@ -76,8 +77,8 @@
         android:id="@+id/rv_conversation"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/chat_bg"
         android:layout_marginTop="4dp"
+        android:background="@color/chat_bg"
         android:clipToPadding="false"
         android:paddingHorizontal="6dp"
         android:paddingVertical="?actionBarSize"

@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.databinding.FragmentSplashScreenBinding;
+import com.hisu.zola.util.local.LocalDataManager;
 
 @SuppressLint("CustomSplashScreen")
 public class SplashScreenFragment extends Fragment {
@@ -42,8 +43,7 @@ public class SplashScreenFragment extends Fragment {
         return mBinding.getRoot();
     }
 
-//  Todo: Write method to check user login/logout state
     private boolean isUserLoggedIn() {
-        return false;
+        return LocalDataManager.getUserLoginState();
     }
 }
