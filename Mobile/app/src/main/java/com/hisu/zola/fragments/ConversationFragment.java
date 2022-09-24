@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,18 +15,13 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.hisu.zola.MainActivity;
+import com.hisu.zola.R;
 import com.hisu.zola.adapters.MessageAdapter;
 import com.hisu.zola.databinding.FragmentConversationBinding;
-import com.hisu.zola.entity.Conversation;
 import com.hisu.zola.entity.Message;
-import com.hisu.zola.util.ApiService;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class ConversationFragment extends Fragment {
 
@@ -72,19 +66,21 @@ public class ConversationFragment extends Fragment {
     }
 
     private void initRecyclerView() {
+        messages = new ArrayList<>();
+        messageAdapter = new MessageAdapter(messages, mMainActivity);
+        mBinding.rvConversation.setAdapter(messageAdapter);
+
         mBinding.rvConversation.setLayoutManager(
                 new LinearLayoutManager(
                         mMainActivity, LinearLayoutManager.VERTICAL, false
                 )
         );
-
-        messages = new ArrayList<>();
     }
 
-//  Todo: fake conversation info
+    //  Todo: fake conversation info
     private void getConversationInfo() {
         mBinding.tvUsername.setText("Harry");
-        mBinding.tvLastActive.setText("Vừa mới truy cập");
+        mBinding.tvLastActive.setText(getString(R.string.user_active));
     }
 
     private void addActionForBackBtn() {
@@ -112,28 +108,17 @@ public class ConversationFragment extends Fragment {
     }
 
     private void sendMessage(Message message) {
-        if(mBinding.btnSend.getVisibility() != View.VISIBLE) return;
+        if (mBinding.btnSend.getVisibility() != View.VISIBLE) return;
 
-        ApiService.apiService.sendMessage("1",
-                message).enqueue(new Callback<Message>() {
-            @Override
-            public void onResponse(Call<Message> call, Response<Message> response) {
-                messages.add(message);
-                messageAdapter.setMessages(messages);
+        messages.add(message);
+        messageAdapter.setMessages(messages);
 
-                closeSoftKeyboard();
+        closeSoftKeyboard();
 
-                mBinding.edtChat.setText("");
-                mBinding.edtChat.requestFocus();
+        mBinding.edtChat.setText("");
+        mBinding.edtChat.requestFocus();
 
-                mBinding.rvConversation.smoothScrollToPosition(messages.size() -1);
-            }
-
-            @Override
-            public void onFailure(Call<Message> call, Throwable t) {
-                Toast.makeText(mMainActivity, t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        smoothScrollToLatestMsg();
     }
 
     private void closeSoftKeyboard() {
@@ -158,33 +143,38 @@ public class ConversationFragment extends Fragment {
             public void afterTextChanged(Editable editable) {
                 int textLength = editable.toString().trim().length();
 
-                if (textLength > 0)
+                if (textLength > 0) {
                     mBinding.btnSend.setVisibility(View.VISIBLE);
-                else
-                    mBinding.btnSend.setVisibility(View.INVISIBLE);
+                    mBinding.btnSendImg.setVisibility(View.GONE);
+                } else {
+                    mBinding.btnSend.setVisibility(View.GONE);
+                    mBinding.btnSendImg.setVisibility(View.VISIBLE);
+                }
             }
         });
     }
 
     private void loadConversation(String conversationID) {
-        ApiService.apiService.getConversation(conversationID).enqueue(new Callback<Conversation>() {
-            @Override
-            public void onResponse(@NonNull Call<Conversation> call, @NonNull Response<Conversation> response) {
-                if(response.isSuccessful()) {
-                    messages = response.body() != null ?
-                            response.body().getMessages() : new ArrayList<>();
+//        ApiService.apiService.getConversation(conversationID).enqueue(new Callback<Conversation>() {
+//            @Override
+//            public void onResponse(@NonNull Call<Conversation> call, @NonNull Response<Conversation> response) {
+//                if(response.isSuccessful()) {
+//                    messages = response.body() != null ?
+//                            response.body().getMessages() : new ArrayList<>();
+//
+//                    messageAdapter.setMessages(messages);
+//                    smoothScrollToLatestMsg();
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(@NonNull Call<Conversation> call, @NonNull Throwable t) {
+//                Log.e("MSG_API_ERR", t.getMessage());
+//            }
+//        });
+    }
 
-                    messageAdapter = new MessageAdapter(messages, mMainActivity);
-
-                    mBinding.rvConversation.setAdapter(messageAdapter);
-                    mBinding.rvConversation.scrollToPosition(messages.size() - 1);
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Conversation> call, @NonNull Throwable t) {
-                Log.e("MSG_API_ERR", t.getMessage());
-            }
-        });
+    private void smoothScrollToLatestMsg() {
+        mBinding.rvConversation.smoothScrollToPosition(messages.size() - 1);
     }
 }

@@ -22,9 +22,14 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private List<Message> messages;
     private final Context mContext;
 
+    public MessageAdapter(Context mContext) {
+        this.mContext = mContext;
+    }
+
     public MessageAdapter(List<Message> messages, Context context) {
         this.messages = messages;
         this.mContext = context;
+        notifyDataSetChanged();
     }
 
     public List<Message> getMessages() {
@@ -56,7 +61,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         if(holder.getItemViewType() == MSG_SEND_TYPE)
             ((MessageSendViewHolder) holder).binding.tvMsgSend.setText(message.getContent());
-        else {
+        else if(holder.getItemViewType() == MSG_RECEIVE_TYPE){
 //          If multiple messages were from the same user then display cover photo only once
             if(position != 0) {
                 if(messages.get(position - 1).getFrom().equalsIgnoreCase(message.getFrom()))

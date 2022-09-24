@@ -4,19 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.LoginFragment">
-
-
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:src="@drawable/ic_left_arrow"
-        app:layout_constraintEnd_toStartOf="@+id/guideline3"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/guideline2"
-        app:layout_constraintTop_toTopOf="parent" />
+    tools:context=".fragments.LoginFragment"
+    android:background="@color/white">
 
     <TextView
         android:id="@+id/textView3"
@@ -93,7 +82,7 @@
             android:gravity="end|center"
             android:textSize="18dp"
             android:textStyle="bold"
-            android:text="Hiện"
+            android:text="@string/show"
             android:fontFamily="@font/be_vietnam"
             android:textColor="@color/darkBlue" />
     </LinearLayout>
@@ -102,10 +91,10 @@
         android:id="@+id/imageView3"
         android:layout_width="wrap_content"
         android:layout_height="300dp"
-        android:src="@drawable/bg_register"
+        android:src="@drawable/bg_login"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_login"

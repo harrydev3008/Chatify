@@ -36,7 +36,6 @@
             android:ellipsize="end"
             android:fontFamily="@font/be_vietnam"
             android:maxLines="1"
-            android:text="Harry Nguyen"
             android:textColor="@color/darkBlack"
             android:textSize="20dp"
             android:textStyle="bold"
@@ -45,9 +44,10 @@
 
         <TextView
             android:id="@+id/tv_conversation_active_time"
-            android:layout_width="wrap_content"
+            android:layout_width="80dp"
             android:layout_height="wrap_content"
-            android:text="59 phút"
+            android:maxLines="1"
+            android:gravity="end"
             android:fontFamily="@font/be_vietnam"
             android:textSize="14dp"
             app:layout_constraintBottom_toBottomOf="@+id/tv_conversation_name"
@@ -61,7 +61,6 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:fontFamily="@font/be_vietnam"
-            android:text="Em ăn cơm chưa?"
             android:textSize="18dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@+id/tv_conversation_name" />

@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.StartScreenFragment">
+    tools:context=".fragments.StartScreenFragment"
+    android:background="@color/white">
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/vp_starter"
@@ -18,7 +19,7 @@
         android:id="@+id/circle_indicator"
         android:layout_width="wrap_content"
         android:layout_height="20dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:ci_drawable="@drawable/indicator_bg"
         app:layout_constraintStart_toStartOf="@+id/vp_starter"

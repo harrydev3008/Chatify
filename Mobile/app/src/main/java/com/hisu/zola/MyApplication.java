@@ -6,12 +6,16 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
 
+import com.hisu.zola.util.local.LocalDataManager;
+
 public class MyApplication extends Application {
 
     @Override
     public void onCreate() {
         super.onCreate();
+
         createNotificationChannel();
+        LocalDataManager.init(getApplicationContext());
     }
 
     @SuppressLint("ObsoleteSdkInt")

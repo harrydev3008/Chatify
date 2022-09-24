@@ -3,14 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="end"
-    android:layout_marginBottom="4dp">
+    android:layout_marginVertical="2dp">
 
     <TextView
         android:id="@+id/tv_msg_send"
         android:background="@drawable/message_send"
         android:padding="12dp"
         android:maxWidth="360dp"
-        android:text="hello! from sg with love"
+        android:text="@string/slogan"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/chat_text_color"
