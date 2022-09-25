@@ -34,7 +34,7 @@ public class SplashScreenFragment extends Fragment {
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
 
             if(isUserLoggedIn())
-                mMainActivity.setFragment(new HomeFragment());
+                mMainActivity.setFragment(HomeFragment.newInstance(HomeFragment.NORMAL_ARGS));
             else
                 mMainActivity.setFragment(new StartScreenFragment());
 

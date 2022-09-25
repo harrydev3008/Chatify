@@ -8,13 +8,14 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="primary_color">#1398ff</color>
+    <color name="primary_color">#008cfd</color>
     <color name="secondaryColor">#AB2153</color>
     <color name="darkBlue">#03045e</color>
     <color name="darkBlack">#000000</color>
     <color name="gray">#6c757d</color>
     <color name="gray_70">#707070</color>
     <color name="gray_e5">#e5e5e5</color>
+    <color name="gray_bf">#bfd4e7</color>
 
 <!-- chat ui colors   -->
     <color name="chat_bg">#e5e7f6</color>

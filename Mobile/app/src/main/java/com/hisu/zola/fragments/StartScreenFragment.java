@@ -56,7 +56,7 @@ public class StartScreenFragment extends Fragment {
             mMainActivity.getSupportFragmentManager()
                     .beginTransaction()
                     .setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left)
-                    .replace(mMainActivity.getViewContainerID(), new RegisterFragment())
+                    .replace(mMainActivity.getViewContainerID(), new LoginFragment())
                     .commit();
         });
 

@@ -7,18 +7,22 @@ public class MySharedPreferences {
 
     public static final String SHARED_PREFERENCE = "ZOLA_SHARED_PREFERENCE";
     public static final String USER_LOGIN_KEY = "USER_LOGIN_STATE";
+    public static final String USER_INFO_KEY = "USER_LOGIN_STATE";
 
-
-    private Context mContext;
+    private final Context mContext;
 
     public MySharedPreferences(Context mContext) {
         this.mContext = mContext;
     }
 
-    public void putBoolean(String key, boolean value) {
-        SharedPreferences sharedPreferences = getSharedPreferences();
+    private SharedPreferences getSharedPreferences() {
+        return mContext.getSharedPreferences(
+                SHARED_PREFERENCE, Context.MODE_PRIVATE
+        );
+    }
 
-        SharedPreferences.Editor editor = sharedPreferences.edit();
+    public void putBoolean(String key, boolean value) {
+        SharedPreferences.Editor editor = getSharedPreferences().edit();
         editor.putBoolean(key, value);
         editor.apply();
     }
@@ -27,9 +31,13 @@ public class MySharedPreferences {
         return getSharedPreferences().getBoolean(key, false);
     }
 
-    private SharedPreferences getSharedPreferences() {
-        return mContext.getSharedPreferences(
-                SHARED_PREFERENCE, Context.MODE_PRIVATE
-        );
+    public void putString(String key, String value) {
+        SharedPreferences.Editor editor = getSharedPreferences().edit();
+        editor.putString(key, value);
+        editor.apply();
+    }
+
+    public String getString(String key) {
+        return getSharedPreferences().getString(key, "");
     }
 }

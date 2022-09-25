@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/white">
 
     <ImageView
         android:id="@+id/iv_cover_photo"
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:src="@drawable/bg_video_call"
-        android:scaleType="fitCenter"/>
+        android:scaleType="fitCenter"
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/tv_feature"
@@ -28,6 +31,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:text="@string/password"
+        android:paddingHorizontal="8dp"
+        android:justificationMode="inter_word"
         android:fontFamily="@font/be_vietnam"
         android:gravity="center"
         android:textSize="20dp"/>

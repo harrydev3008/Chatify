@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".fragments.StartScreenFragment"
-    android:background="@color/white">
+    android:background="@color/white"
+    >
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/vp_starter"
@@ -46,11 +47,13 @@
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:fontFamily="@font/be_vietnam"
-        android:padding="10dp"
-        app:backgroundTint="@null"
-        android:background="@drawable/button_outline"
+        android:padding="15dp"
+        app:backgroundTint="@color/white"
         android:text="@string/register"
-        android:textColor="#023047"
+        app:cornerRadius="50dp"
+        app:strokeColor="@color/gray_e5"
+        app:strokeWidth="2dp"
+        android:textColor="@color/darkBlue"
         android:textSize="24dp"
         android:layout_marginTop="10dp"
         android:textStyle="bold"
