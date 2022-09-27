@@ -18,6 +18,8 @@ android {
         properties.load(project.rootProject.file("local.properties").newDataInputStream())
 
         buildConfigField "String", "BASE_URL", "\"${properties.getProperty("Base_Url")}\""
+        buildConfigField "String", "SERVER_URL", "\"${properties.getProperty("SERVER_URL")}\""
+        buildConfigField "String", "SERVER_PORT", "\"${properties.getProperty("SERVER_PORT")}\""
     }
 
     buildFeatures {
@@ -53,4 +55,6 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
+
+    implementation 'com.github.nkzawa:socket.io-client:0.6.0'
 }

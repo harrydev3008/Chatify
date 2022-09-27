@@ -1,14 +1,22 @@
 package com.hisu.zola.fragments;
 
+import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.PasswordTransformationMethod;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -17,6 +25,7 @@ import androidx.fragment.app.Fragment;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentRegisterBinding;
+import com.hisu.zola.util.OtpDialog;
 
 public class RegisterFragment extends Fragment {
 
@@ -58,7 +67,7 @@ public class RegisterFragment extends Fragment {
         String confirmPwd = mBinding.edtConfirmPassword.getText().toString().trim();
 
         if (validateUserRegisterAccount(phoneNo, pwd, confirmPwd)) {
-            mMainActivity.setFragment(HomeFragment.newInstance(HomeFragment.NORMAL_ARGS));
+            openConfirmOTPDialog(Gravity.CENTER);
         }
     }
 
@@ -88,6 +97,32 @@ public class RegisterFragment extends Fragment {
             return false;
         }
 
+        return true;
+    }
+
+    private void openConfirmOTPDialog(int gravity) {
+        OtpDialog otpDialog = new OtpDialog(mMainActivity, Gravity.CENTER);
+
+        otpDialog.addActionForBtnCancel(view -> {
+            otpDialog.hideDialog();
+        });
+
+        otpDialog.addActionForBtnConfirm(view -> {
+            if (verifyOTP(otpDialog.getEditTextInput())) {
+                otpDialog.hideDialog();
+                mMainActivity.setFragment(new RegisterUserInfoFragment());
+            }
+        });
+
+        otpDialog.addActionForBtnReSentOtp(view -> {
+            Toast.makeText(mMainActivity, "OTP not receive!", Toast.LENGTH_SHORT).show();
+        });
+
+        otpDialog.showDialog();
+    }
+
+    private boolean verifyOTP(String userOTP) {
+//      Todo: verify otp
         return true;
     }
 
