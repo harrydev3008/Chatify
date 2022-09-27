@@ -30,12 +30,19 @@
     <string name="login_now">Đăng nhập ngay!</string>
 
     <!--Others Hint-->
+    <string name="display_name">Tên hiển thị</string>
+    <string name="skip">Bỏ qua</string>
     <string name="search_hint">Tìm kiếm</string>
     <string name="chat_msg_hint">Tin nhắn</string>
     <string name="user_active">Đang hoạt động</string>
     <string name="logout">Đăng xuất</string>
     <string name="logout_confirm">Bạn có thực sự muốn đăng xuất không?!</string>
     <string name="cancel">Huỷ</string>
+    <string name="confirm">Xác nhận</string>
+    <string name="confirm_otp">Xác nhận mã OTP</string>
+    <string name="confirm_otp_pls">Vui lòng nhập mã OTP của bạn!</string>
+    <string name="confirm_skip">Bạn có chắc muốn bỏ qua bước này? Bạn sẽ phải tự thay đổi thông tin cá nhân sau nếu bỏ qua.</string>
+    <string name="otp_not_receive">Không nhận được mã OTP? Gửi lại.</string>
     <string name="edit_pf">Sửa hồ sơ</string>
     <string name="user_info">Thông tin cá nhân</string>
     <string name="gender">Giới tính</string>
@@ -62,4 +69,6 @@
     <string name="action_message">Tin nhắn</string>
     <string name="action_contact">Danh bạ</string>
     <string name="action_profile">Cá nhân</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

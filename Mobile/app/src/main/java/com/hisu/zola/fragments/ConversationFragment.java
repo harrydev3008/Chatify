@@ -7,18 +7,27 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.Socket;
+import com.google.gson.Gson;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.MessageAdapter;
 import com.hisu.zola.databinding.FragmentConversationBinding;
 import com.hisu.zola.entity.Message;
+import com.hisu.zola.util.SocketIOHandler;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +40,7 @@ public class ConversationFragment extends Fragment {
     private MainActivity mMainActivity;
     private List<Message> messages;
     private MessageAdapter messageAdapter;
+    private Socket mSocket;
 
     public static ConversationFragment newInstance(String conversationID) {
         Bundle args = new Bundle();
@@ -48,6 +58,9 @@ public class ConversationFragment extends Fragment {
 
         mMainActivity = (MainActivity) getActivity();
         mBinding = FragmentConversationBinding.inflate(inflater, container, false);
+
+        mSocket = SocketIOHandler.getSocketConnection();
+        mSocket.on("ReceiveMessage", onMessageReceive);
 
         initRecyclerView();
 
@@ -70,7 +83,6 @@ public class ConversationFragment extends Fragment {
     private void initRecyclerView() {
         messages = new ArrayList<>();
         messageAdapter = new MessageAdapter(messages, mMainActivity);
-        mBinding.rvConversation.setAdapter(messageAdapter);
 
         mBinding.rvConversation.setLayoutManager(
                 new LinearLayoutManager(
@@ -113,13 +125,16 @@ public class ConversationFragment extends Fragment {
     private void sendMessage(Message message) {
         if (mBinding.btnSend.getVisibility() != View.VISIBLE) return;
 
-        messages.add(message);
-        messageAdapter.setMessages(messages);
+        mSocket.emit("NewMessage", new Gson().toJson(message));
 
         closeSoftKeyboard();
 
         mBinding.edtChat.setText("");
         mBinding.edtChat.requestFocus();
+
+        messages.add(message);
+        messageAdapter.setMessages(messages);
+        messageAdapter.notifyItemInserted(messages.indexOf(message));
 
         smoothScrollToLatestMsg();
     }
@@ -158,26 +173,33 @@ public class ConversationFragment extends Fragment {
     }
 
     private void loadConversation(String conversationID) {
-//        ApiService.apiService.getConversation(conversationID).enqueue(new Callback<Conversation>() {
-//            @Override
-//            public void onResponse(@NonNull Call<Conversation> call, @NonNull Response<Conversation> response) {
-//                if(response.isSuccessful()) {
-//                    messages = response.body() != null ?
-//                            response.body().getMessages() : new ArrayList<>();
-//
-//                    messageAdapter.setMessages(messages);
-//                    smoothScrollToLatestMsg();
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(@NonNull Call<Conversation> call, @NonNull Throwable t) {
-//                Log.e("MSG_API_ERR", t.getMessage());
-//            }
-//        });
+        messages.add(new Message("1", "1"));
+        messages.add(new Message("2", "1"));
+        messages.add(new Message("1", "1"));
+        messages.add(new Message("1", "1"));
+        messages.add(new Message("2", "1"));
+
+        messageAdapter.setMessages(messages);
+        mBinding.rvConversation.setAdapter(messageAdapter);
     }
 
     private void smoothScrollToLatestMsg() {
         mBinding.rvConversation.smoothScrollToPosition(messages.size() - 1);
     }
+
+    private final Emitter.Listener onMessageReceive = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            mMainActivity.runOnUiThread(() -> {
+                JSONObject data = (JSONObject) args[0];
+                if (data != null) {
+                    Message message = new Gson().fromJson(data.toString(), Message.class);
+                    messages.add(message);
+                    messageAdapter.setMessages(messages);
+                    messageAdapter.notifyItemInserted(messages.indexOf(message));
+                    smoothScrollToLatestMsg();
+                }
+            });
+        }
+    };
 }

@@ -22,7 +22,6 @@ import com.hisu.zola.R;
 import com.hisu.zola.adapters.ConversationAdapter;
 import com.hisu.zola.databinding.FragmentConversationListBinding;
 import com.hisu.zola.entity.ConversationHolder;
-import com.hisu.zola.listeners.IOnConversationItemSelectedListener;
 
 import java.util.List;
 
@@ -78,13 +77,14 @@ public class ConversationListFragment extends Fragment {
                 ), mMainActivity
         );
 
-        adapter.setOnConversationItemSelectedListener(conversationID -> mMainActivity.getSupportFragmentManager().beginTransaction()
-                .replace(
-                        mMainActivity.getViewContainerID(),
-                        ConversationFragment.newInstance(conversationID)
-                )
-                .addToBackStack("Single_Conversation")
-                .commit());
+        adapter.setOnConversationItemSelectedListener(conversationID ->
+                mMainActivity.getSupportFragmentManager().beginTransaction()
+                        .replace(
+                                mMainActivity.getViewContainerID(),
+                                ConversationFragment.newInstance(conversationID)
+                        )
+                        .addToBackStack("Single_Conversation")
+                        .commit());
 
         mBinding.rvConversationList.setAdapter(adapter);
     }

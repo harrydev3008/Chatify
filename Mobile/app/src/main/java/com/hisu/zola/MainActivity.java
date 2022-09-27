@@ -11,6 +11,7 @@ import androidx.fragment.app.FragmentManager;
 import com.hisu.zola.databinding.ActivityMainBinding;
 import com.hisu.zola.fragments.LoginFragment;
 import com.hisu.zola.fragments.SplashScreenFragment;
+import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
 
 public class MainActivity extends AppCompatActivity {
@@ -33,7 +34,14 @@ public class MainActivity extends AppCompatActivity {
         mainBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mainBinding.getRoot());
 
+        initSocket();
+
         setFragment(new SplashScreenFragment());
+    }
+
+    private void initSocket() {
+        SocketIOHandler.getInstance();
+        SocketIOHandler.establishSocketConnection();
     }
 
     public void setFragment(Fragment fragment) {
@@ -81,5 +89,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         backPressTime = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SocketIOHandler.closeSocketConnection();
     }
 }
