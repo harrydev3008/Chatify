@@ -27,6 +27,8 @@
             android:layout_height="wrap_content"
             android:text="@string/confirm_otp_pls"
             android:gravity="center"
+            android:textStyle="bold"
+            android:fontFamily="@font/be_vietnam"
             android:textSize="18dp"
             android:paddingVertical="8dp"
             android:textColor="@color/black"/>
@@ -36,13 +38,17 @@
             android:id="@+id/edt_otp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="OTP"
+            android:textAlignment="center"
+            android:maxLines="1"
+            android:maxLength="6"
+            android:hint="@string/otp"
+            android:fontFamily="@font/be_vietnam"
             android:inputType="number"
-            android:layout_marginVertical="12dp"
-            android:textSize="20dp"
+            android:layout_marginBottom="14dp"
+            android:textSize="30dp"
             android:paddingVertical="10dp"
             android:paddingHorizontal="8dp"
-            android:background="@drawable/edit_text_outline"/>
+            android:background="@drawable/edit_text_outline_focus"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -56,6 +62,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:padding="10dp"
+                android:textSize="16dp"
                 android:textColor="@color/white"
                 app:cornerRadius="8dp"
                 android:backgroundTint="@color/secondaryColor"
@@ -69,6 +76,7 @@
                 android:layout_weight="1"
                 android:padding="10dp"
                 app:cornerRadius="8dp"
+                android:textSize="16dp"
                 android:backgroundTint="@color/primary_color"
                 android:layout_height="wrap_content"
                 android:text="@string/confirm"/>
@@ -83,6 +91,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginBottom="12dp"
             android:textColor="@color/primary_color"
+            android:fontFamily="@font/be_vietnam_medium"
             android:textStyle="bold"
             android:text="@string/otp_not_receive"/>
     </LinearLayout>

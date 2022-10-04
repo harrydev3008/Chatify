@@ -1,8 +1,5 @@
 package com.hisu.zola.fragments;
 
-import android.app.Dialog;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.PasswordTransformationMethod;
@@ -10,9 +7,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -25,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentRegisterBinding;
+import com.hisu.zola.util.NotificationUtil;
 import com.hisu.zola.util.OtpDialog;
 
 public class RegisterFragment extends Fragment {
@@ -104,12 +99,12 @@ public class RegisterFragment extends Fragment {
         OtpDialog otpDialog = new OtpDialog(mMainActivity, Gravity.CENTER);
 
         otpDialog.addActionForBtnCancel(view -> {
-            otpDialog.hideDialog();
+            otpDialog.dismissDialog();
         });
 
         otpDialog.addActionForBtnConfirm(view -> {
-            if (verifyOTP(otpDialog.getEditTextInput())) {
-                otpDialog.hideDialog();
+            if (verifyOTP(otpDialog.getEdtOtp(), "123")) {
+                otpDialog.dismissDialog();
                 mMainActivity.setFragment(new RegisterUserInfoFragment());
             }
         });
@@ -119,11 +114,11 @@ public class RegisterFragment extends Fragment {
         });
 
         otpDialog.showDialog();
-    }
 
-    private boolean verifyOTP(String userOTP) {
-//      Todo: verify otp
-        return true;
+        NotificationUtil.otpNotification(
+                mMainActivity, getString(R.string.system_noty_channel_id),
+                getString(R.string.otp), "123"
+        );
     }
 
     private void addChangeBackgroundColorOnFocusForUserNameEditText() {
@@ -180,5 +175,22 @@ public class RegisterFragment extends Fragment {
                     .replace(mMainActivity.getViewContainerID(), new LoginFragment())
                     .commit();
         });
+    }
+
+    private boolean verifyOTP(EditText editText, String otpNumber) {
+
+        if(TextUtils.isEmpty(editText.getText().toString().trim())) {
+            editText.setError(getString(R.string.empty_otp_err));
+            editText.requestFocus();
+            return false;
+        }
+
+        if(!editText.getText().toString().trim().equals(otpNumber)) {
+            editText.setError(getString(R.string.wrong_otp_err));
+            editText.requestFocus();
+            return false;
+        }
+
+        return true;
     }
 }

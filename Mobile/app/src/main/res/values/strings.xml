@@ -16,6 +16,8 @@
     <string name="login">Đăng nhập</string>
     <string name="username">Số điện thoại đăng nhập</string>
     <string name="password">Mật khẩu</string>
+    <string name="new_password">Mật khẩu mới</string>
+    <string name="change_password">Đổi mật khẩu</string>
     <string name="forgot_password">Quên mật khẩu?</string>
     <string name="no_account">Chưa có tài khoản?</string>
     <string name="register_now">Đăng ký ngay!</string>
@@ -37,12 +39,17 @@
     <string name="user_active">Đang hoạt động</string>
     <string name="logout">Đăng xuất</string>
     <string name="logout_confirm">Bạn có thực sự muốn đăng xuất không?!</string>
+    <string name="send_me_otp">Gửi mã OTP đến tôi</string>
+    <string name="reset_pwd_confirm">Chúng tôi sẽ gửi mã OTP đến số điện thoại bạn đã dùng để đăng ký tài khoản để thực hiện việc đổi mật khẩu.</string>
+    <string name="otp">Mã OTP</string>
+    <string name="empty_otp_err">Bạn chưa nhập mã OTP!</string>
+    <string name="wrong_otp_err">Mã OTP không chính xác!</string>
     <string name="cancel">Huỷ</string>
     <string name="confirm">Xác nhận</string>
     <string name="confirm_otp">Xác nhận mã OTP</string>
     <string name="confirm_otp_pls">Vui lòng nhập mã OTP của bạn!</string>
-    <string name="confirm_skip">Bạn có chắc muốn bỏ qua bước này? Bạn sẽ phải tự thay đổi thông tin cá nhân sau nếu bỏ qua.</string>
-    <string name="otp_not_receive">Không nhận được mã OTP? Gửi lại.</string>
+    <string name="confirm_skip">Nếu bỏ qua bước này, bạn sẽ phải tự cập nhật thông tin cá nhân của mình về sau!</string>
+    <string name="otp_not_receive">Không nhận được mã OTP? Gửi lại!</string>
     <string name="edit_pf">Sửa hồ sơ</string>
     <string name="user_info">Thông tin cá nhân</string>
     <string name="gender">Giới tính</string>
@@ -51,7 +58,7 @@
     <string name="save">Lưu</string>
     <string name="dob">Ngày sinh</string>
     <string name="phone_no">Số điện thoại</string>
-    <string name="press_again_to_exit">Nhấn lần nữa để thoát</string>
+    <string name="press_again_to_exit">Nhấn lần nữa để thoát!</string>
 
     <!--Error Messages-->
     <string name="empty_phone_no_err">Bạn chưa điền số điện thoại!</string>
@@ -69,6 +76,4 @@
     <string name="action_message">Tin nhắn</string>
     <string name="action_contact">Danh bạ</string>
     <string name="action_profile">Cá nhân</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

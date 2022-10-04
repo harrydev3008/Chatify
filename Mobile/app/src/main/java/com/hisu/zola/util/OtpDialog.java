@@ -33,6 +33,10 @@ public class OtpDialog {
         return dialog;
     }
 
+    public EditText getEdtOtp() {
+        return edtOtp;
+    }
+
     private void initDialog() {
         dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -65,7 +69,7 @@ public class OtpDialog {
         dialog.show();
     }
 
-    public void hideDialog() {
+    public void dismissDialog() {
         dialog.dismiss();
     }
 

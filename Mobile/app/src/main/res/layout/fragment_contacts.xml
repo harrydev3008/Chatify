@@ -3,24 +3,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".fragments.ContactsFragment"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".fragments.ContactsFragment">
 
-    <LinearLayout
+    <com.google.android.material.tabs.TabLayout
         android:id="@+id/contacts_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
-        android:background="@color/primary_color">
-        <androidx.appcompat.widget.SearchView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:searchIcon="@drawable/ic_search"/>
-    </LinearLayout>
+        android:background="@color/primary_color" />
 
-    <TextView
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/rcv_contact"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Contacts" />
+        android:layout_height="match_parent" />
 
 </LinearLayout>
