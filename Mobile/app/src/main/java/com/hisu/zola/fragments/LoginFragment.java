@@ -48,7 +48,7 @@ public class LoginFragment extends Fragment {
             new AlertDialog.Builder(mMainActivity)
                     .setIcon(R.drawable.ic_alert)
                     .setTitle(getString(R.string.change_password))
-                    .setMessage(getString(R.string.reset_pwd_confirm))
+                    .setMessage(getString(R.string.reset_phone_confirm))
                     .setPositiveButton(getString(R.string.send_me_otp),
                             (dialogInterface, i) -> showConfirmResetPwDialog())
                     .setNegativeButton(getString(R.string.cancel), null)

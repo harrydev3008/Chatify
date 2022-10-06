@@ -9,7 +9,7 @@
     <ImageView
         android:id="@+id/iv_cover_photo"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="250dp"
         android:src="@drawable/bg_video_call"
         android:scaleType="fitCenter"
         tools:ignore="ContentDescription" />
