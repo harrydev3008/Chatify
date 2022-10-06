@@ -15,6 +15,6 @@
         android:layout_height="wrap_content"
         android:textColor="@color/chat_text_color"
         android:fontFamily="@font/roboto"
-        android:textSize="22dp"/>
+        android:textSize="22sp"/>
 
 </LinearLayout>

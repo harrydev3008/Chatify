@@ -40,7 +40,7 @@
     <string name="logout">Đăng xuất</string>
     <string name="logout_confirm">Bạn có thực sự muốn đăng xuất không?!</string>
     <string name="send_me_otp">Gửi mã OTP đến tôi</string>
-    <string name="reset_pwd_confirm">Chúng tôi sẽ gửi mã OTP đến số điện thoại bạn đã dùng để đăng ký tài khoản để thực hiện việc đổi mật khẩu.</string>
+    <string name="reset_phone_confirm">Chúng tôi sẽ gửi mã OTP đến số điện thoại bạn đã dùng để đăng ký tài khoản để thực hiện việc đổi số điện thoại mới.</string>
     <string name="otp">Mã OTP</string>
     <string name="empty_otp_err">Bạn chưa nhập mã OTP!</string>
     <string name="wrong_otp_err">Mã OTP không chính xác!</string>
@@ -58,7 +58,14 @@
     <string name="save">Lưu</string>
     <string name="dob">Ngày sinh</string>
     <string name="phone_no">Số điện thoại</string>
+    <string name="account">Tài khoản</string>
+    <string name="secure">Bảo mật</string>
+    <string name="verify_2_step">Xác thực 2 lớp</string>
+    <string name="verify_2_step_desc">Zola sẽ gửi mã OTP mỗi khi bạn đăng nhập</string>
+    <string name="change_phone_no">Đổi số điện thoại</string>
+    <string name="delete_account">Xoá tài khoản</string>
     <string name="press_again_to_exit">Nhấn lần nữa để thoát!</string>
+    <string name="account_and_secure">Tài khoản và bảo mật</string>
 
     <!--Error Messages-->
     <string name="empty_phone_no_err">Bạn chưa điền số điện thoại!</string>
@@ -76,4 +83,6 @@
     <string name="action_message">Tin nhắn</string>
     <string name="action_contact">Danh bạ</string>
     <string name="action_profile">Cá nhân</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

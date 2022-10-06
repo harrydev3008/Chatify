@@ -4,14 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.StartScreenFragment"
     android:background="@color/white"
-    >
+    tools:context=".fragments.StartScreenFragment">
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/vp_starter"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
+        android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -21,44 +20,61 @@
         android:layout_width="wrap_content"
         android:layout_height="20dp"
         android:layout_marginTop="2dp"
-        app:layout_constraintEnd_toEndOf="parent"
         app:ci_drawable="@drawable/indicator_bg"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/vp_starter"
         app:layout_constraintTop_toBottomOf="@+id/vp_starter" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_login"
-        android:layout_width="300dp"
-        android:layout_marginTop="60dp"
-        app:cornerRadius="50dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:text="@string/login"
-        android:textStyle="bold"
-        android:padding="15dp"
+        android:layout_marginTop="40dp"
         android:backgroundTint="@color/primary_color"
         android:fontFamily="@font/be_vietnam"
+        android:padding="15dp"
+        android:text="@string/login"
         android:textSize="24dp"
+        android:textStyle="bold"
+        app:cornerRadius="50dp"
+        app:layout_constraintEnd_toStartOf="@+id/guideline15"
+        app:layout_constraintStart_toStartOf="@+id/guideline14"
         app:layout_constraintTop_toBottomOf="@+id/circle_indicator" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_register"
-        android:layout_width="300dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:fontFamily="@font/be_vietnam"
         android:padding="15dp"
-        app:backgroundTint="@color/white"
         android:text="@string/register"
-        app:cornerRadius="50dp"
-        app:strokeColor="@color/gray_e5"
-        app:strokeWidth="2dp"
         android:textColor="@color/darkBlue"
         android:textSize="24dp"
-        android:layout_marginTop="10dp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_login" />
+        app:backgroundTint="@color/white"
+        app:cornerRadius="50dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline15"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="@+id/guideline14"
+        app:layout_constraintTop_toBottomOf="@+id/btn_login"
+        app:layout_constraintVertical_bias="0.0"
+        app:strokeColor="@color/gray_e5"
+        app:strokeWidth="2dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline14"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="40dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline15"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="40dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -92,8 +92,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        SocketIOHandler.close();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SocketIOHandler.establishSocketConnection();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
-        SocketIOHandler.closeSocketConnection();
+        SocketIOHandler.disconnect();
     }
 }

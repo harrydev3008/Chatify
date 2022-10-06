@@ -44,7 +44,8 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginTop="8dp"
-        android:src="@mipmap/ic_launcher"
+        android:src="@drawable/app_logo"
+        android:scaleType="centerCrop"
         app:layout_constraintEnd_toStartOf="@+id/guideline9"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/guideline8"
@@ -97,7 +98,7 @@
         android:paddingHorizontal="4dp"
         android:paddingVertical="6dp"
         android:textCursorDrawable="@drawable/edt_cursor"
-        android:textSize="20dp"
+        android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="@+id/imv_avatar"
         app:layout_constraintEnd_toStartOf="@+id/guideline9"
         app:layout_constraintHorizontal_bias="0.0"
@@ -125,7 +126,7 @@
             android:buttonTint="@color/primary_color"
             android:checked="true"
             android:text="@string/gender_m"
-            android:textSize="20dp" />
+            android:textSize="20sp" />
 
         <RadioButton
             android:id="@+id/rBtn_gender_f"
@@ -133,7 +134,7 @@
             android:layout_height="wrap_content"
             android:buttonTint="@color/primary_color"
             android:text="@string/gender_f"
-            android:textSize="20dp" />
+            android:textSize="20sp" />
     </RadioGroup>
 
     <com.google.android.material.button.MaterialButton
@@ -146,7 +147,7 @@
         android:padding="8dp"
         android:text="@string/save"
         android:textAllCaps="false"
-        android:textSize="18dp"
+        android:textSize="18sp"
         android:textStyle="bold"
         app:cornerRadius="20dp"
         app:layout_constraintEnd_toStartOf="@+id/guideline9"

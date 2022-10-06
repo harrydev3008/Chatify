@@ -29,8 +29,12 @@ public class SocketIOHandler {
         mSocketIO.connect();
     }
 
-    public static void closeSocketConnection() {
+    public static void disconnect() {
         mSocketIO.disconnect();
+    }
+
+    public static void close() {
+        mSocketIO.close();
     }
 
     private URI getConnectionURI() {
