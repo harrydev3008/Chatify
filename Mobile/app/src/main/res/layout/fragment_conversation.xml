@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.ConversationFragment">
+    tools:context=".fragments.conversation.ConversationFragment">
 
     <LinearLayout
         android:id="@+id/chat_toolbar_container"
@@ -34,8 +34,8 @@
                 android:layout_width="match_parent"
                 android:fontFamily="@font/be_vietnam_medium"
                 android:layout_height="wrap_content"
-                android:text="Harry"
-                android:textSize="22dp"
+                android:text="@string/app_name"
+                android:textSize="22sp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:layout_marginStart="10dp"
@@ -47,8 +47,8 @@
                 android:layout_width="match_parent"
                 android:fontFamily="@font/be_vietnam"
                 android:layout_height="wrap_content"
-                android:text="Truy cập 37 phút trước"
-                android:textSize="14dp"
+                android:text="@string/user_active"
+                android:textSize="14sp"
                 android:layout_marginStart="10dp"
                 android:gravity="center|start"
                 android:textColor="@color/gray_e5"/>
@@ -67,8 +67,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_video_call"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_gravity="center"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/btn_conversation_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_side_menu"
             android:layout_gravity="center"
             tools:ignore="ContentDescription" />
     </LinearLayout>
@@ -99,7 +106,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_sticker"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            tools:ignore="ContentDescription" />
 
         <EditText
             android:id="@+id/edt_chat"
@@ -116,14 +124,16 @@
             android:textColorHighlight="@color/chat_text_hint_color"
             android:textColorHint="@color/chat_text_hint_color"
             android:textCursorDrawable="@drawable/edt_cursor"
-            android:textSize="18dp" />
+            android:textSize="18sp"
+            tools:ignore="Autofill" />
 
         <ImageView
             android:id="@+id/btn_send_img"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_img_outline"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            tools:ignore="ContentDescription" />
 
         <ImageView
             android:id="@+id/btn_send"
@@ -131,7 +141,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_send_msg"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            tools:ignore="ContentDescription" />
     </LinearLayout>
-
 </RelativeLayout>

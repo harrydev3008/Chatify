@@ -8,11 +8,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.hisu.zola.database.Database;
 import com.hisu.zola.databinding.ActivityMainBinding;
+import com.hisu.zola.entity.ConversationHolder;
 import com.hisu.zola.fragments.LoginFragment;
 import com.hisu.zola.fragments.SplashScreenFragment;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
+
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,7 +37,10 @@ public class MainActivity extends AppCompatActivity {
 
         mainBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mainBinding.getRoot());
-
+//        Database db = Database.getDatabase(this);
+//        Database.dbExecutor.execute(() -> {
+//            db.conversationDAO().insert(new ConversationHolder("1", false, R.drawable.app_logo, "Harry","new msg", 1));
+//        });
         initSocket();
 
         setFragment(new SplashScreenFragment());

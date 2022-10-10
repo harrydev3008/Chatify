@@ -3,8 +3,63 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    tools:context=".fragments.ContactsFragment"
-    android:background="@color/secondaryColor">
+    tools:context=".fragments.contact.ContactsFragment">
 
+    <LinearLayout
+        android:id="@+id/conversation_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:background="@color/primary_color"
+        android:orientation="horizontal"
+        android:paddingHorizontal="10dp">
+
+        <ImageButton
+            android:id="@+id/mBtn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_back_white"
+            android:background="@null"
+            android:layout_gravity="center"
+            tools:ignore="ContentDescription" />
+
+        <EditText
+            android:id="@+id/edt_search"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="35dp"
+            android:layout_marginHorizontal="10dp"
+            android:background="@drawable/layout_search_view"
+            android:layout_gravity="center"
+            android:paddingHorizontal="8dp"
+            android:hint="@string/search_hint"
+            android:maxLines="1"
+            android:drawablePadding="10dp"
+            android:importantForAutofill="no"
+            android:inputType="text"/>
+
+        <ImageButton
+            android:id="@+id/mBtn_add_friend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_add_friend"
+            android:background="@null"
+            tools:ignore="ContentDescription" />
+    </LinearLayout>
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tl_contact"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:background="@drawable/border_bottom"
+        app:tabIndicatorColor="@color/primary_color"
+        app:tabRippleColor="@color/primary_color"
+        app:tabSelectedTextColor="@color/black" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/vp_contact"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 </LinearLayout>

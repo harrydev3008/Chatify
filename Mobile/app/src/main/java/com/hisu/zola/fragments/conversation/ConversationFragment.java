@@ -1,4 +1,4 @@
-package com.hisu.zola.fragments;
+package com.hisu.zola.fragments.conversation;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -7,14 +7,11 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
-import android.view.animation.LayoutAnimationController;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.github.nkzawa.emitter.Emitter;
@@ -25,6 +22,7 @@ import com.hisu.zola.R;
 import com.hisu.zola.adapters.MessageAdapter;
 import com.hisu.zola.databinding.FragmentConversationBinding;
 import com.hisu.zola.entity.Message;
+import com.hisu.zola.fragments.HomeFragment;
 import com.hisu.zola.util.SocketIOHandler;
 
 import org.json.JSONObject;
@@ -68,6 +66,7 @@ public class ConversationFragment extends Fragment {
         addActionForBackBtn();
         addActionForAudioCallBtn();
         addActionForVideoCallBtn();
+        addActionForSideMenu();
 
         addActionForSendMessageBtn();
         addToggleShowSendIcon();
@@ -99,7 +98,6 @@ public class ConversationFragment extends Fragment {
 
     private void addActionForBackBtn() {
         mBinding.btnBack.setOnClickListener(view -> {
-            mMainActivity.getSupportFragmentManager().popBackStack();
             mMainActivity.setFragment(HomeFragment.newInstance(HomeFragment.NORMAL_ARGS));
         });
     }
@@ -113,6 +111,12 @@ public class ConversationFragment extends Fragment {
     private void addActionForVideoCallBtn() {
         mBinding.btnVideoCall.setOnClickListener(view -> {
             Toast.makeText(mMainActivity, "Video call", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void addActionForSideMenu() {
+        mBinding.btnConversationMenu.setOnClickListener(view -> {
+            Toast.makeText(mMainActivity, "Side menu", Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -173,11 +177,6 @@ public class ConversationFragment extends Fragment {
     }
 
     private void loadConversation(String conversationID) {
-        messages.add(new Message("1", "1"));
-        messages.add(new Message("2", "1"));
-        messages.add(new Message("1", "1"));
-        messages.add(new Message("1", "1"));
-        messages.add(new Message("2", "1"));
 
         messageAdapter.setMessages(messages);
         mBinding.rvConversation.setAdapter(messageAdapter);

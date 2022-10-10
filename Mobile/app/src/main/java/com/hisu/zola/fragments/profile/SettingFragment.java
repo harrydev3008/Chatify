@@ -1,4 +1,4 @@
-package com.hisu.zola.fragments;
+package com.hisu.zola.fragments.profile;
 
 import android.os.Bundle;
 
@@ -17,6 +17,8 @@ import android.widget.Toast;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentSettingBinding;
+import com.hisu.zola.fragments.HomeFragment;
+import com.hisu.zola.fragments.ResetPasswordFragment;
 import com.hisu.zola.util.NotificationUtil;
 import com.hisu.zola.util.OtpDialog;
 

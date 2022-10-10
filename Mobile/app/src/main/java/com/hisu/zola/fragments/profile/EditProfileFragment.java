@@ -1,4 +1,4 @@
-package com.hisu.zola.fragments;
+package com.hisu.zola.fragments.profile;
 
 import android.app.DatePickerDialog;
 import android.graphics.Color;
@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentEditProfileBinding;
+import com.hisu.zola.fragments.HomeFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

@@ -7,15 +7,21 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.badge.BadgeDrawable;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentHomeBinding;
+import com.hisu.zola.fragments.contact.ContactsFragment;
+import com.hisu.zola.fragments.conversation.ConversationListFragment;
+import com.hisu.zola.fragments.profile.ProfileFragment;
 
 public class HomeFragment extends Fragment {
 
-    public static final String BACK_FROM_EDIT_ARGS = "BACK_FROM_MODE";
+    public static final String BACK_FROM_EDIT_ARGS = "BACK_FROM_EDIT_MODE";
+    public static final String BACK_FROM_CONTACT_ARGS = "BACK_FROM_CONTACT_MODE";
     public static final String NORMAL_ARGS = "NORMAL_MODE";
     public static final String MODE = "MODE";
 
@@ -42,12 +48,18 @@ public class HomeFragment extends Fragment {
         if (getArguments().getString(MODE).equalsIgnoreCase(BACK_FROM_EDIT_ARGS)) {
             setChildrenFragment(new ProfileFragment(), "Conversation");
             mBinding.navigationMenu.setSelectedItemId(R.id.action_profile);
-        } else if (getArguments().getString(MODE).equalsIgnoreCase(NORMAL_ARGS)) {
+        }  else if (getArguments().getString(MODE).equalsIgnoreCase(BACK_FROM_CONTACT_ARGS)) {
+            setChildrenFragment(new ContactsFragment(), "Contacts");
+            mBinding.navigationMenu.setSelectedItemId(R.id.action_contact);
+        }
+        else if (getArguments().getString(MODE).equalsIgnoreCase(NORMAL_ARGS)) {
             setChildrenFragment(new ConversationListFragment(), "Conversation");
             mBinding.navigationMenu.setSelectedItemId(R.id.action_message);
         }
 
         addSelectedActionForNavItem();
+
+        messageBadge();
 
         return mBinding.getRoot();
     }
@@ -81,5 +93,14 @@ public class HomeFragment extends Fragment {
                 .replace(mBinding.homeViewContainer.getId(), fragment)
                 .addToBackStack(backStackName)
                 .commit();
+    }
+
+//  Todo: add method to observe unread msg from db
+    private void messageBadge() {
+        BadgeDrawable badge = mBinding.navigationMenu.getOrCreateBadge(R.id.action_message);
+        badge.setNumber(5);
+        badge.setBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.chat_badge_bg));
+        badge.setVerticalOffset(10);
+        badge.setHorizontalOffset(5);
     }
 }
