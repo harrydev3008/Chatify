@@ -39,7 +39,6 @@ public class FriendRequestFragment extends Fragment {
     private void initTabLayout() {
         adapter = new FriendRequestViewPagerAdapter(mainActivity);
         mBinding.vpContainer.setAdapter(adapter);
-        mBinding.vpContainer.setUserInputEnabled(false);
 
         new TabLayoutMediator(mBinding.tlFriendRequest, mBinding.vpContainer, (tab, position) -> {
             switch (position) {

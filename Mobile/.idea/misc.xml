@@ -55,7 +55,7 @@
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_conversation_list.xml" value="0.264" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_edit_profile.xml" value="0.2" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_friend_request.xml" value="0.2" />
-        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_friend_request_receive.xml" value="0.18547008547008548" />
+        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_friend_request_receive.xml" value="0.264" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_friend_request_send.xml" value="0.18547008547008548" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_home.xml" value="0.264" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/fragment_login.xml" value="0.2" />
@@ -70,6 +70,8 @@
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/layout_chat_send.xml" value="0.4" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/layout_chat_sender.xml" value="0.22604166666666667" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/layout_conversation.xml" value="0.1" />
+        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/layout_friend_request_receive.xml" value="0.4" />
+        <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/layout_friend_request_send.xml" value="0.264" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/layout_otp_dialog.xml" value="0.264" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/layout_register_user_info.xml" value="0.225" />
         <entry key="..\:/ProjectZola/Mobile/app/src/main/res/layout/layout_reset_password.xml" value="0.16628175519630484" />

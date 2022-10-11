@@ -72,6 +72,9 @@
     <string name="friend_request">Lời mời kết bạn</string>
     <string name="friend_request_send">Đã gửi</string>
     <string name="friend_request_receive">Đã nhận</string>
+    <string name="friend_request_accept">Chấp nhận</string>
+    <string name="friend_request_delete">Xoá</string>
+    <string name="friend_request_cancel">Thu hồi</string>
     <string name="friend_from_contact">Danh bạ máy</string>
     <string name="friend_from_contact_desc">Các liên hệ có dùng Zola</string>
 

@@ -39,7 +39,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(mainBinding.getRoot());
 //        Database db = Database.getDatabase(this);
 //        Database.dbExecutor.execute(() -> {
-//            db.conversationDAO().insert(new ConversationHolder("1", false, R.drawable.app_logo, "Harry","new msg", 1));
+//            db.conversationDAO().insert(new ConversationHolder("3", false, R.drawable.app_logo, "Harry","new msg", 1));
+//            db.conversationDAO().insert(new ConversationHolder("4", false, R.drawable.app_logo, "Harry","new msg", 1));
+//            db.conversationDAO().insert(new ConversationHolder("5", false, R.drawable.app_logo, "Harry","new msg", 1));
+//            db.conversationDAO().insert(new ConversationHolder("6", false, R.drawable.app_logo, "Harry","new msg", 1));
+//            db.conversationDAO().insert(new ConversationHolder("7", false, R.drawable.app_logo, "Harry","new msg", 1));
+//            db.conversationDAO().insert(new ConversationHolder("8", false, R.drawable.app_logo, "Harry","new msg", 1));
+//            db.conversationDAO().insert(new ConversationHolder("9", false, R.drawable.app_logo, "Harry","new msg", 1));
+//            db.conversationDAO().insert(new ConversationHolder("10", false, R.drawable.app_logo, "Harry","new msg", 1));
 //        });
         initSocket();
 
@@ -114,5 +121,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         SocketIOHandler.disconnect();
+        SocketIOHandler.establishSocketConnection();
     }
 }
