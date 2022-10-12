@@ -102,7 +102,7 @@ public class ResetPasswordFragment extends Fragment {
         mBinding.btnSave.setOnClickListener(view -> {
             if (validateNewPassword(mBinding.edtNewPwd.getText().toString().trim(),
                     mBinding.edtConfirmNewPwd.getText().toString().trim()))
-                mainActivity.setFragment(HomeFragment.newInstance(HomeFragment.NORMAL_ARGS));
+            mainActivity.getSupportFragmentManager().popBackStackImmediate();
         });
     }
 

@@ -1,23 +1,15 @@
-package com.hisu.zola.fragments;
+package com.hisu.zola.fragments.profile;
 
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.hisu.zola.MainActivity;
-import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentProfileBinding;
-import com.hisu.zola.util.NotificationUtil;
-import com.hisu.zola.util.OtpDialog;
 
 public class ProfileFragment extends Fragment {
 
@@ -40,13 +32,13 @@ public class ProfileFragment extends Fragment {
 
     private void addActionForBtnEditProfile() {
         mBinding.btnEditProfile.setOnClickListener(view -> {
-            mMainActivity.setFragment(new EditProfileFragment());
+            mMainActivity.addFragmentToBackStack(new EditProfileFragment());
         });
     }
 
     private void addActionForBtnSetting() {
         mBinding.iBtnSetting.setOnClickListener(view -> {
-            mMainActivity.setFragment(new SettingFragment());
+            mMainActivity.addFragmentToBackStack(new SettingFragment());
         });
     }
 }

@@ -1,4 +1,4 @@
-package com.hisu.zola.fragments;
+package com.hisu.zola.fragments.conversation;
 
 import android.os.Bundle;
 
@@ -11,19 +11,21 @@ import android.view.ViewGroup;
 
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
-import com.hisu.zola.databinding.FragmentContactsBinding;
+import com.hisu.zola.databinding.FragmentConversationDetailBinding;
 
-public class ContactsFragment extends Fragment {
+public class ConversationDetailFragment extends Fragment {
 
-    private FragmentContactsBinding mBinding;
-    private MainActivity mMainActivity;
+   private FragmentConversationDetailBinding mBinding;
+   private MainActivity mainActivity;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        mMainActivity = (MainActivity) getActivity();
-        mBinding = FragmentContactsBinding.inflate(inflater, container, false);
+        mainActivity = (MainActivity) getActivity();
+        mBinding = FragmentConversationDetailBinding.inflate(
+                inflater, container, false
+        );
 
         return mBinding.getRoot();
     }

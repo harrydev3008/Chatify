@@ -1,4 +1,4 @@
-package com.hisu.zola.fragments;
+package com.hisu.zola.fragments.conversation;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,14 +21,14 @@ import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.ConversationAdapter;
 import com.hisu.zola.databinding.FragmentConversationListBinding;
-import com.hisu.zola.entity.ConversationHolder;
-
-import java.util.List;
+import com.hisu.zola.view_model.ConversationListViewModel;
 
 public class ConversationListFragment extends Fragment {
 
     private FragmentConversationListBinding mBinding;
     private MainActivity mMainActivity;
+    private ConversationListViewModel viewModel;
+    private ConversationAdapter adapter;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -37,10 +38,8 @@ public class ConversationListFragment extends Fragment {
         mBinding = FragmentConversationListBinding.inflate(inflater, container, false);
 
         initConversationListRecyclerView();
-        loadConversationList();
 
-        backToPrevPage();
-
+        tapToCloseApp();
         toggleShowClearIconOnSearchEditText();
         clearTextOnSearchEditText();
         addMoreFriendEvent();
@@ -49,27 +48,9 @@ public class ConversationListFragment extends Fragment {
     }
 
     private void initConversationListRecyclerView() {
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(
-                mMainActivity, RecyclerView.VERTICAL, false
-        );
+        viewModel = new ViewModelProvider(mMainActivity).get(ConversationListViewModel.class);
 
-        mBinding.rvConversationList.setLayoutManager(linearLayoutManager);
-    }
-
-    private void loadConversationList() {
-        ConversationAdapter adapter = new ConversationAdapter(
-                List.of(
-                        new ConversationHolder("1", false, R.mipmap.app_launcher_icon, "Harry Nguyen",
-                                "Em ăn cơm chưa?", 1),
-                        new ConversationHolder("2", false, R.mipmap.app_launcher_icon, "John Doe",
-                                "Dude? why not reply?", 2),
-                        new ConversationHolder("3", false, R.mipmap.app_launcher_icon, "Marry Jane",
-                                "Harry?", 1),
-                        new ConversationHolder("4", false, R.mipmap.app_launcher_icon, "Peta Parker",
-                                "Wanna put some dirt in her eyes?", 0)
-                ), mMainActivity
-        );
-
+        adapter = new ConversationAdapter(mMainActivity);
         adapter.setOnConversationItemSelectedListener(conversationID ->
                 mMainActivity.getSupportFragmentManager().beginTransaction()
                         .replace(
@@ -79,10 +60,23 @@ public class ConversationListFragment extends Fragment {
                         .addToBackStack("Single_Conversation")
                         .commit());
 
-        mBinding.rvConversationList.setAdapter(adapter);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(
+                mMainActivity, RecyclerView.VERTICAL, false
+        );
+
+        mBinding.rvConversationList.setLayoutManager(linearLayoutManager);
+
+        loadConversationList();
     }
 
-    private void backToPrevPage() {
+    private void loadConversationList() {
+        viewModel.getData().observe(mMainActivity, conversation -> {
+            adapter.setConversations(conversation);
+            mBinding.rvConversationList.setAdapter(adapter);
+        });
+    }
+
+    private void tapToCloseApp() {
         mBinding.mBtnCloseSearch.setOnClickListener(view -> {
             mMainActivity.onBackPressed();
         });

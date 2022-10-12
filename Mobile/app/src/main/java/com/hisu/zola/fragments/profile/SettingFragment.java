@@ -1,4 +1,4 @@
-package com.hisu.zola.fragments;
+package com.hisu.zola.fragments.profile;
 
 import android.os.Bundle;
 
@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentSettingBinding;
+import com.hisu.zola.fragments.ResetPasswordFragment;
 import com.hisu.zola.util.NotificationUtil;
 import com.hisu.zola.util.OtpDialog;
 
@@ -31,6 +32,8 @@ public class SettingFragment extends Fragment {
 
         mainActivity = (MainActivity) getActivity();
         mBinding = FragmentSettingBinding.inflate(inflater, container, false);
+
+        mainActivity.setBottomNavVisibility(View.GONE);
 
         addActionForBtnBackToPrevPage();
         addActionForBtnLogout();
@@ -132,15 +135,8 @@ public class SettingFragment extends Fragment {
 
     private void addActionForBtnBackToPrevPage() {
         mBinding.iBtnBack.setOnClickListener(view -> {
-            mainActivity.getSupportFragmentManager().popBackStack();
-            mainActivity.getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(
-                            mainActivity.getViewContainerID(),
-                            HomeFragment.newInstance(HomeFragment.BACK_FROM_EDIT_ARGS)
-                    )
-                    .addToBackStack("Home")
-                    .commit();
+            mainActivity.setBottomNavVisibility(View.VISIBLE);
+            mainActivity.getSupportFragmentManager().popBackStackImmediate();
         });
     }
 }

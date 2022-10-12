@@ -31,6 +31,14 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         this.mContext = mContext;
     }
 
+    public ConversationAdapter(Context mContext) {
+        this.mContext = mContext;
+    }
+
+    public void setConversations(List<ConversationHolder> conversations) {
+        this.conversations = conversations;
+    }
+
     @NonNull
     @Override
     public ConversationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -46,7 +54,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         ConversationHolder conversation = conversations.get(position);
 
         holder.binding.ivConversationCoverPhoto.setImageResource(conversation.getCoverPhoto());
-        holder.binding.tvConversationName.setText(conversation.getName());
+        holder.binding.tvConversationName.setText(conversation.getId());
         holder.binding.tvLastMsg.setText(conversation.getLastMessage());
 
         int unreadMsgQuantity = conversation.getUnreadMessages();

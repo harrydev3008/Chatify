@@ -1,4 +1,4 @@
-package com.hisu.zola.fragments;
+package com.hisu.zola.fragments.profile;
 
 import android.app.DatePickerDialog;
 import android.graphics.Color;
@@ -45,20 +45,14 @@ public class EditProfileFragment extends Fragment {
     }
 
     private void init() {
+        mainActivity.setBottomNavVisibility(View.GONE);
         mCalendar = Calendar.getInstance();
     }
 
     private void addActionForBtnBackToPrevPage() {
         mBinding.iBtnBack.setOnClickListener(view -> {
-            mainActivity.getSupportFragmentManager().popBackStack();
-            mainActivity.getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(
-                            mainActivity.getViewContainerID(),
-                            HomeFragment.newInstance(HomeFragment.BACK_FROM_EDIT_ARGS)
-                    )
-                    .addToBackStack("Home")
-                    .commit();
+            mainActivity.setBottomNavVisibility(View.VISIBLE);
+            mainActivity.getSupportFragmentManager().popBackStackImmediate();
         });
     }
 

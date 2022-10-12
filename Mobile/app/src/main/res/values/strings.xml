@@ -66,6 +66,18 @@
     <string name="delete_account">Xoá tài khoản</string>
     <string name="press_again_to_exit">Nhấn lần nữa để thoát!</string>
     <string name="account_and_secure">Tài khoản và bảo mật</string>
+    <string name="tab_contact_friend">Bạn bè</string>
+    <string name="tab_contact_group">Nhóm</string>
+    <string name="new_group">Tạo nhóm mới</string>
+    <string name="friend_request">Lời mời kết bạn</string>
+    <string name="friend_request_send">Đã gửi</string>
+    <string name="friend_request_receive">Đã nhận</string>
+    <string name="friend_request_accept">Chấp nhận</string>
+    <string name="friend_request_delete">Xoá</string>
+    <string name="friend_request_cancel">Thu hồi</string>
+    <string name="friend_from_contact">Danh bạ máy</string>
+    <string name="friend_from_contact_desc">Các liên hệ có dùng Zola</string>
+    <string name="typing">Đang nhập &#8230;</string>
 
     <!--Error Messages-->
     <string name="empty_phone_no_err">Bạn chưa điền số điện thoại!</string>
@@ -83,6 +95,5 @@
     <string name="action_message">Tin nhắn</string>
     <string name="action_contact">Danh bạ</string>
     <string name="action_profile">Cá nhân</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
