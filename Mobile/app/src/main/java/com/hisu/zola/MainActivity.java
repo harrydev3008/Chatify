@@ -1,22 +1,24 @@
 package com.hisu.zola;
 
 import android.os.Bundle;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import com.hisu.zola.database.Database;
+import com.google.android.material.badge.BadgeDrawable;
 import com.hisu.zola.databinding.ActivityMainBinding;
-import com.hisu.zola.entity.ConversationHolder;
-import com.hisu.zola.fragments.LoginFragment;
 import com.hisu.zola.fragments.SplashScreenFragment;
+import com.hisu.zola.fragments.StartScreenFragment;
+import com.hisu.zola.fragments.contact.ContactsFragment;
+import com.hisu.zola.fragments.conversation.ConversationListFragment;
+import com.hisu.zola.fragments.profile.ProfileFragment;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
-
-import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -49,8 +51,48 @@ public class MainActivity extends AppCompatActivity {
 //            db.conversationDAO().insert(new ConversationHolder("10", false, R.drawable.app_logo, "Harry","new msg", 1));
 //        });
         initSocket();
+        addSelectedActionForNavItem();
+        messageBadge();
 
         setFragment(new SplashScreenFragment());
+    }
+
+    public void setBottomNavVisibility(int hide) {
+        mainBinding.navigationMenu.setVisibility(hide);
+    }
+
+    private void messageBadge() {
+        BadgeDrawable badge = mainBinding.navigationMenu.getOrCreateBadge(R.id.action_message);
+        badge.setNumber(5);
+        badge.setBackgroundColor(ContextCompat.getColor(this, R.color.chat_badge_bg));
+        badge.setVerticalOffset(10);
+        badge.setHorizontalOffset(5);
+    }
+
+    private void addSelectedActionForNavItem() {
+        mainBinding.navigationMenu.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.action_message)
+                addFragmentToBackStack(new ConversationListFragment());
+            else if (itemId == R.id.action_contact)
+                addFragmentToBackStack(new ContactsFragment());
+            else if (itemId == R.id.action_profile)
+                addFragmentToBackStack(new ProfileFragment());
+
+            if (mainBinding.navigationMenu.getVisibility() != View.VISIBLE)
+                setBottomNavVisibility(View.VISIBLE);
+
+            return true;
+        });
+    }
+
+    public void addFragmentToBackStack(Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(getViewContainerID(), fragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     private void initSocket() {
@@ -69,19 +111,17 @@ public class MainActivity extends AppCompatActivity {
         return mainBinding.viewContainer.getId();
     }
 
-    private void clearFragmentListBeforeLogOut() {
-        FragmentManager manager = getSupportFragmentManager();
-        if (manager.getBackStackEntryCount() > 0) {
-            FragmentManager.BackStackEntry topFragment = manager.getBackStackEntryAt(0);
-            manager.popBackStack(topFragment.getId(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        }
+    private void clearFragmentList() {
+        getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
     public void logOut() {
         if (LocalDataManager.getUserLoginState()) {
             LocalDataManager.setUserLoginState(false);
-            clearFragmentListBeforeLogOut();
-            setFragment(new LoginFragment());
+            mainBinding.navigationMenu.setSelectedItemId(R.id.action_message);
+            setBottomNavVisibility(View.GONE);
+            clearFragmentList();
+            setFragment(new StartScreenFragment());
         }
     }
 
@@ -120,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        clearFragmentList();
         SocketIOHandler.disconnect();
         SocketIOHandler.establishSocketConnection();
     }

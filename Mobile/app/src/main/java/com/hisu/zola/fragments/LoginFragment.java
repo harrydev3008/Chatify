@@ -1,5 +1,6 @@
 package com.hisu.zola.fragments;
 
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.PasswordTransformationMethod;
@@ -18,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentLoginBinding;
+import com.hisu.zola.fragments.conversation.ConversationListFragment;
 import com.hisu.zola.util.NotificationUtil;
 import com.hisu.zola.util.OtpDialog;
 import com.hisu.zola.util.local.LocalDataManager;
@@ -118,7 +120,8 @@ public class LoginFragment extends Fragment {
 
         if (validateUserAccount(username, password)) {
             LocalDataManager.setUserLoginState(true);
-            mMainActivity.setFragment(HomeFragment.newInstance(HomeFragment.NORMAL_ARGS));
+            mMainActivity.setBottomNavVisibility(View.VISIBLE);
+            mMainActivity.setFragment(new ConversationListFragment());
         }
     }
 

@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentRegisterUserInfoBinding;
+import com.hisu.zola.fragments.conversation.ConversationListFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -44,9 +45,12 @@ public class RegisterUserInfoFragment extends Fragment {
                     .setTitle(getString(R.string.confirm))
                     .setMessage(getString(R.string.confirm_skip))
                     .setPositiveButton(getString(R.string.confirm),
-                            (dialogInterface, i) -> mainActivity.setFragment(
-                                    HomeFragment.newInstance(HomeFragment.NORMAL_ARGS)
-                            ))
+                            (dialogInterface, i) -> {
+                                mainActivity.setBottomNavVisibility(View.VISIBLE);
+                                mainActivity.addFragmentToBackStack(
+                                        new ConversationListFragment()
+                                );
+                            })
                     .setNegativeButton(getString(R.string.cancel), null)
                     .show();
         });

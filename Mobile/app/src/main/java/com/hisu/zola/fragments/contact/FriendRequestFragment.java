@@ -9,13 +9,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.FriendRequestViewPagerAdapter;
 import com.hisu.zola.databinding.FragmentFriendRequestBinding;
-import com.hisu.zola.fragments.HomeFragment;
 
 public class FriendRequestFragment extends Fragment {
 
@@ -57,7 +55,7 @@ public class FriendRequestFragment extends Fragment {
 
     private void addActionForBtnBackToPrev() {
         mBinding.iBtnBack.setOnClickListener(view -> {
-            mainActivity.setFragment(HomeFragment.newInstance(HomeFragment.BACK_FROM_CONTACT_ARGS));
+            mainActivity.getSupportFragmentManager().popBackStackImmediate();
         });
     }
 }

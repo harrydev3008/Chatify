@@ -11,21 +11,22 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
+import com.github.ybq.android.spinkit.sprite.Sprite;
+import com.github.ybq.android.spinkit.style.DoubleBounce;
+import com.github.ybq.android.spinkit.style.ThreeBounce;
 import com.google.gson.Gson;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.MessageAdapter;
 import com.hisu.zola.databinding.FragmentConversationBinding;
 import com.hisu.zola.entity.Message;
-import com.hisu.zola.fragments.HomeFragment;
 import com.hisu.zola.util.SocketIOHandler;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,8 +60,11 @@ public class ConversationFragment extends Fragment {
 
         mSocket = SocketIOHandler.getSocketConnection();
         mSocket.on("ReceiveMessage", onMessageReceive);
+        mSocket.on("typing", onTyping);
 
         initRecyclerView();
+
+        initProgressBar();
 
         getConversationInfo();
         addActionForBackBtn();
@@ -79,7 +83,15 @@ public class ConversationFragment extends Fragment {
         return mBinding.getRoot();
     }
 
+    private void initProgressBar() {
+        Sprite threeBounce = new ThreeBounce();
+        threeBounce.setColor(ContextCompat.getColor(mMainActivity, R.color.primary_color));
+        mBinding.progressBar.setIndeterminateDrawable(threeBounce);
+    }
+
     private void initRecyclerView() {
+        mMainActivity.setBottomNavVisibility(View.GONE);
+
         messages = new ArrayList<>();
         messageAdapter = new MessageAdapter(messages, mMainActivity);
 
@@ -98,7 +110,8 @@ public class ConversationFragment extends Fragment {
 
     private void addActionForBackBtn() {
         mBinding.btnBack.setOnClickListener(view -> {
-            mMainActivity.setFragment(HomeFragment.newInstance(HomeFragment.NORMAL_ARGS));
+            mMainActivity.setBottomNavVisibility(View.VISIBLE);
+            mMainActivity.getSupportFragmentManager().popBackStackImmediate();
         });
     }
 
@@ -190,13 +203,29 @@ public class ConversationFragment extends Fragment {
         @Override
         public void call(Object... args) {
             mMainActivity.runOnUiThread(() -> {
-                JSONObject data = (JSONObject) args[0];
+                String data = (String) args[0];
                 if (data != null) {
                     Message message = new Gson().fromJson(data.toString(), Message.class);
                     messages.add(message);
                     messageAdapter.setMessages(messages);
                     messageAdapter.notifyItemInserted(messages.indexOf(message));
                     smoothScrollToLatestMsg();
+                }
+            });
+        }
+    };
+
+    private final Emitter.Listener onTyping = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            mMainActivity.runOnUiThread(() -> {
+                String data = (String) args[0];
+                if (data != null) {
+                    boolean isTyping = Boolean.parseBoolean(data.replaceAll("\"", ""));
+                    if(isTyping)
+                        mBinding.typing.setVisibility(View.VISIBLE);
+                     else
+                        mBinding.typing.setVisibility(View.GONE);
                 }
             });
         }

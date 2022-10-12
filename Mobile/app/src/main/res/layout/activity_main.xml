@@ -11,4 +11,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/navigation_menu"
+        android:layout_width="match_parent"
+        android:layout_height="?android:actionBarSize"
+        android:layout_alignParentBottom="true"
+        app:itemIconTint="@color/bottom_nav_item_select_color"
+        app:itemTextColor="@color/bottom_nav_item_select_color"
+        app:menu="@menu/home_bottom_nav_menu"
+        android:visibility="gone"/>
 </RelativeLayout>

@@ -77,6 +77,7 @@
     <string name="friend_request_cancel">Thu hồi</string>
     <string name="friend_from_contact">Danh bạ máy</string>
     <string name="friend_from_contact_desc">Các liên hệ có dùng Zola</string>
+    <string name="typing">Đang nhập &#8230;</string>
 
     <!--Error Messages-->
     <string name="empty_phone_no_err">Bạn chưa điền số điện thoại!</string>

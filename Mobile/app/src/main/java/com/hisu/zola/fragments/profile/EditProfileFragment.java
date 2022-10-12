@@ -16,7 +16,6 @@ import androidx.fragment.app.Fragment;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentEditProfileBinding;
-import com.hisu.zola.fragments.HomeFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -46,20 +45,14 @@ public class EditProfileFragment extends Fragment {
     }
 
     private void init() {
+        mainActivity.setBottomNavVisibility(View.GONE);
         mCalendar = Calendar.getInstance();
     }
 
     private void addActionForBtnBackToPrevPage() {
         mBinding.iBtnBack.setOnClickListener(view -> {
-            mainActivity.getSupportFragmentManager().popBackStack();
-            mainActivity.getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(
-                            mainActivity.getViewContainerID(),
-                            HomeFragment.newInstance(HomeFragment.BACK_FROM_EDIT_ARGS)
-                    )
-                    .addToBackStack("Home")
-                    .commit();
+            mainActivity.setBottomNavVisibility(View.VISIBLE);
+            mainActivity.getSupportFragmentManager().popBackStackImmediate();
         });
     }
 

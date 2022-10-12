@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.databinding.FragmentSplashScreenBinding;
+import com.hisu.zola.fragments.conversation.ConversationListFragment;
 import com.hisu.zola.util.local.LocalDataManager;
 
 @SuppressLint("CustomSplashScreen")
@@ -27,15 +28,19 @@ public class SplashScreenFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         mMainActivity = (MainActivity) getActivity();
 
         mBinding = FragmentSplashScreenBinding.inflate(inflater, container, false);
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
 
-            if(isUserLoggedIn())
-                mMainActivity.setFragment(HomeFragment.newInstance(HomeFragment.NORMAL_ARGS));
-            else
+            mMainActivity.setBottomNavVisibility(View.GONE);
+
+            if(isUserLoggedIn()) {
+                mMainActivity.setBottomNavVisibility(View.VISIBLE);
+                mMainActivity.addFragmentToBackStack(new ConversationListFragment());
+            }else
                 mMainActivity.setFragment(new StartScreenFragment());
 
         }, DELAY_TIME);

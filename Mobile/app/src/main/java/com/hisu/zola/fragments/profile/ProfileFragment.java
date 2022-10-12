@@ -32,13 +32,13 @@ public class ProfileFragment extends Fragment {
 
     private void addActionForBtnEditProfile() {
         mBinding.btnEditProfile.setOnClickListener(view -> {
-            mMainActivity.setFragment(new EditProfileFragment());
+            mMainActivity.addFragmentToBackStack(new EditProfileFragment());
         });
     }
 
     private void addActionForBtnSetting() {
         mBinding.iBtnSetting.setOnClickListener(view -> {
-            mMainActivity.setFragment(new SettingFragment());
+            mMainActivity.addFragmentToBackStack(new SettingFragment());
         });
     }
 }
