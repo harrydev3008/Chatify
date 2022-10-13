@@ -1,7 +1,7 @@
 package com.hisu.zola.util;
 
-import com.github.nkzawa.socketio.client.IO;
-import com.github.nkzawa.socketio.client.Socket;
+import io.socket.client.IO;
+import io.socket.client.Socket;
 import com.hisu.zola.BuildConfig;
 
 import java.net.URI;
@@ -21,11 +21,11 @@ public class SocketIOHandler {
         return instance;
     }
 
-    public static Socket getSocketConnection() {
+    public Socket getSocketConnection() {
         return mSocketIO;
     }
 
-    public static void establishSocketConnection() {
+    public void establishSocketConnection() {
         mSocketIO.connect();
     }
 
