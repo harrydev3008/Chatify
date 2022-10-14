@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.hisu.zola.MainActivity;
+import com.hisu.zola.R;
 import com.hisu.zola.adapters.ConversationAdapter;
 import com.hisu.zola.databinding.FragmentContactGroupBinding;
 import com.hisu.zola.fragments.conversation.ConversationFragment;
@@ -43,14 +44,19 @@ public class ContactGroupFragment extends Fragment {
         viewModel = new ViewModelProvider(mainActivity).get(ConversationListViewModel.class);
 
         adapter = new ConversationAdapter(mainActivity);
-        adapter.setOnConversationItemSelectedListener(conversationID ->
-                mainActivity.getSupportFragmentManager().beginTransaction()
-                        .replace(
-                                mainActivity.getViewContainerID(),
-                                ConversationFragment.newInstance(conversationID)
-                        )
-                        .addToBackStack("Group_Conversation")
-                        .commit());
+        adapter.setOnConversationItemSelectedListener(conversationID -> {
+            mainActivity.setBottomNavVisibility(View.GONE);
+            mainActivity.getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(
+                            R.anim.slide_in_left, R.anim.slide_out_left,
+                            R.anim.slide_out_right, R.anim.slide_out_right)
+                    .add(
+                            mainActivity.getViewContainerID(),
+                            ConversationFragment.newInstance(conversationID)
+                    )
+                    .addToBackStack("Group_Conversation")
+                    .commit();
+        });
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(
                 mainActivity, RecyclerView.VERTICAL, false

@@ -41,6 +41,7 @@
     <string name="logout_confirm">Bạn có thực sự muốn đăng xuất không?!</string>
     <string name="send_me_otp">Gửi mã OTP đến tôi</string>
     <string name="reset_phone_confirm">Chúng tôi sẽ gửi mã OTP đến số điện thoại bạn đã dùng để đăng ký tài khoản để thực hiện việc đổi số điện thoại mới.</string>
+    <string name="reset_pwd_confirm">Chúng tôi sẽ gửi mã OTP đến số điện thoại bạn đã dùng để đăng ký tài khoản để thực hiện việc đổi mật khẩu mới.</string>
     <string name="otp">Mã OTP</string>
     <string name="empty_otp_err">Bạn chưa nhập mã OTP!</string>
     <string name="wrong_otp_err">Mã OTP không chính xác!</string>
@@ -78,6 +79,9 @@
     <string name="friend_from_contact">Danh bạ máy</string>
     <string name="friend_from_contact_desc">Các liên hệ có dùng Zola</string>
     <string name="typing">Đang nhập &#8230;</string>
+    <string name="confirm_update_profile">Cập nhật thông tin tài khoản</string>
+    <string name="confirm_update_profile_desc">Bạn có chắc chắn muốn cập nhật lại các thông tin này chứ?!</string>
+    <string name="pls_wait">Đang xử lý&#8230; Bạn đợi tý nhé ^^!</string>
 
     <!--Error Messages-->
     <string name="empty_phone_no_err">Bạn chưa điền số điện thoại!</string>

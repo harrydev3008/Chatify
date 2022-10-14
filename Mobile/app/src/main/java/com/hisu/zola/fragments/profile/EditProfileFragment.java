@@ -1,8 +1,13 @@
 package com.hisu.zola.fragments.profile;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +15,8 @@ import android.view.ViewGroup;
 import android.widget.DatePicker;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
@@ -26,6 +33,8 @@ public class EditProfileFragment extends Fragment {
     private FragmentEditProfileBinding mBinding;
     private MainActivity mainActivity;
     private Calendar mCalendar;
+    private Uri newAvatarUri;
+    private ActivityResultLauncher<Intent> resultLauncher;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -39,6 +48,7 @@ public class EditProfileFragment extends Fragment {
         addActionForBtnBackToPrevPage();
         addActionToPickImageFromGallery();
         addActionForEditTextDateOfBirth();
+        addActionForChangeAvatarButton();
         addActionForBtnSave();
 
         return mBinding.getRoot();
@@ -47,12 +57,28 @@ public class EditProfileFragment extends Fragment {
     private void init() {
         mainActivity.setBottomNavVisibility(View.GONE);
         mCalendar = Calendar.getInstance();
+
+        resultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(), result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        newAvatarUri = result.getData().getData();
+                        mBinding.imvAvatar.setImageURI(newAvatarUri);
+                    }
+                });
     }
 
     private void addActionForBtnBackToPrevPage() {
         mBinding.iBtnBack.setOnClickListener(view -> {
             mainActivity.setBottomNavVisibility(View.VISIBLE);
             mainActivity.getSupportFragmentManager().popBackStackImmediate();
+        });
+    }
+
+    private void addActionForChangeAvatarButton() {
+        mBinding.imvAvatar.setOnClickListener(view -> {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("image/*");
+            resultLauncher.launch(intent);
         });
     }
 
@@ -92,8 +118,32 @@ public class EditProfileFragment extends Fragment {
 
     private void addActionForBtnSave() {
         mBinding.btnSave.setOnClickListener(view -> {
-            Toast.makeText(mainActivity, "Update user data", Toast.LENGTH_SHORT).show();
+            confirmUpdateProfile();
         });
+    }
+
+    private void confirmUpdateProfile() {
+        new AlertDialog.Builder(getContext())
+                .setTitle(getString(R.string.confirm_update_profile))
+                .setMessage(getString(R.string.confirm_update_profile_desc))
+                .setIcon(R.drawable.ic_alert)
+                .setPositiveButton(getString(R.string.confirm), (dialogInterface, i) ->
+                        updateProfile()
+                )
+                .setNegativeButton(getString(R.string.cancel), null)
+                .show();
+    }
+
+
+    private void updateProfile() {
+        ProgressDialog dialog = new ProgressDialog(getContext());
+        dialog.setMessage(getString(R.string.pls_wait));
+        dialog.show();
+
+        if(validateUserUpdateData()) {
+            dialog.dismiss();
+            mBinding.iBtnBack.performClick();
+        }
     }
 
     private boolean validateUserUpdateData() {

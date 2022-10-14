@@ -92,6 +92,7 @@
         android:clickable="false"
         android:drawableRight="@drawable/ic_edit_2_outline"
         android:focusable="false"
+        android:cursorVisible="false"
         android:focusableInTouchMode="false"
         android:hint="@string/app_name"
         android:inputType="textPersonName"

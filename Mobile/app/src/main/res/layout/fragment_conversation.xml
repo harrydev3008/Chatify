@@ -3,81 +3,80 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.conversation.ConversationFragment">
 
     <LinearLayout
         android:id="@+id/chat_toolbar_container"
         android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
-        android:background="@color/primary_color"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:paddingHorizontal="10dp"
-        android:elevation="4dp">
+        android:background="@color/primary_color"
+        android:elevation="4dp"
+        android:paddingHorizontal="10dp">
 
         <ImageView
             android:id="@+id/btn_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_back_white"
             android:layout_gravity="center"
-            tools:ignore="ContentDescription"/>
+            android:src="@drawable/ic_back_white"
+            tools:ignore="ContentDescription" />
 
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:paddingEnd="16dp"
-            android:orientation="vertical">
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:orientation="vertical"
+            android:gravity="center">
 
             <TextView
                 android:id="@+id/tv_username"
                 android:layout_width="match_parent"
-                android:fontFamily="@font/be_vietnam_medium"
                 android:layout_height="wrap_content"
-                android:text="@string/app_name"
-                android:textSize="22sp"
                 android:ellipsize="end"
+                android:fontFamily="@font/be_vietnam_medium"
+                android:gravity="start"
                 android:maxLines="1"
-                android:layout_marginStart="10dp"
-                android:gravity="center|start"
-                android:textColor="@color/white"/>
+                android:text="@string/app_name"
+                android:textColor="@color/white"
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/tv_last_active"
                 android:layout_width="match_parent"
-                android:fontFamily="@font/be_vietnam"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/be_vietnam"
+                android:gravity="start"
                 android:text="@string/user_active"
-                android:textSize="14sp"
-                android:layout_marginStart="10dp"
-                android:gravity="center|start"
-                android:textColor="@color/gray_e5"/>
+                android:textColor="@color/gray_e5"
+                android:textSize="14sp" />
         </LinearLayout>
 
         <ImageView
             android:id="@+id/btn_audio_call"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_audio_call"
             android:layout_gravity="center"
-            tools:ignore="ContentDescription"/>
+            android:src="@drawable/ic_audio_call"
+            tools:ignore="ContentDescription" />
 
         <ImageView
             android:id="@+id/btn_video_call"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_video_call"
-            android:layout_marginHorizontal="20dp"
             android:layout_gravity="center"
+            android:layout_marginHorizontal="20dp"
+            android:src="@drawable/ic_video_call"
             tools:ignore="ContentDescription" />
 
         <ImageView
             android:id="@+id/btn_conversation_menu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_side_menu"
             android:layout_gravity="center"
+            android:src="@drawable/ic_side_menu"
             tools:ignore="ContentDescription" />
     </LinearLayout>
 
@@ -85,7 +84,7 @@
         android:id="@+id/rv_conversation"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="10dp"
         android:background="@color/chat_bg"
         android:clipToPadding="false"
         android:paddingHorizontal="6dp"
@@ -96,18 +95,18 @@
         android:id="@+id/chat_container"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:orientation="horizontal"
-        android:elevation="4dp"
         android:layout_alignParentBottom="true"
         android:background="@color/chat_msg_box_bg"
+        android:elevation="4dp"
+        android:orientation="horizontal"
         android:paddingHorizontal="8dp">
 
         <ImageView
             android:id="@+id/btn_emoji"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_sticker"
             android:layout_gravity="center"
+            android:src="@drawable/ic_sticker"
             tools:ignore="ContentDescription" />
 
         <EditText
@@ -115,8 +114,8 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:elevation="2dp"
             android:background="@android:color/transparent"
+            android:elevation="2dp"
             android:fontFamily="@font/be_vietnam"
             android:hint="@string/chat_msg_hint"
             android:inputType="text"
@@ -132,17 +131,17 @@
             android:id="@+id/btn_send_img"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_img_outline"
             android:layout_gravity="center"
+            android:src="@drawable/ic_img_outline"
             tools:ignore="ContentDescription" />
 
         <ImageView
             android:id="@+id/btn_send"
-            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_send_msg"
             android:layout_gravity="center"
+            android:src="@drawable/ic_send_msg"
+            android:visibility="gone"
             tools:ignore="ContentDescription" />
     </LinearLayout>
 
@@ -151,27 +150,29 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/chat_container"
-        android:layout_marginStart="2dp"
-        android:layout_marginBottom="2dp"
-        android:visibility="visible"
+        android:layout_marginBottom="1dp"
         android:gravity="center_horizontal|center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:background="@color/white"
+        android:paddingVertical="2dp"
+        android:paddingHorizontal="6dp">
 
         <ProgressBar
             android:id="@+id/progressBar"
             style="@style/SpinKitView.Small.ThreeBounce"
             android:layout_width="20dp"
-            android:layout_height="20dp"/>
+            android:layout_height="20dp" />
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:textSize="14sp"
-            android:textColor="@color/gray_70"
             android:layout_gravity="center"
-            android:text="@string/typing" />
+            android:layout_marginStart="4dp"
+            android:text="@string/typing"
+            android:textColor="@color/primary_color"
+            android:textSize="14sp" />
     </LinearLayout>
 
 

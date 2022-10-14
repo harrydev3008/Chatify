@@ -52,8 +52,10 @@
         android:id="@+id/rv_conversation_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingVertical="2dp"
+        android:paddingTop="2dp"
         android:paddingHorizontal="8dp"
+        android:paddingBottom="?actionBarSize"
+        android:clipToPadding="false"
         android:background="@color/white"/>
 
 </LinearLayout>

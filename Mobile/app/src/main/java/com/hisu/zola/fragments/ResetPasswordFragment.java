@@ -1,11 +1,6 @@
 package com.hisu.zola.fragments;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-
 import android.text.TextUtils;
 import android.text.method.PasswordTransformationMethod;
 import android.view.LayoutInflater;
@@ -14,6 +9,10 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
@@ -102,25 +101,25 @@ public class ResetPasswordFragment extends Fragment {
         mBinding.btnSave.setOnClickListener(view -> {
             if (validateNewPassword(mBinding.edtNewPwd.getText().toString().trim(),
                     mBinding.edtConfirmNewPwd.getText().toString().trim()))
-            mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                mainActivity.getSupportFragmentManager().popBackStackImmediate();
         });
     }
 
     private boolean validateNewPassword(String newPwd, String confirmPwd) {
 
-        if(TextUtils.isEmpty(newPwd)) {
+        if (TextUtils.isEmpty(newPwd)) {
             mBinding.edtNewPwd.setError(getString(R.string.empty_pwd_err));
             mBinding.edtNewPwd.requestFocus();
             return false;
         }
 
-        if(TextUtils.isEmpty(confirmPwd)) {
+        if (TextUtils.isEmpty(confirmPwd)) {
             mBinding.edtConfirmNewPwd.setError(getString(R.string.empty_confirm_pwd_err));
             mBinding.edtConfirmNewPwd.requestFocus();
             return false;
         }
 
-        if(!newPwd.equals(confirmPwd)) {
+        if (!newPwd.equals(confirmPwd)) {
             mBinding.edtConfirmNewPwd.setError(getString(R.string.not_match_confirm_pwd_err));
             mBinding.edtConfirmNewPwd.requestFocus();
             return false;

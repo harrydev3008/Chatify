@@ -11,7 +11,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url "https://jitpack.io" }
-        jcenter() // Warning: this repository is going to shut down soon
+        jcenter() // This one was shut down but we need it in order for spinkit lib to work
     }
 }
 rootProject.name = "Zola"

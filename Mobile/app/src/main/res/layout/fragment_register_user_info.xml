@@ -73,6 +73,7 @@
         android:layout_marginTop="16dp"
         android:background="@drawable/border_bottom"
         android:clickable="false"
+        android:cursorVisible="false"
         android:drawableRight="@drawable/ic_edit_2_outline"
         android:focusable="false"
         android:focusableInTouchMode="false"

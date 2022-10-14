@@ -58,14 +58,19 @@ public class ContactFriendFragment extends Fragment {
         viewModel = new ViewModelProvider(mainActivity).get(ConversationListViewModel.class);
 
         adapter = new ConversationAdapter(mainActivity);
-        adapter.setOnConversationItemSelectedListener(conversationID ->
-                mainActivity.getSupportFragmentManager().beginTransaction()
-                        .replace(
-                                mainActivity.getViewContainerID(),
-                                ConversationFragment.newInstance(conversationID)
-                        )
-                        .addToBackStack("Single_Conversation")
-                        .commit());
+        adapter.setOnConversationItemSelectedListener(conversationID -> {
+            mainActivity.setBottomNavVisibility(View.GONE);
+            mainActivity.getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(
+                            R.anim.slide_in_left, R.anim.slide_out_left,
+                            R.anim.slide_out_right, R.anim.slide_out_right)
+                    .add(
+                            mainActivity.getViewContainerID(),
+                            ConversationFragment.newInstance(conversationID)
+                    )
+                    .addToBackStack("Single_Conversation")
+                    .commit();
+        });
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(
                 mainActivity, RecyclerView.VERTICAL, false

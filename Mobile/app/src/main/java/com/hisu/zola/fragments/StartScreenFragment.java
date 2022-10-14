@@ -55,7 +55,6 @@ public class StartScreenFragment extends Fragment {
         mBinding.btnLogin.setOnClickListener(view -> {
             mMainActivity.getSupportFragmentManager()
                     .beginTransaction()
-                    .setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left)
                     .replace(mMainActivity.getViewContainerID(), new LoginFragment())
                     .commit();
         });

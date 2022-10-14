@@ -11,9 +11,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.transition.TransitionInflater;
 
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.ThreeBounce;
@@ -90,7 +92,6 @@ public class ConversationFragment extends Fragment {
     }
 
     private void initRecyclerView() {
-        mMainActivity.setBottomNavVisibility(View.GONE);
 
         messages = new ArrayList<>();
         messageAdapter = new MessageAdapter(messages, mMainActivity);

@@ -51,14 +51,19 @@ public class ConversationListFragment extends Fragment {
         viewModel = new ViewModelProvider(mMainActivity).get(ConversationListViewModel.class);
 
         adapter = new ConversationAdapter(mMainActivity);
-        adapter.setOnConversationItemSelectedListener(conversationID ->
-                mMainActivity.getSupportFragmentManager().beginTransaction()
-                        .replace(
-                                mMainActivity.getViewContainerID(),
-                                ConversationFragment.newInstance(conversationID)
-                        )
-                        .addToBackStack("Single_Conversation")
-                        .commit());
+        adapter.setOnConversationItemSelectedListener(conversationID -> {
+            mMainActivity.setBottomNavVisibility(View.GONE);
+            mMainActivity.getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(
+                            R.anim.slide_in_left, R.anim.slide_out_left,
+                            R.anim.slide_out_right, R.anim.slide_out_right)
+                    .add(
+                            mMainActivity.getViewContainerID(),
+                            ConversationFragment.newInstance(conversationID)
+                    )
+                    .addToBackStack("Single_Conversation")
+                    .commit();
+        });
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(
                 mMainActivity, RecyclerView.VERTICAL, false
