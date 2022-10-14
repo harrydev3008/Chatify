@@ -11,14 +11,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.transition.TransitionInflater;
 
-import com.github.nkzawa.emitter.Emitter;
-import com.github.nkzawa.socketio.client.Socket;
 import com.github.ybq.android.spinkit.sprite.Sprite;
-import com.github.ybq.android.spinkit.style.DoubleBounce;
 import com.github.ybq.android.spinkit.style.ThreeBounce;
 import com.google.gson.Gson;
 import com.hisu.zola.MainActivity;
@@ -30,6 +29,9 @@ import com.hisu.zola.util.SocketIOHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 
 public class ConversationFragment extends Fragment {
 
@@ -58,7 +60,7 @@ public class ConversationFragment extends Fragment {
         mMainActivity = (MainActivity) getActivity();
         mBinding = FragmentConversationBinding.inflate(inflater, container, false);
 
-        mSocket = SocketIOHandler.getSocketConnection();
+        mSocket = SocketIOHandler.getInstance().getSocketConnection();
         mSocket.on("ReceiveMessage", onMessageReceive);
         mSocket.on("typing", onTyping);
 
@@ -90,7 +92,6 @@ public class ConversationFragment extends Fragment {
     }
 
     private void initRecyclerView() {
-        mMainActivity.setBottomNavVisibility(View.GONE);
 
         messages = new ArrayList<>();
         messageAdapter = new MessageAdapter(messages, mMainActivity);
@@ -222,9 +223,9 @@ public class ConversationFragment extends Fragment {
                 String data = (String) args[0];
                 if (data != null) {
                     boolean isTyping = Boolean.parseBoolean(data.replaceAll("\"", ""));
-                    if(isTyping)
+                    if (isTyping)
                         mBinding.typing.setVisibility(View.VISIBLE);
-                     else
+                    else
                         mBinding.typing.setVisibility(View.GONE);
                 }
             });

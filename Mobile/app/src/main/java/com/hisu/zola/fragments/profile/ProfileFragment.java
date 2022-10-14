@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.hisu.zola.MainActivity;
+import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentProfileBinding;
 
 public class ProfileFragment extends Fragment {
@@ -32,13 +33,21 @@ public class ProfileFragment extends Fragment {
 
     private void addActionForBtnEditProfile() {
         mBinding.btnEditProfile.setOnClickListener(view -> {
-            mMainActivity.addFragmentToBackStack(new EditProfileFragment());
+            mMainActivity.getSupportFragmentManager().beginTransaction()
+                    .add(mMainActivity.getViewContainerID(),new EditProfileFragment())
+                    .addToBackStack(null)
+                    .commit();
         });
     }
 
     private void addActionForBtnSetting() {
         mBinding.iBtnSetting.setOnClickListener(view -> {
-            mMainActivity.addFragmentToBackStack(new SettingFragment());
+            mMainActivity.getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left,
+                            R.anim.slide_out_right, R.anim.slide_out_right)
+                    .add(mMainActivity.getViewContainerID(), new SettingFragment())
+                    .addToBackStack(null)
+                    .commit();
         });
     }
 }

@@ -1,11 +1,6 @@
 package com.hisu.zola.fragments.profile;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
-
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -13,6 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
 
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
@@ -39,7 +38,6 @@ public class SettingFragment extends Fragment {
         addActionForBtnLogout();
         addActionForBtnChangePwd();
         addActionForBtnChangePhoneNumber();
-        addActionForBtnDeleteAccount();
 
         return mBinding.getRoot();
     }
@@ -125,12 +123,6 @@ public class SettingFragment extends Fragment {
         }
 
         return true;
-    }
-
-    private void addActionForBtnDeleteAccount() {
-        mBinding.tvDeleteAccount.setOnClickListener(view -> {
-            Toast.makeText(mainActivity, "Delete account", Toast.LENGTH_SHORT).show();
-        });
     }
 
     private void addActionForBtnBackToPrevPage() {

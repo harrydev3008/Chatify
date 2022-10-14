@@ -16,5 +16,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:background="@color/white"
-        android:padding="8dp"/>
+        android:paddingHorizontal="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="?actionBarSize"
+        android:clipToPadding="false"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

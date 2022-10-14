@@ -1,52 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
-    android:layout_marginTop="4dp"
+    android:layout_marginBottom="6dp"
+    android:orientation="horizontal"
+    android:gravity="center"
     android:background="@color/white">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/cimv_request_avatar"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:src="@drawable/app_logo"
         app:civ_border_color="@color/gray_70"
         app:civ_border_width="1dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/tv_request_name"
-        android:layout_width="160dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:ellipsize="end"
-        android:fontFamily="@font/be_vietnam"
-        android:maxLines="1"
-        android:text="@string/app_name"
-        android:textColor="@color/black"
-        android:textSize="22sp"
-        app:layout_constraintBottom_toBottomOf="@+id/cimv_request_avatar"
-        app:layout_constraintStart_toEndOf="@+id/cimv_request_avatar"
-        app:layout_constraintTop_toTopOf="@+id/cimv_request_avatar" />
+    <LinearLayout
+        android:id="@+id/layout_parent"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal"
+        android:background="@drawable/border_bottom"
+        android:gravity="center">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_cancel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/white"
-        android:fontFamily="@font/be_vietnam"
-        android:text="@string/friend_request_cancel"
-        android:textAllCaps="false"
-        android:textColor="@color/darkBlue"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:cornerRadius="20dp"
-        app:layout_constraintBottom_toBottomOf="@+id/cimv_request_avatar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/cimv_request_avatar"
-        app:strokeColor="@color/gray"
-        app:strokeWidth="1dp" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/tv_request_name"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="12dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/be_vietnam"
+            android:maxLines="1"
+            android:text="@string/app_name"
+            android:textColor="@color/black"
+            android:textSize="20sp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/white"
+            android:fontFamily="@font/be_vietnam"
+            android:text="@string/friend_request_cancel"
+            android:textAllCaps="false"
+            android:textColor="@color/darkBlue"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="20dp"
+            android:gravity="end"
+            app:strokeColor="@color/gray"
+            app:strokeWidth="1dp" />
+    </LinearLayout>
+</LinearLayout>

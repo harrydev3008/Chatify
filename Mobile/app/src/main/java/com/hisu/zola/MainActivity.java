@@ -97,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void initSocket() {
         SocketIOHandler.getInstance();
-        SocketIOHandler.establishSocketConnection();
     }
 
     public void setFragment(Fragment fragment) {
@@ -154,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        SocketIOHandler.establishSocketConnection();
+        SocketIOHandler.getInstance().establishSocketConnection();
     }
 
     @Override
@@ -162,6 +161,6 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         clearFragmentList();
         SocketIOHandler.disconnect();
-        SocketIOHandler.establishSocketConnection();
+        SocketIOHandler.getInstance().establishSocketConnection();
     }
 }

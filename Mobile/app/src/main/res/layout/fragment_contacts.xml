@@ -52,7 +52,7 @@
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tl_contact"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_height="45dp"
         android:background="@drawable/border_bottom"
         app:tabIndicatorColor="@color/primary_color"
         app:tabRippleColor="@color/primary_color"
@@ -61,5 +61,9 @@
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/vp_contact"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:paddingHorizontal="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="?actionBarSize"
+        android:clipToPadding="false"/>
 </LinearLayout>

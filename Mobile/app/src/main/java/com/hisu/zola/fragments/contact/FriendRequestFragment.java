@@ -55,7 +55,7 @@ public class FriendRequestFragment extends Fragment {
 
     private void addActionForBtnBackToPrev() {
         mBinding.iBtnBack.setOnClickListener(view -> {
-            mainActivity.getSupportFragmentManager().popBackStackImmediate();
+            mainActivity.addFragmentToBackStack(new ContactsFragment());
         });
     }
 }
