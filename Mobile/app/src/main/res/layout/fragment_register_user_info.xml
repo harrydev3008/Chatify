@@ -27,7 +27,7 @@
         android:fontFamily="@font/be_vietnam"
         android:text="@string/skip"
         android:textColor="@color/primary_color"
-        android:textSize="24dp"
+        android:textSize="22sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@+id/guideline11"
         app:layout_constraintHorizontal_bias="1.0"
@@ -49,24 +49,6 @@
         app:layout_constraintGuide_end="8dp" />
 
     <EditText
-        android:id="@+id/edt_display_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/border_bottom"
-        android:drawableRight="@drawable/ic_edit_2_outline"
-        android:hint="@string/display_name"
-        android:inputType="textPersonName"
-        android:paddingHorizontal="4dp"
-        android:paddingVertical="6dp"
-        android:textCursorDrawable="@drawable/edt_cursor"
-        android:textSize="20dp"
-        app:layout_constraintEnd_toStartOf="@+id/guideline11"
-        app:layout_constraintStart_toStartOf="@+id/guideline10"
-        app:layout_constraintTop_toBottomOf="@+id/cimv_avatar"
-        tools:ignore="Autofill" />
-
-    <EditText
         android:id="@+id/edt_dob"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -86,7 +68,7 @@
         android:textSize="20dp"
         app:layout_constraintEnd_toStartOf="@+id/guideline11"
         app:layout_constraintStart_toStartOf="@+id/guideline10"
-        app:layout_constraintTop_toBottomOf="@+id/edt_display_name"
+        app:layout_constraintTop_toBottomOf="@+id/cimv_avatar"
         tools:ignore="Autofill" />
 
     <RadioGroup
