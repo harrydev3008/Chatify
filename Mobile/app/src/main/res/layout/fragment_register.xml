@@ -24,7 +24,7 @@
     <ImageView
         android:id="@+id/imageView3"
         android:layout_width="wrap_content"
-        android:layout_height="300dp"
+        android:layout_height="200dp"
         android:src="@drawable/bg_register"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -76,6 +76,23 @@
         app:layout_constraintTop_toBottomOf="@+id/textView3"
         tools:ignore="Autofill" />
 
+    <EditText
+        android:id="@+id/edt_display_name"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/edit_text_outline"
+        android:hint="@string/display_name"
+        android:inputType="number"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="10dp"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toStartOf="@+id/guideline3"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/guideline2"
+        app:layout_constraintTop_toBottomOf="@+id/edt_username"
+        tools:ignore="Autofill" />
+
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="0dp"
@@ -86,7 +103,7 @@
         android:paddingVertical="4dp"
         app:layout_constraintEnd_toStartOf="@+id/guideline3"
         app:layout_constraintStart_toStartOf="@+id/guideline2"
-        app:layout_constraintTop_toBottomOf="@+id/edt_username">
+        app:layout_constraintTop_toBottomOf="@+id/edt_display_name">
 
         <EditText
             android:id="@+id/edt_password"

@@ -1,9 +1,14 @@
 package com.hisu.zola.fragments.conversation;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,11 +16,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.transition.TransitionInflater;
 
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.ThreeBounce;
@@ -25,11 +28,17 @@ import com.hisu.zola.R;
 import com.hisu.zola.adapters.MessageAdapter;
 import com.hisu.zola.databinding.FragmentConversationBinding;
 import com.hisu.zola.entity.Message;
+import com.hisu.zola.util.ImageConvertUtil;
 import com.hisu.zola.util.SocketIOHandler;
+import com.vanniktech.emoji.EmojiPopup;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import gun0912.tedimagepicker.builder.TedImagePicker;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
@@ -42,6 +51,8 @@ public class ConversationFragment extends Fragment {
     private List<Message> messages;
     private MessageAdapter messageAdapter;
     private Socket mSocket;
+    private EmojiPopup emojiPopup;
+    private boolean isToggleEmojiButton = false;
 
     public static ConversationFragment newInstance(String conversationID) {
         Bundle args = new Bundle();
@@ -66,6 +77,7 @@ public class ConversationFragment extends Fragment {
 
         initRecyclerView();
 
+        initEmojiKeyboard();
         initProgressBar();
 
         getConversationInfo();
@@ -77,6 +89,10 @@ public class ConversationFragment extends Fragment {
         addActionForSendMessageBtn();
         addToggleShowSendIcon();
 
+        mBinding.btnSendImg.setOnClickListener(view -> {
+            openBottomImagePicker();
+        });
+
         String conversationID = getArguments() != null ?
                 getArguments().getString(CONVERSATION_ID_ARGS) : "";
 
@@ -84,6 +100,51 @@ public class ConversationFragment extends Fragment {
 
         return mBinding.getRoot();
     }
+
+    private void initEmojiKeyboard() {
+        emojiPopup = EmojiPopup.Builder.fromRootView(mBinding.test).build(mBinding.edtChat);
+        mBinding.btnEmoji.setOnClickListener(view -> {
+            isToggleEmojiButton = !isToggleEmojiButton;
+
+            toggleEmojiButtonIcon();
+            emojiPopup.toggle();
+        });
+    }
+
+    private void toggleEmojiButtonIcon() {
+        if (isToggleEmojiButton) {
+            mBinding.btnEmoji.setImageDrawable(ContextCompat.getDrawable(mMainActivity, R.drawable.ic_keyboard));
+        } else {
+            mBinding.btnEmoji.setImageDrawable(ContextCompat.getDrawable(mMainActivity, R.drawable.ic_sticker));
+        }
+    }
+
+    private void openBottomImagePicker() {
+        TedImagePicker.with(mMainActivity)
+                .startMultiImage(uriList -> {
+                    uriList.forEach(uri -> {
+                        try {
+
+                            Bitmap bitmap = ImageConvertUtil.uriToBitmap(mMainActivity, uri);
+                            String imageStr = ImageConvertUtil.bitmapToBase64(bitmap);
+
+                            Message newMessage = new Message("1", "", "image", imageStr);
+                            sendMessage(newMessage);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                });
+    }
+
+//    private String encodeImage(Bitmap imageBitmap) {
+//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//        imageBitmap.compress(Bitmap.CompressFormat.JPEG,100, outputStream);
+//
+//        byte[] byteArray = outputStream.toByteArray();
+//
+//        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+//    }
 
     private void initProgressBar() {
         Sprite threeBounce = new ThreeBounce();
@@ -136,13 +197,11 @@ public class ConversationFragment extends Fragment {
 
     private void addActionForSendMessageBtn() {
         mBinding.btnSend.setOnClickListener(view -> {
-            sendMessage(new Message("1", mBinding.edtChat.getText().toString().trim()));
+            sendMessage(new Message("1", mBinding.edtChat.getText().toString().trim(), "text", null));
         });
     }
 
     private void sendMessage(Message message) {
-        if (mBinding.btnSend.getVisibility() != View.VISIBLE) return;
-
         mSocket.emit("NewMessage", new Gson().toJson(message));
 
         closeSoftKeyboard();
@@ -206,7 +265,7 @@ public class ConversationFragment extends Fragment {
             mMainActivity.runOnUiThread(() -> {
                 String data = (String) args[0];
                 if (data != null) {
-                    Message message = new Gson().fromJson(data.toString(), Message.class);
+                    Message message = new Gson().fromJson(data, Message.class);
                     messages.add(message);
                     messageAdapter.setMessages(messages);
                     messageAdapter.notifyItemInserted(messages.indexOf(message));
