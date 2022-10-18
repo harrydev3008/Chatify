@@ -54,7 +54,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         ConversationHolder conversation = conversations.get(position);
 
         holder.binding.ivConversationCoverPhoto.setImageResource(conversation.getCoverPhoto());
-        holder.binding.tvConversationName.setText(conversation.getId());
+        holder.binding.tvConversationName.setText(conversation.getName());
         holder.binding.tvLastMsg.setText(conversation.getLastMessage());
 
         int unreadMsgQuantity = conversation.getUnreadMessages();

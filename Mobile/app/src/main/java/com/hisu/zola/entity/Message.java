@@ -1,26 +1,51 @@
 package com.hisu.zola.entity;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.util.Base64;
-
-import com.google.gson.annotations.Expose;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Message {
     //  Todo: Message object structure will change later, this is just for quick test
     private String from;
     private String content;
     private String type;
-    private String uri;
 //    private LocalDateTime sentDate;
+
+    public Message() {
+    }
+
+    public Message(String from, String content, String type) {
+        this.from = from;
+        this.content = content;
+        this.type = type;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "from='" + from + '\'' +
+                ", content='" + content + '\'' +
+                ", type='" + type + '\'' +
+                '}';
+    }
 }

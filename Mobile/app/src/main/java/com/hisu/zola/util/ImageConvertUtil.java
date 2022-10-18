@@ -19,7 +19,7 @@ public class ImageConvertUtil {
 
     public static String bitmapToBase64(Bitmap imageBitmap) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+        imageBitmap.compress(Bitmap.CompressFormat.JPEG, 60, outputStream);
 
         byte[] byteArray = outputStream.toByteArray();
 

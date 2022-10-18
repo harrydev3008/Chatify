@@ -52,7 +52,7 @@
         android:id="@+id/edt_dob"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="32dp"
         android:background="@drawable/border_bottom"
         android:clickable="false"
         android:cursorVisible="false"
@@ -65,7 +65,7 @@
         android:paddingHorizontal="4dp"
         android:paddingVertical="6dp"
         android:textCursorDrawable="@drawable/edt_cursor"
-        android:textSize="20dp"
+        android:textSize="20sp"
         app:layout_constraintEnd_toStartOf="@+id/guideline11"
         app:layout_constraintStart_toStartOf="@+id/guideline10"
         app:layout_constraintTop_toBottomOf="@+id/cimv_avatar"
@@ -90,7 +90,7 @@
             android:buttonTint="@color/primary_color"
             android:checked="true"
             android:text="@string/gender_m"
-            android:textSize="20dp" />
+            android:textSize="20sp" />
 
         <RadioButton
             android:id="@+id/rBtn_gender_female"
@@ -98,7 +98,7 @@
             android:layout_height="wrap_content"
             android:buttonTint="@color/primary_color"
             android:text="@string/gender_f"
-            android:textSize="20dp" />
+            android:textSize="20sp" />
     </RadioGroup>
 
     <com.google.android.material.button.MaterialButton
@@ -110,7 +110,7 @@
         android:padding="8dp"
         android:text="@string/save"
         android:textAllCaps="false"
-        android:textSize="18dp"
+        android:textSize="18sp"
         app:cornerRadius="20dp"
         app:layout_constraintEnd_toStartOf="@+id/guideline11"
         app:layout_constraintStart_toStartOf="@+id/guideline10"

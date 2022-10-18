@@ -4,13 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Setter @Getter
-@NoArgsConstructor @AllArgsConstructor
 @Entity(tableName = "conversations")
 public class ConversationHolder {
 //  Todo: this is for test, will change later
@@ -22,4 +16,65 @@ public class ConversationHolder {
     private String name;
     private String lastMessage;
     private int unreadMessages;
+
+    public ConversationHolder() {
+    }
+
+    public ConversationHolder(@NonNull String id, boolean isGroup, int coverPhoto, String name, String lastMessage, int unreadMessages) {
+        this.id = id;
+        this.isGroup = isGroup;
+        this.coverPhoto = coverPhoto;
+        this.name = name;
+        this.lastMessage = lastMessage;
+        this.unreadMessages = unreadMessages;
+    }
+
+    @NonNull
+    public String getId() {
+        return id;
+    }
+
+    public void setId(@NonNull String id) {
+        this.id = id;
+    }
+
+    public boolean isGroup() {
+        return isGroup;
+    }
+
+    public void setGroup(boolean group) {
+        isGroup = group;
+    }
+
+    public int getCoverPhoto() {
+        return coverPhoto;
+    }
+
+    public void setCoverPhoto(int coverPhoto) {
+        this.coverPhoto = coverPhoto;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getLastMessage() {
+        return lastMessage;
+    }
+
+    public void setLastMessage(String lastMessage) {
+        this.lastMessage = lastMessage;
+    }
+
+    public int getUnreadMessages() {
+        return unreadMessages;
+    }
+
+    public void setUnreadMessages(int unreadMessages) {
+        this.unreadMessages = unreadMessages;
+    }
 }

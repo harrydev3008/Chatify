@@ -85,6 +85,7 @@
 
     <!--Error Messages-->
     <string name="empty_phone_no_err">Bạn chưa điền số điện thoại!</string>
+    <string name="empty_display_name_err">Bạn chưa điền tên hiển thị!</string>
     <string name="invalid_phone_format_err">Số điện thoại sai định dạng!</string>
     <string name="empty_pwd_err">Bạn chưa nhập mật khẩu!</string>
     <string name="invalid_pwd_format_err">Mật khẩu phải chứa ký tự hoa và số!</string>

@@ -38,6 +38,7 @@ public class RegisterFragment extends Fragment {
         addToggleShowPasswordEvent(mBinding.edtConfirmPassword, mBinding.tvToggleConfirmPassword);
 
         addChangeBackgroundColorOnFocusForUserNameEditText();
+        addChangeBackgroundColorOnFocusForDisplayEditText();
 
         addChangeBackgroundColorOnFocusForPasswordEditText(
                 mBinding.edtPassword, mBinding.linearLayout
@@ -58,19 +59,26 @@ public class RegisterFragment extends Fragment {
 
     private void register() {
         String phoneNo = mBinding.edtUsername.getText().toString().trim();
+        String displayName = mBinding.edtDisplayName.getText().toString().trim();
         String pwd = mBinding.edtPassword.getText().toString().trim();
         String confirmPwd = mBinding.edtConfirmPassword.getText().toString().trim();
 
-        if (validateUserRegisterAccount(phoneNo, pwd, confirmPwd)) {
+        if (validateUserRegisterAccount(phoneNo, displayName, pwd, confirmPwd)) {
             openConfirmOTPDialog(Gravity.CENTER);
         }
     }
 
-    private boolean validateUserRegisterAccount(String phoneNo, String pwd, String confirmPwd) {
+    private boolean validateUserRegisterAccount(String phoneNo, String displayName, String pwd, String confirmPwd) {
 
         if (TextUtils.isEmpty(phoneNo)) {
             mBinding.edtUsername.setError(getString(R.string.empty_phone_no_err));
             mBinding.edtUsername.requestFocus();
+            return false;
+        }
+
+        if (TextUtils.isEmpty(displayName)) {
+            mBinding.edtDisplayName.setError(getString(R.string.empty_display_name_err));
+            mBinding.edtDisplayName.requestFocus();
             return false;
         }
 
@@ -129,6 +137,19 @@ public class RegisterFragment extends Fragment {
                                 R.drawable.edit_text_outline_focus));
             else
                 mBinding.edtUsername.setBackground(
+                        ContextCompat.getDrawable(mMainActivity.getApplicationContext(),
+                                R.drawable.edit_text_outline));
+        });
+    }
+
+    private void addChangeBackgroundColorOnFocusForDisplayEditText() {
+        mBinding.edtDisplayName.setOnFocusChangeListener((view, isFocus) -> {
+            if (isFocus)
+                mBinding.edtDisplayName.setBackground(
+                        ContextCompat.getDrawable(mMainActivity.getApplicationContext(),
+                                R.drawable.edit_text_outline_focus));
+            else
+                mBinding.edtDisplayName.setBackground(
                         ContextCompat.getDrawable(mMainActivity.getApplicationContext(),
                                 R.drawable.edit_text_outline));
         });
