@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.hisu.zola.databinding.LayoutChatReceiveBinding;
 import com.hisu.zola.databinding.LayoutChatSendBinding;
 import com.hisu.zola.entity.Message;
@@ -61,7 +62,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         Message message = messages.get(position);
 
         if (holder.getItemViewType() == MSG_SEND_TYPE) {
-            ((MessageSendViewHolder) holder).displayMessageContent(message);
+            ((MessageSendViewHolder) holder).displayMessageContent(mContext ,message);
 
         } else if (holder.getItemViewType() == MSG_RECEIVE_TYPE) {
 //          If multiple messages were from the same user then display cover photo only once
@@ -70,7 +71,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     ((MessageReceiveViewHolder) holder).binding.ivUserPfp.setVisibility(View.INVISIBLE);
             }
 
-            ((MessageReceiveViewHolder) holder).displayMessageContent(message);
+            ((MessageReceiveViewHolder) holder).displayMessageContent(mContext, message);
         }
     }
 
@@ -94,7 +95,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             this.binding = binding;
         }
 
-        private void displayMessageContent(Message message) {
+        private void displayMessageContent(Context context, Message message) {
             if (message.getType().equalsIgnoreCase("text")) {
                 binding.imgMsgSendHolder.setVisibility(View.GONE);
                 binding.tvMsgSend.setVisibility(View.VISIBLE);
@@ -102,7 +103,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             } else {
                 binding.tvMsgSend.setVisibility(View.GONE);
                 binding.imgMsgSendHolder.setVisibility(View.VISIBLE);
-                binding.imgMsgSend.setImageBitmap(ImageConvertUtil.base64ToBitmap(message.getUri()));
+                Glide.with(context).load(message.getContent()).into(binding.imgMsgSend);
             }
         }
     }
@@ -116,7 +117,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             this.binding = binding;
         }
 
-        private void displayMessageContent(Message message) {
+        private void displayMessageContent(Context context, Message message) {
             if (message.getType().equalsIgnoreCase("text")) {
                 binding.imgMsgReceiveHolder.setVisibility(View.GONE);
                 binding.tvMsgReceive.setVisibility(View.VISIBLE);
@@ -124,7 +125,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             } else {
                 binding.tvMsgReceive.setVisibility(View.GONE);
                 binding.imgMsgReceiveHolder.setVisibility(View.VISIBLE);
-                binding.imgMsgReceive.setImageBitmap(ImageConvertUtil.base64ToBitmap(message.getUri()));
+                Glide.with(context).load(message.getContent()).into(binding.imgMsgReceive);
             }
         }
     }

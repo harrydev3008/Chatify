@@ -1,13 +1,11 @@
 package com.hisu.zola.fragments.conversation;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,19 +26,27 @@ import com.hisu.zola.R;
 import com.hisu.zola.adapters.MessageAdapter;
 import com.hisu.zola.databinding.FragmentConversationBinding;
 import com.hisu.zola.entity.Message;
-import com.hisu.zola.util.ImageConvertUtil;
+import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.RealPathUtil;
 import com.hisu.zola.util.SocketIOHandler;
 import com.vanniktech.emoji.EmojiPopup;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import gun0912.tedimagepicker.builder.TedImagePicker;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ConversationFragment extends Fragment {
 
@@ -53,6 +59,7 @@ public class ConversationFragment extends Fragment {
     private Socket mSocket;
     private EmojiPopup emojiPopup;
     private boolean isToggleEmojiButton = false;
+    private Message test;
 
     public static ConversationFragment newInstance(String conversationID) {
         Bundle args = new Bundle();
@@ -72,6 +79,7 @@ public class ConversationFragment extends Fragment {
         mBinding = FragmentConversationBinding.inflate(inflater, container, false);
 
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
+
         mSocket.on("ReceiveMessage", onMessageReceive);
         mSocket.on("typing", onTyping);
 
@@ -89,9 +97,7 @@ public class ConversationFragment extends Fragment {
         addActionForSendMessageBtn();
         addToggleShowSendIcon();
 
-        mBinding.btnSendImg.setOnClickListener(view -> {
-            openBottomImagePicker();
-        });
+        mBinding.btnSendImg.setOnClickListener(view -> openBottomImagePicker());
 
         String conversationID = getArguments() != null ?
                 getArguments().getString(CONVERSATION_ID_ARGS) : "";
@@ -121,30 +127,35 @@ public class ConversationFragment extends Fragment {
 
     private void openBottomImagePicker() {
         TedImagePicker.with(mMainActivity)
-                .startMultiImage(uriList -> {
-                    uriList.forEach(uri -> {
-                        try {
-
-                            Bitmap bitmap = ImageConvertUtil.uriToBitmap(mMainActivity, uri);
-                            String imageStr = ImageConvertUtil.bitmapToBase64(bitmap);
-
-                            Message newMessage = new Message("1", "", "image", imageStr);
-                            sendMessage(newMessage);
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        }
-                    });
+                .startMultiImage(uris -> {
+                    uris.forEach(this::uploadFileToServer);
                 });
     }
 
-//    private String encodeImage(Bitmap imageBitmap) {
-//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//        imageBitmap.compress(Bitmap.CompressFormat.JPEG,100, outputStream);
-//
-//        byte[] byteArray = outputStream.toByteArray();
-//
-//        return Base64.encodeToString(byteArray, Base64.DEFAULT);
-//    }
+    private void uploadFileToServer(Uri uri) {
+
+        File file = new File(RealPathUtil.getRealPath(mMainActivity, uri));
+        RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        MultipartBody.Part part = MultipartBody.Part.createFormData("image", file.getName(), requestBody);
+
+        ApiService.apiService.postImage(part).enqueue(new Callback<Message>() {
+            @Override
+            public void onResponse(@NonNull Call<Message> call, @NonNull Response<Message> response) {
+                if(response.isSuccessful()) {
+                    Message message = response.body();
+                    if (message != null) {
+                        message.setFrom("1");
+                        sendMessage(message);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Message> call, @NonNull Throwable t) {
+                Log.e("ERR", t.getLocalizedMessage());
+            }
+        });
+    }
 
     private void initProgressBar() {
         Sprite threeBounce = new ThreeBounce();
@@ -197,11 +208,15 @@ public class ConversationFragment extends Fragment {
 
     private void addActionForSendMessageBtn() {
         mBinding.btnSend.setOnClickListener(view -> {
-            sendMessage(new Message("1", mBinding.edtChat.getText().toString().trim(), "text", null));
+            sendMessage(new Message("1", mBinding.edtChat.getText().toString().trim(), "text"));
         });
     }
 
     private void sendMessage(Message message) {
+        if(!mSocket.connected()) {
+            mSocket.connect();
+        }
+
         mSocket.emit("NewMessage", new Gson().toJson(message));
 
         closeSoftKeyboard();

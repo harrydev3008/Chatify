@@ -43,14 +43,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(mainBinding.getRoot());
 //        Database db = Database.getDatabase(this);
 //        Database.dbExecutor.execute(() -> {
-//            db.conversationDAO().insert(new ConversationHolder("3", false, R.drawable.app_logo, "Harry","new msg", 1));
-//            db.conversationDAO().insert(new ConversationHolder("4", false, R.drawable.app_logo, "Harry","new msg", 1));
-//            db.conversationDAO().insert(new ConversationHolder("5", false, R.drawable.app_logo, "Harry","new msg", 1));
-//            db.conversationDAO().insert(new ConversationHolder("6", false, R.drawable.app_logo, "Harry","new msg", 1));
-//            db.conversationDAO().insert(new ConversationHolder("7", false, R.drawable.app_logo, "Harry","new msg", 1));
-//            db.conversationDAO().insert(new ConversationHolder("8", false, R.drawable.app_logo, "Harry","new msg", 1));
-//            db.conversationDAO().insert(new ConversationHolder("9", false, R.drawable.app_logo, "Harry","new msg", 1));
-//            db.conversationDAO().insert(new ConversationHolder("10", false, R.drawable.app_logo, "Harry","new msg", 1));
+//            db.conversationDAO().insert(new ConversationHolder("1", false, R.drawable.cat, "Chí Hiếu","Iem ăn cơm chưa?!", 1));
+//            db.conversationDAO().insert(new ConversationHolder("2", false, R.drawable.ganyu, "Văn Thành","Tối đi net k bro??", 1));
+//            db.conversationDAO().insert(new ConversationHolder("3", false, R.drawable.pepe, "Linh","Sao ko rep em :<", 1));
 //        });
         initSocket();
         addSelectedActionForNavItem();
@@ -98,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initSocket() {
-        SocketIOHandler.getInstance();
+        SocketIOHandler.getInstance().establishSocketConnection();
     }
 
     public void setFragment(Fragment fragment) {
@@ -155,7 +150,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        SocketIOHandler.getInstance().establishSocketConnection();
     }
 
     @Override
@@ -163,6 +157,5 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         clearFragmentList();
         SocketIOHandler.disconnect();
-        SocketIOHandler.getInstance().establishSocketConnection();
     }
 }

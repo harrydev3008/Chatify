@@ -12,7 +12,9 @@ public class SocketIOHandler {
     private static Socket mSocketIO;
 
     private SocketIOHandler() {
-        mSocketIO = IO.socket(getConnectionURI());
+        IO.Options mOptions = new IO.Options();
+        mOptions.query = "userId=Harry";
+        mSocketIO = IO.socket(getConnectionURI(), mOptions);
     }
 
     public static synchronized SocketIOHandler getInstance() {
