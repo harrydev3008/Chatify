@@ -15,6 +15,7 @@ import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.ContactViewPagerAdapter;
 import com.hisu.zola.databinding.FragmentContactsBinding;
+import com.hisu.zola.fragments.AddFriendFragment;
 
 public class ContactsFragment extends Fragment {
 
@@ -31,6 +32,7 @@ public class ContactsFragment extends Fragment {
 
         tapToCloseApp();
         initTabLabLayout();
+        addMoreFriendEvent();
 
         return mBinding.getRoot();
     }
@@ -58,6 +60,22 @@ public class ContactsFragment extends Fragment {
     private void tapToCloseApp() {
         mBinding.mBtnBack.setOnClickListener(view -> {
             mMainActivity.onBackPressed();
+        });
+    }
+
+    private void addMoreFriendEvent() {
+        mBinding.mBtnAddFriend.setOnClickListener(view -> {
+            mMainActivity.setBottomNavVisibility(View.GONE);
+            mMainActivity.getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(
+                            R.anim.slide_in_left, R.anim.slide_out_left,
+                            R.anim.slide_out_right, R.anim.slide_out_right)
+                    .replace(
+                            mMainActivity.getViewContainerID(),
+                            new AddFriendFragment()
+                    )
+                    .addToBackStack(null)
+                    .commit();
         });
     }
 }

@@ -1,6 +1,6 @@
-package com.hisu.zola.fragments;
+package com.hisu.zola.fragments.authenticate;
 
-import android.opengl.Visibility;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.PasswordTransformationMethod;
@@ -23,6 +23,8 @@ import com.hisu.zola.fragments.conversation.ConversationListFragment;
 import com.hisu.zola.util.NotificationUtil;
 import com.hisu.zola.util.OtpDialog;
 import com.hisu.zola.util.local.LocalDataManager;
+
+import java.util.concurrent.Executors;
 
 public class LoginFragment extends Fragment {
 
@@ -115,14 +117,29 @@ public class LoginFragment extends Fragment {
     }
 
     private void addLoginEvent() {
-        String username = mBinding.edtUsername.getText().toString();
-        String password = mBinding.edtPassword.getText().toString();
 
-        if (validateUserAccount(username, password)) {
-            LocalDataManager.setUserLoginState(true);
-            mMainActivity.setBottomNavVisibility(View.VISIBLE);
-            mMainActivity.setFragment(new ConversationListFragment());
-        }
+        ProgressDialog progressDialog = new ProgressDialog(mMainActivity);
+
+        Executors.newSingleThreadExecutor().execute(() -> {
+
+            mMainActivity.runOnUiThread(() -> {
+                progressDialog.setMessage(getString(R.string.pls_wait));
+                progressDialog.show();
+            });
+
+            String username = mBinding.edtUsername.getText().toString();
+            String password = mBinding.edtPassword.getText().toString();
+
+            if (validateUserAccount(username, password)) {
+                LocalDataManager.setUserLoginState(true);
+
+                mMainActivity.runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    mMainActivity.setBottomNavVisibility(View.VISIBLE);
+                    mMainActivity.setFragment(new ConversationListFragment());
+                });
+            }
+        });
     }
 
     private boolean validateUserAccount(String username, String password) {

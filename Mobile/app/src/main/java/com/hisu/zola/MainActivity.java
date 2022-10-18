@@ -11,9 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.badge.BadgeDrawable;
-import com.hisu.zola.database.Database;
 import com.hisu.zola.databinding.ActivityMainBinding;
-import com.hisu.zola.entity.ConversationHolder;
 import com.hisu.zola.fragments.SplashScreenFragment;
 import com.hisu.zola.fragments.StartScreenFragment;
 import com.hisu.zola.fragments.contact.ContactsFragment;

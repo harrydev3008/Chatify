@@ -1,4 +1,4 @@
-package com.hisu.zola.fragments;
+package com.hisu.zola.fragments.authenticate;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
@@ -28,6 +28,7 @@ import com.hisu.zola.util.local.LocalDataManager;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.concurrent.Executors;
 
 public class RegisterUserInfoFragment extends Fragment {
 
@@ -127,16 +128,25 @@ public class RegisterUserInfoFragment extends Fragment {
     }
 
     private void saveUserInfo() {
-        ProgressDialog dialog = new ProgressDialog(getContext());
-        dialog.setMessage(getString(R.string.pls_wait));
-        dialog.show();
+        ProgressDialog dialog = new ProgressDialog(mainActivity);
 
-        if(validateUserInfo()) {
-            dialog.dismiss();
-            LocalDataManager.setUserLoginState(true);
-            mainActivity.setBottomNavVisibility(View.VISIBLE);
-            mainActivity.addFragmentToBackStack(new ConversationListFragment());
-        }
+        Executors.newSingleThreadExecutor().execute(() -> {
+
+            mainActivity.runOnUiThread(() -> {
+                dialog.setMessage(getString(R.string.pls_wait));
+                dialog.show();
+            });
+
+            if(validateUserInfo()) {
+                LocalDataManager.setUserLoginState(true);
+
+                mainActivity.runOnUiThread(() -> {
+                    dialog.dismiss();
+                    mainActivity.setBottomNavVisibility(View.VISIBLE);
+                    mainActivity.addFragmentToBackStack(new ConversationListFragment());
+                });
+            }
+        });
     }
 
     private boolean validateUserInfo() {

@@ -1,5 +1,6 @@
-package com.hisu.zola.fragments;
+package com.hisu.zola.fragments.authenticate;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.PasswordTransformationMethod;
@@ -21,6 +22,8 @@ import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentRegisterBinding;
 import com.hisu.zola.util.NotificationUtil;
 import com.hisu.zola.util.OtpDialog;
+
+import java.util.concurrent.Executors;
 
 public class RegisterFragment extends Fragment {
 
@@ -58,14 +61,24 @@ public class RegisterFragment extends Fragment {
     }
 
     private void register() {
-        String phoneNo = mBinding.edtUsername.getText().toString().trim();
-        String displayName = mBinding.edtDisplayName.getText().toString().trim();
-        String pwd = mBinding.edtPassword.getText().toString().trim();
-        String confirmPwd = mBinding.edtConfirmPassword.getText().toString().trim();
+        ProgressDialog progressDialog = new ProgressDialog(mMainActivity);
 
-        if (validateUserRegisterAccount(phoneNo, displayName, pwd, confirmPwd)) {
-            openConfirmOTPDialog(Gravity.CENTER);
-        }
+        Executors.newSingleThreadExecutor().execute(() -> {
+
+            mMainActivity.runOnUiThread(() -> {
+                progressDialog.setMessage(getString(R.string.pls_wait));
+                progressDialog.show();
+            });
+
+            String phoneNo = mBinding.edtUsername.getText().toString().trim();
+            String displayName = mBinding.edtDisplayName.getText().toString().trim();
+            String pwd = mBinding.edtPassword.getText().toString().trim();
+            String confirmPwd = mBinding.edtConfirmPassword.getText().toString().trim();
+
+            if (validateUserRegisterAccount(phoneNo, displayName, pwd, confirmPwd)) {
+                openConfirmOTPDialog(Gravity.CENTER);
+            }
+        });
     }
 
     private boolean validateUserRegisterAccount(String phoneNo, String displayName, String pwd, String confirmPwd) {
