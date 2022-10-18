@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray_e5"
+    android:background="@color/gray_f1"
     tools:context=".fragments.profile.SettingFragment">
 
     <RelativeLayout
@@ -122,7 +122,7 @@
             android:id="@+id/view"
             android:layout_width="match_parent"
             android:layout_height="8dp"
-            android:background="@color/gray_e5"
+            android:background="@color/gray_f1"
             app:layout_constraintTop_toBottomOf="@+id/tv_change_password" />
 
         <TextView
@@ -187,7 +187,7 @@
             android:id="@+id/view2"
             android:layout_width="match_parent"
             android:layout_height="8dp"
-            android:background="@color/gray_e5"
+            android:background="@color/gray_f1"
             app:layout_constraintTop_toBottomOf="@+id/relativeLayout" />
 
         <TextView

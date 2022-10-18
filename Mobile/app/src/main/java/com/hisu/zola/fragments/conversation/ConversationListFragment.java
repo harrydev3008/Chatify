@@ -21,6 +21,7 @@ import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.ConversationAdapter;
 import com.hisu.zola.databinding.FragmentConversationListBinding;
+import com.hisu.zola.fragments.AddFriendFragment;
 import com.hisu.zola.view_model.ConversationListViewModel;
 
 public class ConversationListFragment extends Fragment {
@@ -57,7 +58,7 @@ public class ConversationListFragment extends Fragment {
                     .setCustomAnimations(
                             R.anim.slide_in_left, R.anim.slide_out_left,
                             R.anim.slide_out_right, R.anim.slide_out_right)
-                    .add(
+                    .replace(
                             mMainActivity.getViewContainerID(),
                             ConversationFragment.newInstance(conversationID)
                     )
@@ -138,8 +139,17 @@ public class ConversationListFragment extends Fragment {
 
     private void addMoreFriendEvent() {
         mBinding.mBtnAddFriend.setOnClickListener(view -> {
-            //Todo: add method allow user to add more friend by phone number or username, etc..
-            Toast.makeText(mMainActivity, "Function not available right now!", Toast.LENGTH_SHORT).show();
+            mMainActivity.setBottomNavVisibility(View.GONE);
+            mMainActivity.getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(
+                            R.anim.slide_in_left, R.anim.slide_out_left,
+                            R.anim.slide_out_right, R.anim.slide_out_right)
+                    .replace(
+                            mMainActivity.getViewContainerID(),
+                            new AddFriendFragment()
+                    )
+                    .addToBackStack(null)
+                    .commit();
         });
     }
 }

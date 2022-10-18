@@ -2,7 +2,6 @@ package com.hisu.zola.fragments.conversation;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -34,8 +33,6 @@ import com.vanniktech.emoji.EmojiPopup;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import gun0912.tedimagepicker.builder.TedImagePicker;
 import io.socket.client.Socket;
@@ -43,7 +40,6 @@ import io.socket.emitter.Emitter;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -59,7 +55,6 @@ public class ConversationFragment extends Fragment {
     private Socket mSocket;
     private EmojiPopup emojiPopup;
     private boolean isToggleEmojiButton = false;
-    private Message test;
 
     public static ConversationFragment newInstance(String conversationID) {
         Bundle args = new Bundle();
@@ -127,6 +122,8 @@ public class ConversationFragment extends Fragment {
 
     private void openBottomImagePicker() {
         TedImagePicker.with(mMainActivity)
+                .title(getString(R.string.pick_img))
+                .buttonText(getString(R.string.send))
                 .startMultiImage(uris -> {
                     uris.forEach(this::uploadFileToServer);
                 });
@@ -202,7 +199,16 @@ public class ConversationFragment extends Fragment {
 
     private void addActionForSideMenu() {
         mBinding.btnConversationMenu.setOnClickListener(view -> {
-            Toast.makeText(mMainActivity, "Side menu", Toast.LENGTH_SHORT).show();
+            mMainActivity.getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(
+                            R.anim.slide_in_left, R.anim.slide_out_left,
+                            R.anim.slide_out_right, R.anim.slide_out_right)
+                    .replace(
+                            mMainActivity.getViewContainerID(),
+                            new ConversationDetailFragment()
+                    )
+                    .addToBackStack(null)
+                    .commit();
         });
     }
 

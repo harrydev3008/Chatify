@@ -1,4 +1,4 @@
-package com.hisu.zola.fragments;
+package com.hisu.zola.fragments.authenticate;
 
 import android.os.Bundle;
 import android.text.TextUtils;

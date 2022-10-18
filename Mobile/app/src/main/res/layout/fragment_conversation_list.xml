@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     tools:context=".fragments.conversation.ConversationListFragment"
     android:orientation="vertical"
-    android:background="@color/gray_e5">
+    android:background="@color/gray_f1">
 
     <LinearLayout
         android:id="@+id/conversation_toolbar"

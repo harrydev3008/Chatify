@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentSettingBinding;
-import com.hisu.zola.fragments.ResetPasswordFragment;
+import com.hisu.zola.fragments.authenticate.ResetPasswordFragment;
 import com.hisu.zola.util.NotificationUtil;
 import com.hisu.zola.util.OtpDialog;
 

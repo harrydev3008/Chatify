@@ -4,20 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/gray_f1"
     tools:context=".fragments.contact.FriendRequestReceiveFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_friend_request_receive"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_height="wrap_content"
         android:background="@color/white"
+        android:backgroundTint="@color/white"
+        android:clipToPadding="false"
         android:paddingHorizontal="8dp"
         android:paddingTop="8dp"
-        android:paddingBottom="?actionBarSize"
-        android:clipToPadding="false"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

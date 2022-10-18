@@ -10,6 +10,7 @@ import androidx.transition.TransitionInflater;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
@@ -25,10 +26,52 @@ public class ConversationDetailFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         mainActivity = (MainActivity) getActivity();
+
         mBinding = FragmentConversationDetailBinding.inflate(
                 inflater, container, false
         );
 
+        addActionForBackBtn();
+        addActionForEventChangeNickName();
+        addActionForEventViewSentFiles();
+        addActionForEventDeleteConversation();
+        addActionForEventUnfriend();
+
         return mBinding.getRoot();
+    }
+
+    private void addActionForBackBtn() {
+        mBinding.iBtnBack.setOnClickListener(view -> {
+            mainActivity.setBottomNavVisibility(View.VISIBLE);
+            mainActivity.getSupportFragmentManager().popBackStackImmediate();
+        });
+    }
+
+    private void addActionForEventChangeNickName() {
+        //Todo: allow user set theirs' friend nick name
+        mBinding.tvChangeNickName.setOnClickListener(view -> {
+            Toast.makeText(mainActivity, "ChangeNickName", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void addActionForEventViewSentFiles() {
+        //Todo: allow user view all files sent
+        mBinding.tvSentFile.setOnClickListener(view -> {
+            Toast.makeText(mainActivity, "ViewSentFiles", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void addActionForEventDeleteConversation() {
+        //Todo: allow user remove conversation
+        mBinding.tvDeleteConversation.setOnClickListener(view -> {
+            Toast.makeText(mainActivity, "DeleteConversation", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void addActionForEventUnfriend() {
+        //Todo: allow user unfriend
+        mBinding.tvUnfriend.setOnClickListener(view -> {
+            Toast.makeText(mainActivity, "Unfriend", Toast.LENGTH_SHORT).show();
+        });
     }
 }

@@ -67,10 +67,15 @@
     <string name="delete_account">Xoá tài khoản</string>
     <string name="press_again_to_exit">Nhấn lần nữa để thoát!</string>
     <string name="account_and_secure">Tài khoản và bảo mật</string>
+    <string name="add_friend">Thêm bạn</string>
+    <string name="find">Tìm</string>
+    <string name="add_friend_by_phone_no">Thêm bạn bằng số điện thoại</string>
+    <string name="option">Tùy chọn</string>
     <string name="tab_contact_friend">Bạn bè</string>
     <string name="tab_contact_group">Nhóm</string>
     <string name="new_group">Tạo nhóm mới</string>
     <string name="friend_request">Lời mời kết bạn</string>
+    <string name="friend_request_desc">Thu hồi hoặc từ chối lời mời kết bạn</string>
     <string name="friend_request_send">Đã gửi</string>
     <string name="friend_request_receive">Đã nhận</string>
     <string name="friend_request_accept">Chấp nhận</string>
@@ -82,6 +87,14 @@
     <string name="confirm_update_profile">Cập nhật thông tin tài khoản</string>
     <string name="confirm_update_profile_desc">Bạn có chắc chắn muốn cập nhật lại các thông tin này chứ?!</string>
     <string name="pls_wait">Đang xử lý&#8230; Bạn đợi tý nhé ^^!</string>
+    <string name="send">Gửi</string>
+    <string name="pick_img">Chọn ảnh để gửi</string>
+    <string name="change_friend_nick_name">Đổi tên gợi nhớ</string>
+    <string name="sent_file">Ảnh, file đã gửi</string>
+    <string name="unfriend">Huỷ kết bạn</string>
+    <string name="delete_conversation">Xoá lịch sử cuộc trò chuyện</string>
+    <string name="phone_contact">Danh bạ máy</string>
+    <string name="phone_contact_desc">Thêm bạn từ danh bạ máy</string>
 
     <!--Error Messages-->
     <string name="empty_phone_no_err">Bạn chưa điền số điện thoại!</string>
