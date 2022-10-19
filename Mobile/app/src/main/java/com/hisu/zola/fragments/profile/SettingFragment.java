@@ -67,14 +67,7 @@ public class SettingFragment extends Fragment {
 
     private void addActionForBtnChangePhoneNumber() {
         mBinding.acChangePhoneNumber.setOnClickListener(view -> {
-            new AlertDialog.Builder(mainActivity)
-                    .setIcon(R.drawable.ic_alert)
-                    .setTitle(getString(R.string.change_phone_no))
-                    .setMessage(getString(R.string.reset_phone_confirm))
-                    .setPositiveButton(getString(R.string.send_me_otp),
-                            (dialogInterface, i) -> showConfirmResetPhoneNumberDialog())
-                    .setNegativeButton(getString(R.string.cancel), null)
-                    .show();
+            mainActivity.addFragmentToBackStack(new ConfirmChangePhoneNumberFragment());
         });
     }
 

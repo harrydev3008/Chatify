@@ -7,40 +7,40 @@ import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.hisu.zola.R;
 
-public class OtpDialog {
+public class ConfirmPhoneNumberDialog {
 
     private Dialog dialog;
     private final Context context;
     private final int gravity;
 
-    private EditText edtOtp;
-    private Button btnCancel, btnConfirm;
-    private TextView tvOtpNotReceive;
+    private TextView tvPhoneNumber, tvChange, tvConfirm;
 
-    public OtpDialog(Context context, int gravity) {
+    public ConfirmPhoneNumberDialog(Context context, int gravity) {
         this.context = context;
         this.gravity = gravity;
         initDialog();
+    }
+
+    public void setNewPhoneNumber(String newPhoneNumber) {
+        this.tvPhoneNumber.setText(newPhoneNumber);
+    }
+
+    public String getNewPhoneNumber() {
+        return tvPhoneNumber.getText().toString();
     }
 
     public Dialog getDialog() {
         return dialog;
     }
 
-    public EditText getEdtOtp() {
-        return edtOtp;
-    }
-
     private void initDialog() {
         dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.layout_otp_dialog);
+        dialog.setContentView(R.layout.layout_change_phone_number);
         dialog.setCancelable(false);
 
         Window window = dialog.getWindow();
@@ -59,10 +59,9 @@ public class OtpDialog {
     }
 
     private void initUIComponent() {
-         edtOtp = dialog.findViewById(R.id.edt_otp);
-         btnCancel = dialog.findViewById(R.id.mBtn_cancel);
-         btnConfirm = dialog.findViewById(R.id.mBtn_confirm);
-         tvOtpNotReceive = dialog.findViewById(R.id.tv_otp_not_receive);
+        tvPhoneNumber = dialog.findViewById(R.id.tv_new_phone_no);
+        tvChange = dialog.findViewById(R.id.tv_change);
+        tvConfirm = dialog.findViewById(R.id.tv_confirm);
     }
 
     public void showDialog() {
@@ -73,19 +72,11 @@ public class OtpDialog {
         dialog.dismiss();
     }
 
-    public String getEditTextInput() {
-        return edtOtp != null ? edtOtp.getText().toString().trim() : "";
-    }
-
-    public void addActionForBtnCancel(View.OnClickListener onClickListener) {
-        btnCancel.setOnClickListener(onClickListener);
+    public void addActionForBtnChange(View.OnClickListener onClickListener) {
+        tvChange.setOnClickListener(onClickListener);
     }
 
     public void addActionForBtnConfirm(View.OnClickListener onClickListener) {
-        btnConfirm.setOnClickListener(onClickListener);
-    }
-
-    public void addActionForBtnReSentOtp(View.OnClickListener onClickListener) {
-        tvOtpNotReceive.setOnClickListener(onClickListener);
+        tvConfirm.setOnClickListener(onClickListener);
     }
 }

@@ -51,6 +51,8 @@
     <string name="confirm_otp_pls">Vui lòng nhập mã OTP của bạn!</string>
     <string name="confirm_skip">Nếu bỏ qua bước này, bạn sẽ phải tự cập nhật thông tin cá nhân của mình về sau!</string>
     <string name="otp_not_receive">Không nhận được mã OTP? Gửi lại!</string>
+    <string name="otp_change_phone_no">Mã xác thực sẽ được gửi đến số điện thoại mà bạn vừa nhập. Vui lòng xác nhận số điện thoại trên là đúng.</string>
+    <string name="change">Thay đổi</string>
     <string name="edit_pf">Sửa hồ sơ</string>
     <string name="user_info">Thông tin cá nhân</string>
     <string name="gender">Giới tính</string>
@@ -64,6 +66,10 @@
     <string name="verify_2_step">Xác thực 2 lớp</string>
     <string name="verify_2_step_desc">Zola sẽ gửi mã OTP mỗi khi bạn đăng nhập</string>
     <string name="change_phone_no">Đổi số điện thoại</string>
+    <string name="change_phone_no_for_account">Đổi số điện thoại mới cho tài khoản của bạn</string>
+    <string name="change_phone_no_for_account_desc">Số điện thoại mới sẽ gắn với thông tin, dữ liệu &amp; nhật ký của tài khoản.</string>
+    <string name="change_phone_no_for_account_desc_friend">Bạn bè sẽ tìm thấy bạn bằng số điện thoại mới.</string>
+    <string name="start_change_phone_no">Bắt đầu đổi số điện thoại &gt;</string>
     <string name="delete_account">Xoá tài khoản</string>
     <string name="press_again_to_exit">Nhấn lần nữa để thoát!</string>
     <string name="account_and_secure">Tài khoản và bảo mật</string>
@@ -95,6 +101,11 @@
     <string name="delete_conversation">Xoá lịch sử cuộc trò chuyện</string>
     <string name="phone_contact">Danh bạ máy</string>
     <string name="phone_contact_desc">Thêm bạn từ danh bạ máy</string>
+    <string name="note">Lưu ý:</string>
+    <string name="continue_add">Tiếp tục</string>
+    <string name="new_phone">Nhập số điện thoại mới</string>
+    <string name="note_new_phone">+ Số điện thoại mới sẽ nhận được mã xác thực (OTP) từ tin nhắn qua số điện thoại mới.</string>
+    <string name="note_new_phone_warning">+ Số điện thoại mới phải là số chưa được dùng để đăng ký tài khoản Zola trước đó.</string>
 
     <!--Error Messages-->
     <string name="empty_phone_no_err">Bạn chưa điền số điện thoại!</string>

@@ -76,7 +76,10 @@ public class RegisterFragment extends Fragment {
             String confirmPwd = mBinding.edtConfirmPassword.getText().toString().trim();
 
             if (validateUserRegisterAccount(phoneNo, displayName, pwd, confirmPwd)) {
-                openConfirmOTPDialog(Gravity.CENTER);
+                mMainActivity.runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    openConfirmOTPDialog(Gravity.CENTER);
+                });
             }
         });
     }
