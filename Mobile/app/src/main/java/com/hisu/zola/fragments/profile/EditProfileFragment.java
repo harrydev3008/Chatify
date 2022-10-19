@@ -105,7 +105,7 @@ public class EditProfileFragment extends Fragment {
             );
 
             datePickerDialog.setTitle(getString(R.string.dob));
-            datePickerDialog.setIcon(R.drawable.ic_happy);
+            datePickerDialog.setIcon(R.drawable.ic_calendar);
             datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             datePickerDialog.show();
         });

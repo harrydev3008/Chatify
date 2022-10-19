@@ -68,6 +68,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginEnd="6dp"
                 android:layout_weight="1"
+                android:textCursorDrawable="@drawable/edt_cursor"
                 android:background="@android:color/transparent"
                 android:hint="@string/phone_no"
                 android:textSize="18sp"
@@ -78,8 +79,10 @@
                 android:id="@+id/btn_find"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:backgroundTint="#c0d4e3"
+                android:backgroundTint="@color/gray_bf"
+                android:textColor="@color/white"
                 android:text="@string/find"
+                android:clickable="false"
                 android:textAllCaps="false"
                 android:textSize="17sp"
                 app:cornerRadius="20dp" />
@@ -102,7 +105,7 @@
                 android:id="@+id/im_cover_1"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:src="@drawable/img_contact"
+                android:src="@drawable/ic_contacts__bubble"
                 tools:ignore="ContentDescription" />
 
             <LinearLayout
@@ -149,7 +152,7 @@
                 android:id="@+id/im_cover_2"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:src="@drawable/img_friend_request"
+                android:src="@drawable/ic_friend_bubble"
                 tools:ignore="ContentDescription" />
 
             <LinearLayout
