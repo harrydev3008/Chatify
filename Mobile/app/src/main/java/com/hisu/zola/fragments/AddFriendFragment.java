@@ -16,6 +16,8 @@ import android.widget.Toast;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentAddFriendBinding;
+import com.hisu.zola.fragments.contact.FriendFromContactFragment;
+import com.hisu.zola.fragments.contact.FriendRequestFragment;
 
 public class AddFriendFragment extends Fragment {
 
@@ -30,9 +32,42 @@ public class AddFriendFragment extends Fragment {
         mBinding = FragmentAddFriendBinding.inflate(inflater, container, false);
 
         backToPrevPage();
+        showFriendRequestList();
+        showFriendFromContact();
         phoneNumberOnChangeEvent();
+        addActionForBtnFind();
 
         return mBinding.getRoot();
+    }
+
+    private void showFriendRequestList() {
+        mBinding.acFriendRequest.setOnClickListener(view -> {
+            mainActivity.getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(
+                            R.anim.slide_in_left, R.anim.slide_out_left,
+                            R.anim.slide_out_right, R.anim.slide_out_right)
+                    .replace(
+                            mainActivity.getViewContainerID(),
+                            new FriendRequestFragment()
+                    )
+                    .addToBackStack(null)
+                    .commit();
+        });
+    }
+
+    private void showFriendFromContact() {
+        mBinding.acPhoneContact.setOnClickListener(view -> {
+            mainActivity.getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(
+                            R.anim.slide_in_left, R.anim.slide_out_left,
+                            R.anim.slide_out_right, R.anim.slide_out_right)
+                    .replace(
+                            mainActivity.getViewContainerID(),
+                            new FriendFromContactFragment()
+                    )
+                    .addToBackStack(null)
+                    .commit();
+        });
     }
 
     private void backToPrevPage() {

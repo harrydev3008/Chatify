@@ -141,7 +141,7 @@ public class ConversationFragment extends Fragment {
                 if(response.isSuccessful()) {
                     Message message = response.body();
                     if (message != null) {
-                        message.setFrom("1");
+                        message.setSender("1");
                         sendMessage(message);
                     }
                 }
@@ -214,7 +214,7 @@ public class ConversationFragment extends Fragment {
 
     private void addActionForSendMessageBtn() {
         mBinding.btnSend.setOnClickListener(view -> {
-            sendMessage(new Message("1", mBinding.edtChat.getText().toString().trim(), "text"));
+//            sendMessage(new Message("1", mBinding.edtChat.getText().toString().trim(), "text"));
         });
     }
 

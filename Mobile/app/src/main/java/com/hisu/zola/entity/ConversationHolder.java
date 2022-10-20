@@ -2,10 +2,11 @@ package com.hisu.zola.entity;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 
-@Entity(tableName = "conversations")
+@Entity(tableName = "conversation_holder")
 public class ConversationHolder {
 //  Todo: this is for test, will change later
     @PrimaryKey
@@ -17,6 +18,7 @@ public class ConversationHolder {
     private String lastMessage;
     private int unreadMessages;
 
+    @Ignore
     public ConversationHolder() {
     }
 

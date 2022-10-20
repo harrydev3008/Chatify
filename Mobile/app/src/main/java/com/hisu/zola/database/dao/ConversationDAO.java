@@ -15,9 +15,6 @@ public interface ConversationDAO {
     @Insert
     void insert(ConversationHolder... holder);
 
-    @Query("select * from conversations")
+    @Query("select * from conversation_holder")
     LiveData<List<ConversationHolder>> getConversation();
-
-    @Query("Update conversations set unreadMessages = :unreadMessages where id = :id")
-    void update(int unreadMessages, String id);
 }

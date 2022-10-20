@@ -85,7 +85,7 @@ public class RegisterFragment extends Fragment {
     }
 
     private boolean validateUserRegisterAccount(String phoneNo, String displayName, String pwd, String confirmPwd) {
-
+        //Todo: verify user info => Huy
         if (TextUtils.isEmpty(phoneNo)) {
             mBinding.edtUsername.setError(getString(R.string.empty_phone_no_err));
             mBinding.edtUsername.requestFocus();

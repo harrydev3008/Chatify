@@ -1,19 +1,36 @@
 package com.hisu.zola.entity;
 
+import androidx.annotation.NonNull;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
+@Entity(tableName = "conversations")
 public class Conversation {
-    private String id;
-    private List<User> users;
-    private List<Message> messages;
 
+    @PrimaryKey
+    @SerializedName("_id")
+    @NonNull
+    private String id;
+    @TypeConverters(UserListConverter.class)
+    private List<String> member;
+    private String createdBy;
+    private String label;
+
+    @Ignore
     public Conversation() {
     }
 
-    public Conversation(String id, List<User> users, List<Message> messages) {
+    public Conversation(@NonNull String id, List<String> member, String createdBy, String label) {
         this.id = id;
-        this.users = users;
-        this.messages = messages;
+        this.member = member;
+        this.createdBy = createdBy;
+        this.label = label;
     }
 
     public String getId() {
@@ -24,19 +41,27 @@ public class Conversation {
         this.id = id;
     }
 
-    public List<User> getUsers() {
-        return users;
+    public List<String> getMember() {
+        return member;
     }
 
-    public void setUsers(List<User> users) {
-        this.users = users;
+    public void setMember(List<String> member) {
+        this.member = member;
     }
 
-    public List<Message> getMessages() {
-        return messages;
+    public String getCreatedBy() {
+        return createdBy;
     }
 
-    public void setMessages(List<Message> messages) {
-        this.messages = messages;
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 }

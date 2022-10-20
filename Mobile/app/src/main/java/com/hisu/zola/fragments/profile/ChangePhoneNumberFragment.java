@@ -128,7 +128,7 @@ public class ChangePhoneNumberFragment extends Fragment {
     }
 
     private boolean verifyPhoneNumber(String phoneNumber) {
-        //Todo: validate phone number
+        //Todo: validate phone number => Huy
         return true;
     }
 }

@@ -150,7 +150,7 @@ public class RegisterUserInfoFragment extends Fragment {
     }
 
     private boolean validateUserInfo() {
-        //Verify user info
+        //Todo: Verify user info => Huy
         return true;
     }
 }

@@ -20,5 +20,6 @@
         app:itemIconTint="@color/bottom_nav_item_select_color"
         app:itemTextColor="@color/bottom_nav_item_select_color"
         app:menu="@menu/home_bottom_nav_menu"
+        android:background="@drawable/border_top"
         android:visibility="gone"/>
 </RelativeLayout>

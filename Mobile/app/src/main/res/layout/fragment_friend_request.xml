@@ -58,8 +58,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tl_friend_request"
-        android:paddingTop="8dp"
-        android:paddingBottom="?actionBarSize"
-        android:clipToPadding="false"/>
+        android:paddingTop="8dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

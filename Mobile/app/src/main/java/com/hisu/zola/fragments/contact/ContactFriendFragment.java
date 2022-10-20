@@ -44,13 +44,33 @@ public class ContactFriendFragment extends Fragment {
 
     private void showFriendRequestList() {
         mBinding.acFriendRequest.setOnClickListener(view -> {
-            mainActivity.setFragment(new FriendRequestFragment());
+            mainActivity.setBottomNavVisibility(View.GONE);
+            mainActivity.getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(
+                            R.anim.slide_in_left, R.anim.slide_out_left,
+                            R.anim.slide_out_right, R.anim.slide_out_right)
+                    .replace(
+                            mainActivity.getViewContainerID(),
+                            new FriendRequestFragment()
+                    )
+                    .addToBackStack(null)
+                    .commit();
         });
     }
 
     private void showFriendFromContact() {
         mBinding.acFriendFromContact.setOnClickListener(view -> {
-            Toast.makeText(mainActivity, "friend from contact", Toast.LENGTH_SHORT).show();
+            mainActivity.setBottomNavVisibility(View.GONE);
+            mainActivity.getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(
+                            R.anim.slide_in_left, R.anim.slide_out_left,
+                            R.anim.slide_out_right, R.anim.slide_out_right)
+                    .replace(
+                            mainActivity.getViewContainerID(),
+                            new FriendFromContactFragment()
+                    )
+                    .addToBackStack(null)
+                    .commit();
         });
     }
 
