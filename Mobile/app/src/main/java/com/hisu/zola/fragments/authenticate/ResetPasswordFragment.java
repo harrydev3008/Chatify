@@ -106,7 +106,7 @@ public class ResetPasswordFragment extends Fragment {
     }
 
     private boolean validateNewPassword(String newPwd, String confirmPwd) {
-
+        //Todo: Verify password => Huy
         if (TextUtils.isEmpty(newPwd)) {
             mBinding.edtNewPwd.setError(getString(R.string.empty_pwd_err));
             mBinding.edtNewPwd.requestFocus();

@@ -30,10 +30,4 @@ public class ConversationRepository {
             dao.insert(holder);
         });
     }
-
-    public void update(int newQuan, String id) {
-        Database.dbExecutor.execute(() -> {
-            dao.update(newQuan,id);
-        });
-    }
 }

@@ -67,7 +67,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         } else if (holder.getItemViewType() == MSG_RECEIVE_TYPE) {
 //          If multiple messages were from the same user then display cover photo only once
             if (position != 0) {
-                if (messages.get(position - 1).getFrom().equalsIgnoreCase(message.getFrom()))
+                if (messages.get(position - 1).getSender().equalsIgnoreCase(message.getSender()))
                     ((MessageReceiveViewHolder) holder).binding.ivUserPfp.setVisibility(View.INVISIBLE);
             }
 
@@ -77,7 +77,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public int getItemViewType(int position) {
-        return messages.get(position).getFrom().equalsIgnoreCase("1") ?
+        return messages.get(position).getSender().equalsIgnoreCase("1") ?
                 MSG_SEND_TYPE : MSG_RECEIVE_TYPE;
     }
 
@@ -99,11 +99,11 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             if (message.getType().equalsIgnoreCase("text")) {
                 binding.imgMsgSendHolder.setVisibility(View.GONE);
                 binding.tvMsgSend.setVisibility(View.VISIBLE);
-                binding.tvMsgSend.setText(message.getContent());
+                binding.tvMsgSend.setText(message.getText());
             } else {
                 binding.tvMsgSend.setVisibility(View.GONE);
                 binding.imgMsgSendHolder.setVisibility(View.VISIBLE);
-                Glide.with(context).load(message.getContent()).into(binding.imgMsgSend);
+                Glide.with(context).load(message.getText()).into(binding.imgMsgSend);
             }
         }
     }
@@ -121,11 +121,11 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             if (message.getType().equalsIgnoreCase("text")) {
                 binding.imgMsgReceiveHolder.setVisibility(View.GONE);
                 binding.tvMsgReceive.setVisibility(View.VISIBLE);
-                binding.tvMsgReceive.setText(message.getContent());
+                binding.tvMsgReceive.setText(message.getText());
             } else {
                 binding.tvMsgReceive.setVisibility(View.GONE);
                 binding.imgMsgReceiveHolder.setVisibility(View.VISIBLE);
-                Glide.with(context).load(message.getContent()).into(binding.imgMsgReceive);
+                Glide.with(context).load(message.getText()).into(binding.imgMsgReceive);
             }
         }
     }

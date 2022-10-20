@@ -147,7 +147,7 @@ public class EditProfileFragment extends Fragment {
     }
 
     private boolean validateUserUpdateData() {
-        //Todo: validate user data before save
+        //Todo: validate user data before save => Huy
         return true;
     }
 }

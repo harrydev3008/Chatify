@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:layout_marginTop="8dp"
+    android:paddingBottom="4dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/imv_contact_avatar"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/app_logo"
+        android:scaleType="centerCrop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_contact_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:text="@string/app_name"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toEndOf="@+id/imv_contact_avatar"
+        app:layout_constraintTop_toTopOf="@+id/imv_contact_avatar" />
+
+    <TextView
+        android:id="@+id/tv_app_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/name_in_app"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/imv_contact_avatar"
+        app:layout_constraintEnd_toEndOf="@+id/tv_contact_name"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/tv_contact_name" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_is_friend"
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        android:text="@string/not_a_friend"
+        android:backgroundTint="@color/lightBlue"
+        app:cornerRadius="20dp"
+        android:textSize="12sp"
+        android:textAllCaps="false"
+        android:textColor="@color/primary_color"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_app_name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/tv_contact_name" />
+</androidx.constraintlayout.widget.ConstraintLayout>

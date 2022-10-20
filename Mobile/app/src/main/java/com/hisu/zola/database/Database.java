@@ -6,12 +6,22 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
 import com.hisu.zola.database.dao.ConversationDAO;
+import com.hisu.zola.database.dao.MessageDAO;
+import com.hisu.zola.database.dao.UserDAO;
+import com.hisu.zola.entity.Conversation;
 import com.hisu.zola.entity.ConversationHolder;
+import com.hisu.zola.entity.Message;
+import com.hisu.zola.entity.User;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@androidx.room.Database(entities = ConversationHolder.class, version = 1, exportSchema = false)
+@androidx.room.Database(entities = {
+        ConversationHolder.class,
+        User.class,
+        Message.class,
+        Conversation.class
+}, version = 1, exportSchema = false)
 public abstract class Database extends RoomDatabase {
 
     private static volatile Database INSTANCE;
@@ -19,6 +29,9 @@ public abstract class Database extends RoomDatabase {
      * NUMBER_OF_THREADS is for 4 simple operations: Insert, update, delete & read
      */
     private static final int NUMBER_OF_THREADS = 4;
+
+    public abstract UserDAO userDAO();
+    public abstract MessageDAO messageDAO();
     public abstract ConversationDAO conversationDAO();
 
     public static final ExecutorService dbExecutor = Executors.newFixedThreadPool(NUMBER_OF_THREADS);

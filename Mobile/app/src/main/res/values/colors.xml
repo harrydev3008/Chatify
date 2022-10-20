@@ -10,6 +10,7 @@
 
     <color name="primary_color">#008cfd</color>
     <color name="secondaryColor">#AB2153</color>
+    <color name="lightBlue">#e9f4ff</color>
     <color name="danger">#d90429</color>
     <color name="darkBlue">#03045e</color>
     <color name="darkBlack">#000000</color>

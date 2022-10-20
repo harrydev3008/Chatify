@@ -143,7 +143,7 @@ public class LoginFragment extends Fragment {
     }
 
     private boolean validateUserAccount(String username, String password) {
-
+        //Todo: check phone number and password before calling api to verify user => Huy
         if (TextUtils.isEmpty(username)) {
             mBinding.edtUsername.setError(getString(R.string.empty_phone_no_err));
             mBinding.edtUsername.requestFocus();
@@ -156,8 +156,7 @@ public class LoginFragment extends Fragment {
             return false;
         }
 
-//      Todo: Validate user info goes here
-
+//      Todo: call api to verify user
         return true;
     }
 

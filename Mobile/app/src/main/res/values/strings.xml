@@ -74,6 +74,10 @@
     <string name="press_again_to_exit">Nhấn lần nữa để thoát!</string>
     <string name="account_and_secure">Tài khoản và bảo mật</string>
     <string name="add_friend">Thêm bạn</string>
+    <string name="not_a_friend">Kết bạn</string>
+    <string name="is_a_friend">Đã là bạn</string>
+    <string name="name_in_app">Tên Zola: </string>
+    <string name="sync_from_contact">Cập nhật từ danh bạ máy</string>
     <string name="find">Tìm</string>
     <string name="add_friend_by_phone_no">Thêm bạn bằng số điện thoại</string>
     <string name="option">Tùy chọn</string>
@@ -104,8 +108,10 @@
     <string name="note">Lưu ý:</string>
     <string name="continue_add">Tiếp tục</string>
     <string name="new_phone">Nhập số điện thoại mới</string>
-    <string name="note_new_phone">+ Số điện thoại mới sẽ nhận được mã xác thực (OTP) từ tin nhắn qua số điện thoại mới.</string>
+    <string name="note_new_phone">+ Số điện thoại mới sẽ nhận được mã xác thực (OTP) qua tin nhắn từ hệ thống Zola.</string>
     <string name="note_new_phone_warning">+ Số điện thoại mới phải là số chưa được dùng để đăng ký tài khoản Zola trước đó.</string>
+    <string name="all_friends">Tất cả</string>
+    <string name="not_friends">Chưa là bạn</string>
 
     <!--Error Messages-->
     <string name="empty_phone_no_err">Bạn chưa điền số điện thoại!</string>
