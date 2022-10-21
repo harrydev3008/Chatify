@@ -25,9 +25,11 @@ import com.hisu.zola.R;
 import com.hisu.zola.adapters.MessageAdapter;
 import com.hisu.zola.databinding.FragmentConversationBinding;
 import com.hisu.zola.entity.Message;
+import com.hisu.zola.entity.User;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.RealPathUtil;
 import com.hisu.zola.util.SocketIOHandler;
+import com.hisu.zola.util.local.LocalDataManager;
 import com.vanniktech.emoji.EmojiPopup;
 
 import java.io.File;
@@ -172,9 +174,9 @@ public class ConversationFragment extends Fragment {
         );
     }
 
-    //  Todo: fake conversation info
     private void getConversationInfo() {
-        mBinding.tvUsername.setText("Harry");
+        User currentUser = LocalDataManager.getCurrentUserInfo();
+        mBinding.tvUsername.setText(currentUser.getUsername());
         mBinding.tvLastActive.setText(getString(R.string.user_active));
     }
 

@@ -45,6 +45,7 @@
     <string name="otp">Mã OTP</string>
     <string name="empty_otp_err">Bạn chưa nhập mã OTP!</string>
     <string name="wrong_otp_err">Mã OTP không chính xác!</string>
+    <string name="wrong_pwd_err">Mậu khẩu không chính xác!</string>
     <string name="cancel">Huỷ</string>
     <string name="confirm">Xác nhận</string>
     <string name="confirm_otp">Xác nhận mã OTP</string>

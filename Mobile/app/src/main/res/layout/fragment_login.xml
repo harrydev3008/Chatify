@@ -36,13 +36,13 @@
         app:layout_constraintGuide_end="8dp" />
 
     <EditText
-        android:id="@+id/edt_username"
+        android:id="@+id/edt_phone_no"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_marginTop="8dp"
         android:background="@drawable/edit_text_outline"
         android:hint="@string/username"
-        android:inputType="number"
+        android:inputType="phone"
         android:paddingHorizontal="8dp"
         android:paddingVertical="10dp"
         android:textSize="20sp"
@@ -62,7 +62,7 @@
         android:paddingVertical="4dp"
         app:layout_constraintEnd_toStartOf="@+id/guideline3"
         app:layout_constraintStart_toStartOf="@+id/guideline2"
-        app:layout_constraintTop_toBottomOf="@+id/edt_username">
+        app:layout_constraintTop_toBottomOf="@+id/edt_phone_no">
 
         <EditText
             android:id="@+id/edt_password"

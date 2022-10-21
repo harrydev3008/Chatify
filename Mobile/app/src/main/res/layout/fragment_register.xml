@@ -83,7 +83,7 @@
         android:layout_marginTop="8dp"
         android:background="@drawable/edit_text_outline"
         android:hint="@string/display_name"
-        android:inputType="number"
+        android:inputType="text"
         android:paddingHorizontal="8dp"
         android:paddingVertical="10dp"
         android:textSize="20sp"

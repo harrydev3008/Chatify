@@ -8,9 +8,12 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentProfileBinding;
+import com.hisu.zola.entity.User;
+import com.hisu.zola.util.local.LocalDataManager;
 
 public class ProfileFragment extends Fragment {
 
@@ -25,10 +28,20 @@ public class ProfileFragment extends Fragment {
 
         mBinding = FragmentProfileBinding.inflate(inflater, container, false);
 
+        loadUserInfo();
         addActionForBtnEditProfile();
         addActionForBtnSetting();
 
         return mBinding.getRoot();
+    }
+
+    private void loadUserInfo() {
+        User user = LocalDataManager.getCurrentUserInfo();
+        Glide.with(mMainActivity).load(user.getAvatarURL()).into(mBinding.cimvUserAvatar);
+        mBinding.tvGender.setText(user.isVerifyOTP() ? getString(R.string.gender_m) : getString(R.string.gender_f));
+        mBinding.tvDob.setText(user.getId());
+        mBinding.tvDisplayName.setText(user.getUsername());
+        mBinding.tvPhoneNumber.setText(user.getPhoneNumber());
     }
 
     private void addActionForBtnEditProfile() {

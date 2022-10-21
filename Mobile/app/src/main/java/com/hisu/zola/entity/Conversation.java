@@ -14,9 +14,8 @@ import java.util.List;
 public class Conversation {
 
     @PrimaryKey
-    @SerializedName("_id")
     @NonNull
-    private String id;
+    private String _id;
     @TypeConverters(UserListConverter.class)
     private List<String> member;
     private String createdBy;
@@ -26,19 +25,19 @@ public class Conversation {
     public Conversation() {
     }
 
-    public Conversation(@NonNull String id, List<String> member, String createdBy, String label) {
-        this.id = id;
+    public Conversation(@NonNull String _id, List<String> member, String createdBy, String label) {
+        this._id = _id;
         this.member = member;
         this.createdBy = createdBy;
         this.label = label;
     }
 
     public String getId() {
-        return id;
+        return _id;
     }
 
     public void setId(String id) {
-        this.id = id;
+        this._id = id;
     }
 
     public List<String> getMember() {

@@ -20,9 +20,12 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentEditProfileBinding;
+import com.hisu.zola.entity.User;
+import com.hisu.zola.util.local.LocalDataManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -44,7 +47,7 @@ public class EditProfileFragment extends Fragment {
         mBinding = FragmentEditProfileBinding.inflate(inflater, container, false);
 
         init();
-
+        loadUserInfo();
         addActionForBtnBackToPrevPage();
         addActionToPickImageFromGallery();
         addActionForEditTextDateOfBirth();
@@ -65,6 +68,18 @@ public class EditProfileFragment extends Fragment {
                         mBinding.imvAvatar.setImageURI(newAvatarUri);
                     }
                 });
+    }
+
+    private void loadUserInfo() {
+        User user = LocalDataManager.getCurrentUserInfo();
+        Glide.with(mainActivity).load(user.getAvatarURL()).into(mBinding.imvAvatar);
+
+        mBinding.edtDisplayName.setText(user.getUsername());
+
+        if(user.isVerifyOTP())
+            mBinding.rBtnGenderM.setChecked(true);
+        else
+            mBinding.rBtnGenderF.setChecked(true);
     }
 
     private void addActionForBtnBackToPrevPage() {

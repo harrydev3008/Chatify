@@ -13,9 +13,8 @@ import java.util.Date;
 @Entity(tableName = "messages")
 public class Message {
     @PrimaryKey
-    @SerializedName("_id")
     @NonNull
-    private String id;
+    private String _id;
     private String conversation;
     private String sender;
     private String text;
@@ -27,8 +26,8 @@ public class Message {
     public Message() {
     }
 
-    public Message(@NonNull String id, String conversation, String sender, String text, String type, String createdAt, String updatedAt) {
-        this.id = id;
+    public Message(@NonNull String _id, String conversation, String sender, String text, String type, String createdAt, String updatedAt) {
+        this._id = _id;
         this.conversation = conversation;
         this.sender = sender;
         this.text = text;
@@ -38,11 +37,11 @@ public class Message {
     }
 
     public String getId() {
-        return id;
+        return _id;
     }
 
     public void setId(String id) {
-        this.id = id;
+        this._id = id;
     }
 
     public String getConversation() {

@@ -45,4 +45,12 @@ public class LocalDataManager {
                 User.class
         );
     }
+
+    public static void setUserToken(String token) {
+        getInstance().mySharedPreferences.putString(MySharedPreferences.USER_TOKEN_KEY, token);
+    }
+
+    public static String getUserToken() {
+        return getInstance().mySharedPreferences.getString(MySharedPreferences.USER_TOKEN_KEY);
+    }
 }

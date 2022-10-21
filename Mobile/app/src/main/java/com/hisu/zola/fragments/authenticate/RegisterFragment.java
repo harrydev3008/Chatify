@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentRegisterBinding;
+import com.hisu.zola.entity.User;
 import com.hisu.zola.util.NotificationUtil;
 import com.hisu.zola.util.OtpDialog;
 
@@ -29,6 +30,7 @@ public class RegisterFragment extends Fragment {
 
     private FragmentRegisterBinding mBinding;
     private MainActivity mMainActivity;
+    private User user;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -37,51 +39,44 @@ public class RegisterFragment extends Fragment {
         mMainActivity = (MainActivity) getActivity();
         mBinding = FragmentRegisterBinding.inflate(inflater, container, false);
 
+        init();
+
+
+        return mBinding.getRoot();
+    }
+
+    private void init() {
+        user = new User();
+
         addToggleShowPasswordEvent(mBinding.edtPassword, mBinding.tvTogglePassword);
         addToggleShowPasswordEvent(mBinding.edtConfirmPassword, mBinding.tvToggleConfirmPassword);
 
         addChangeBackgroundColorOnFocusForUserNameEditText();
         addChangeBackgroundColorOnFocusForDisplayEditText();
 
-        addChangeBackgroundColorOnFocusForPasswordEditText(
-                mBinding.edtPassword, mBinding.linearLayout
-        );
+        addChangeBackgroundColorOnFocusForPasswordEditText(mBinding.edtPassword, mBinding.linearLayout);
 
-        addChangeBackgroundColorOnFocusForPasswordEditText(
-                mBinding.edtConfirmPassword, mBinding.linearLayoutConfirm
-        );
+        addChangeBackgroundColorOnFocusForPasswordEditText(mBinding.edtConfirmPassword, mBinding.linearLayoutConfirm);
 
         addSwitchToLoginEvent();
+        addActionForBtnRegister();
+    }
 
+    private void addActionForBtnRegister() {
         mBinding.btnRegister.setOnClickListener(view -> {
             register();
         });
-
-        return mBinding.getRoot();
     }
 
     private void register() {
-        ProgressDialog progressDialog = new ProgressDialog(mMainActivity);
+        String phoneNo = mBinding.edtUsername.getText().toString().trim();
+        String displayName = mBinding.edtDisplayName.getText().toString().trim();
+        String pwd = mBinding.edtPassword.getText().toString().trim();
+        String confirmPwd = mBinding.edtConfirmPassword.getText().toString().trim();
 
-        Executors.newSingleThreadExecutor().execute(() -> {
-
-            mMainActivity.runOnUiThread(() -> {
-                progressDialog.setMessage(getString(R.string.pls_wait));
-                progressDialog.show();
-            });
-
-            String phoneNo = mBinding.edtUsername.getText().toString().trim();
-            String displayName = mBinding.edtDisplayName.getText().toString().trim();
-            String pwd = mBinding.edtPassword.getText().toString().trim();
-            String confirmPwd = mBinding.edtConfirmPassword.getText().toString().trim();
-
-            if (validateUserRegisterAccount(phoneNo, displayName, pwd, confirmPwd)) {
-                mMainActivity.runOnUiThread(() -> {
-                    progressDialog.dismiss();
-                    openConfirmOTPDialog(Gravity.CENTER);
-                });
-            }
-        });
+        if (validateUserRegisterAccount(phoneNo, displayName, pwd, confirmPwd)) {
+            openConfirmOTPDialog(Gravity.CENTER);
+        }
     }
 
     private boolean validateUserRegisterAccount(String phoneNo, String displayName, String pwd, String confirmPwd) {
@@ -116,6 +111,10 @@ public class RegisterFragment extends Fragment {
             return false;
         }
 
+        user.setPhoneNumber(phoneNo);
+        user.setPassword(pwd);
+        user.setUsername(displayName);
+
         return true;
     }
 
@@ -129,7 +128,7 @@ public class RegisterFragment extends Fragment {
         otpDialog.addActionForBtnConfirm(view -> {
             if (verifyOTP(otpDialog.getEdtOtp(), "123")) {
                 otpDialog.dismissDialog();
-                mMainActivity.setFragment(new RegisterUserInfoFragment());
+                mMainActivity.setFragment(RegisterUserInfoFragment.newInstance(user));
             }
         });
 
@@ -216,13 +215,13 @@ public class RegisterFragment extends Fragment {
 
     private boolean verifyOTP(EditText editText, String otpNumber) {
 
-        if(TextUtils.isEmpty(editText.getText().toString().trim())) {
+        if (TextUtils.isEmpty(editText.getText().toString().trim())) {
             editText.setError(getString(R.string.empty_otp_err));
             editText.requestFocus();
             return false;
         }
 
-        if(!editText.getText().toString().trim().equals(otpNumber)) {
+        if (!editText.getText().toString().trim().equals(otpNumber)) {
             editText.setError(getString(R.string.wrong_otp_err));
             editText.requestFocus();
             return false;

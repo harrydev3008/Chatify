@@ -48,7 +48,7 @@
             tools:ignore="ContentDescription" />
 
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/imageView2"
+            android:id="@+id/cimv_user_avatar"
             android:layout_width="150dp"
             android:layout_height="150dp"
             android:layout_marginTop="-80dp"
@@ -76,7 +76,7 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@+id/guideline7"
             app:layout_constraintStart_toStartOf="@+id/guideline6"
-            app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+            app:layout_constraintTop_toBottomOf="@+id/cimv_user_avatar" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline6"
@@ -153,7 +153,7 @@
             app:layout_constraintTop_toBottomOf="@+id/textView6" />
 
         <TextView
-            android:id="@+id/textView10"
+            android:id="@+id/tv_gender"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto"
@@ -167,7 +167,7 @@
             app:layout_constraintTop_toTopOf="@+id/textView4" />
 
         <TextView
-            android:id="@+id/textView11"
+            android:id="@+id/tv_dob"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto"
@@ -181,7 +181,7 @@
             app:layout_constraintTop_toTopOf="@+id/textView6" />
 
         <TextView
-            android:id="@+id/textView12"
+            android:id="@+id/tv_phone_number"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto"
