@@ -16,9 +16,11 @@ import androidx.fragment.app.Fragment;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentSettingBinding;
+import com.hisu.zola.entity.User;
 import com.hisu.zola.fragments.authenticate.ResetPasswordFragment;
 import com.hisu.zola.util.NotificationUtil;
 import com.hisu.zola.util.OtpDialog;
+import com.hisu.zola.util.local.LocalDataManager;
 
 public class SettingFragment extends Fragment {
 
@@ -34,12 +36,18 @@ public class SettingFragment extends Fragment {
 
         mainActivity.setBottomNavVisibility(View.GONE);
 
+        loadUserInfo();
+
         addActionForBtnBackToPrevPage();
         addActionForBtnLogout();
         addActionForBtnChangePwd();
         addActionForBtnChangePhoneNumber();
 
         return mBinding.getRoot();
+    }
+
+    private void loadUserInfo() {
+        mBinding.tvPhoneNo.setText(LocalDataManager.getCurrentUserInfo().getPhoneNumber());
     }
 
     private void addActionForBtnLogout() {

@@ -4,14 +4,15 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.DatePicker;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -22,7 +23,11 @@ import androidx.fragment.app.Fragment;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentRegisterUserInfoBinding;
+import com.hisu.zola.entity.User;
 import com.hisu.zola.fragments.conversation.ConversationListFragment;
+import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.ImageConvertUtil;
+import com.hisu.zola.util.ObjectConvertUtil;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.text.SimpleDateFormat;
@@ -30,13 +35,28 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.concurrent.Executors;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class RegisterUserInfoFragment extends Fragment {
+
+    public static final String REGISTER_KEY  = "NEW_USER";
+    private User user;
 
     private FragmentRegisterUserInfoBinding mBinding;
     private MainActivity mainActivity;
     private Calendar mCalendar;
     private Uri avatarUri;
     private ActivityResultLauncher<Intent> resultLauncher;
+
+    public static RegisterUserInfoFragment newInstance(User user) {
+        Bundle args = new Bundle();
+        args.putSerializable(REGISTER_KEY, user);
+        RegisterUserInfoFragment fragment = new RegisterUserInfoFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -45,12 +65,12 @@ public class RegisterUserInfoFragment extends Fragment {
         mainActivity = (MainActivity) getActivity();
         mBinding = FragmentRegisterUserInfoBinding.inflate(inflater, container, false);
 
-        init();
+        if (getArguments() != null)
+            user = (User) getArguments().getSerializable(REGISTER_KEY);
+        else
+            user = new User();
 
-        addActionForEditTextDateOfBirth();
-        addActionForBtnSkip();
-        addActionForChangeAvatarButton();
-        addActionForBtnSave();
+        init();
 
         return mBinding.getRoot();
     }
@@ -66,6 +86,18 @@ public class RegisterUserInfoFragment extends Fragment {
                         mBinding.cimvAvatar.setImageURI(avatarUri);
                     }
                 });
+
+        generateDefaultPfp();
+
+        addActionForEditTextDateOfBirth();
+        addActionForBtnSkip();
+        addActionForChangeAvatarButton();
+        addActionForBtnSave();
+    }
+
+    private void generateDefaultPfp() {
+        Bitmap bitmap = ImageConvertUtil.createImageFromText(mainActivity,150,150, user.getUsername());
+        mBinding.cimvAvatar.setImageBitmap(bitmap);
     }
 
     private void addActionForEditTextDateOfBirth() {
@@ -102,11 +134,7 @@ public class RegisterUserInfoFragment extends Fragment {
                     .setMessage(getString(R.string.confirm_skip))
                     .setPositiveButton(getString(R.string.confirm),
                             (dialogInterface, i) -> {
-                                LocalDataManager.setUserLoginState(true);
-                                mainActivity.setBottomNavVisibility(View.VISIBLE);
-                                mainActivity.addFragmentToBackStack(
-                                        new ConversationListFragment()
-                                );
+                                saveUserInfo();
                             })
                     .setNegativeButton(getString(R.string.cancel), null)
                     .show();
@@ -128,6 +156,7 @@ public class RegisterUserInfoFragment extends Fragment {
     }
 
     private void saveUserInfo() {
+        Log.e("TETS", user.toString());
         ProgressDialog dialog = new ProgressDialog(mainActivity);
 
         Executors.newSingleThreadExecutor().execute(() -> {
@@ -137,15 +166,28 @@ public class RegisterUserInfoFragment extends Fragment {
                 dialog.show();
             });
 
-            if(validateUserInfo()) {
-                LocalDataManager.setUserLoginState(true);
+            ApiService.apiService.signUp(user).enqueue(new Callback<Object>() {
+                @Override
+                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
 
-                mainActivity.runOnUiThread(() -> {
-                    dialog.dismiss();
-                    mainActivity.setBottomNavVisibility(View.VISIBLE);
-                    mainActivity.addFragmentToBackStack(new ConversationListFragment());
-                });
-            }
+                    if (response.isSuccessful() && response.code() == 200) {
+
+                        LocalDataManager.setUserLoginState(true);
+                        LocalDataManager.setCurrentUserInfo(ObjectConvertUtil.getResponseUser(response));
+
+                        mainActivity.runOnUiThread(() -> {
+                            dialog.dismiss();
+                            mainActivity.setBottomNavVisibility(View.VISIBLE);
+                            mainActivity.addFragmentToBackStack(new ConversationListFragment());
+                        });
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                    Log.e("API_ERR", t.getLocalizedMessage());
+                }
+            });
         });
     }
 

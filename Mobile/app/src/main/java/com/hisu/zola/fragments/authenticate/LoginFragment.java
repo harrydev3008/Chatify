@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,20 +17,31 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentLoginBinding;
+import com.hisu.zola.entity.User;
 import com.hisu.zola.fragments.conversation.ConversationListFragment;
+import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.NotificationUtil;
+import com.hisu.zola.util.ObjectConvertUtil;
 import com.hisu.zola.util.OtpDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
+import java.io.IOException;
 import java.util.concurrent.Executors;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginFragment extends Fragment {
 
     private FragmentLoginBinding mBinding;
     private MainActivity mMainActivity;
+    private ProgressDialog progressDialog;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -38,16 +50,30 @@ public class LoginFragment extends Fragment {
         mBinding = FragmentLoginBinding.inflate(inflater, container, false);
         mMainActivity = (MainActivity) getActivity();
 
+        init();
+
+        return mBinding.getRoot();
+    }
+
+    private void init() {
+        progressDialog = new ProgressDialog(mMainActivity);
+
         addChangeBackgroundColorOnFocusForUserNameEditText();
         addChangeBackgroundColorOnFocusForPasswordEditText();
 
         addToggleShowPasswordEvent();
         addSwitchToRegisterEvent();
+        addActionForBtnLogin();
+        addActionForBtnForgotPassword();
+    }
 
+    private void addActionForBtnLogin() {
         mBinding.btnLogin.setOnClickListener(view -> {
             addLoginEvent();
         });
+    }
 
+    private void addActionForBtnForgotPassword() {
         mBinding.tvForgotPwd.setOnClickListener(view -> {
             new AlertDialog.Builder(mMainActivity)
                     .setIcon(R.drawable.ic_alert)
@@ -58,18 +84,16 @@ public class LoginFragment extends Fragment {
                     .setNegativeButton(getString(R.string.cancel), null)
                     .show();
         });
-
-        return mBinding.getRoot();
     }
 
     private void addChangeBackgroundColorOnFocusForUserNameEditText() {
-        mBinding.edtUsername.setOnFocusChangeListener((view, isFocus) -> {
+        mBinding.edtPhoneNo.setOnFocusChangeListener((view, isFocus) -> {
             if (isFocus)
-                mBinding.edtUsername.setBackground(
+                mBinding.edtPhoneNo.setBackground(
                         ContextCompat.getDrawable(mMainActivity.getApplicationContext(),
                                 R.drawable.edit_text_outline_focus));
             else
-                mBinding.edtUsername.setBackground(
+                mBinding.edtPhoneNo.setBackground(
                         ContextCompat.getDrawable(mMainActivity.getApplicationContext(),
                                 R.drawable.edit_text_outline));
         });
@@ -117,36 +141,65 @@ public class LoginFragment extends Fragment {
     }
 
     private void addLoginEvent() {
+        String phoneNumber = mBinding.edtPhoneNo.getText().toString();
+        String password = mBinding.edtPassword.getText().toString();
 
-        ProgressDialog progressDialog = new ProgressDialog(mMainActivity);
+        if (validateUserAccount(phoneNumber, password)) {
 
-        Executors.newSingleThreadExecutor().execute(() -> {
-
-            mMainActivity.runOnUiThread(() -> {
-                progressDialog.setMessage(getString(R.string.pls_wait));
-                progressDialog.show();
-            });
-
-            String username = mBinding.edtUsername.getText().toString();
-            String password = mBinding.edtPassword.getText().toString();
-
-            if (validateUserAccount(username, password)) {
-                LocalDataManager.setUserLoginState(true);
+            Executors.newSingleThreadExecutor().execute(() -> {
 
                 mMainActivity.runOnUiThread(() -> {
-                    progressDialog.dismiss();
-                    mMainActivity.setBottomNavVisibility(View.VISIBLE);
-                    mMainActivity.setFragment(new ConversationListFragment());
+                    progressDialog.setMessage(getString(R.string.pls_wait));
+                    progressDialog.show();
                 });
-            }
-        });
+
+                User user = new User(phoneNumber, password);
+
+                ApiService.apiService.signIn(user).enqueue(new Callback<>() {
+                    @Override
+                    public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                        if (response.isSuccessful() && response.code() == 200) {
+
+                            LocalDataManager.setUserLoginState(true);
+                            LocalDataManager.setCurrentUserInfo(ObjectConvertUtil.getResponseUser(response));
+
+                            mMainActivity.runOnUiThread(() -> {
+                                progressDialog.dismiss();
+                                mMainActivity.setBottomNavVisibility(View.VISIBLE);
+                                mMainActivity.setFragment(new ConversationListFragment());
+                            });
+
+                        } else if (response.code() == 400) {
+                            try {
+                                JsonObject obj = new Gson().fromJson(response.errorBody().string(), JsonObject.class);
+
+                                int errorCode = obj.get("errorCode").getAsInt();
+                                String errorMsg = obj.get("message").getAsString();
+
+                                mMainActivity.runOnUiThread(() -> {
+                                    progressDialog.dismiss();
+                                    handleLoginError(errorCode, errorMsg);
+                                });
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                        Log.e("API_ERR", t.getLocalizedMessage());
+                    }
+                });
+            });
+        }
     }
 
-    private boolean validateUserAccount(String username, String password) {
+    private boolean validateUserAccount(String phoneNumber, String password) {
         //Todo: check phone number and password before calling api to verify user => Huy
-        if (TextUtils.isEmpty(username)) {
-            mBinding.edtUsername.setError(getString(R.string.empty_phone_no_err));
-            mBinding.edtUsername.requestFocus();
+        if (TextUtils.isEmpty(phoneNumber)) {
+            mBinding.edtPhoneNo.setError(getString(R.string.empty_phone_no_err));
+            mBinding.edtPhoneNo.requestFocus();
             return false;
         }
 
@@ -156,8 +209,18 @@ public class LoginFragment extends Fragment {
             return false;
         }
 
-//      Todo: call api to verify user
         return true;
+    }
+
+    private void handleLoginError(int errorCode, String errorMessage) {
+        if (errorCode == 1) {
+            mBinding.edtPhoneNo.setError(errorMessage);
+            mBinding.edtPhoneNo.requestFocus();
+            return;
+        }
+
+        mBinding.edtPassword.setError(getString(R.string.wrong_pwd_err));
+        mBinding.edtPassword.requestFocus();
     }
 
     private void showConfirmResetPwDialog() {
@@ -192,13 +255,13 @@ public class LoginFragment extends Fragment {
 
     private boolean verifyOTP(EditText editText, String otpNumber) {
 
-        if(TextUtils.isEmpty(editText.getText().toString().trim())) {
+        if (TextUtils.isEmpty(editText.getText().toString().trim())) {
             editText.setError(getString(R.string.empty_otp_err));
             editText.requestFocus();
             return false;
         }
 
-        if(!editText.getText().toString().trim().equals(otpNumber)) {
+        if (!editText.getText().toString().trim().equals(otpNumber)) {
             editText.setError(getString(R.string.wrong_otp_err));
             editText.requestFocus();
             return false;

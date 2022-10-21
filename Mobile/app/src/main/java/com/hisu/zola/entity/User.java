@@ -7,15 +7,15 @@ import androidx.room.PrimaryKey;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Entity(tableName = "users")
-public class User {
+public class User implements Serializable {
 
     @PrimaryKey
-    @SerializedName("_id")
     @NonNull
-    private String id;
+    private String _id;
     private String username;
     private String phoneNumber;
     private String password;
@@ -29,8 +29,8 @@ public class User {
     public User() {
     }
 
-    public User(@NonNull String id, String username, String phoneNumber, String password, String avatarURL, boolean isVerifyOTP) {
-        this.id = id;
+    public User(@NonNull String _id, String username, String phoneNumber, String password, String avatarURL, boolean isVerifyOTP) {
+        this._id = _id;
         this.username = username;
         this.phoneNumber = phoneNumber;
         this.password = password;
@@ -38,12 +38,18 @@ public class User {
         this.isVerifyOTP = isVerifyOTP;
     }
 
+    @Ignore
+    public User(String phoneNumber, String password) {
+        this.phoneNumber = phoneNumber;
+        this.password = password;
+    }
+
     public String getId() {
-        return id;
+        return _id;
     }
 
     public void setId(String id) {
-        this.id = id;
+        this._id = id;
     }
 
     public String getUsername() {
@@ -92,5 +98,18 @@ public class User {
 
     public void setFriends(List<User> friends) {
         this.friends = friends;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "_id='" + _id + '\'' +
+                ", username='" + username + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", password='" + password + '\'' +
+                ", avatarURL='" + avatarURL + '\'' +
+                ", isVerifyOTP=" + isVerifyOTP +
+                ", friends=" + friends +
+                '}';
     }
 }

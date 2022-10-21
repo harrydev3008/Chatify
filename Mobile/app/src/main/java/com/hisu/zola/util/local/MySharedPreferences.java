@@ -7,7 +7,8 @@ public class MySharedPreferences {
 
     public static final String SHARED_PREFERENCE = "ZOLA_SHARED_PREFERENCE";
     public static final String USER_LOGIN_KEY = "USER_LOGIN_STATE";
-    public static final String USER_INFO_KEY = "USER_LOGIN_STATE";
+    public static final String USER_INFO_KEY = "USER_INFO_STATE";
+    public static final String USER_TOKEN_KEY = "USER_TOKEN_STATE";
 
     private final Context mContext;
 
