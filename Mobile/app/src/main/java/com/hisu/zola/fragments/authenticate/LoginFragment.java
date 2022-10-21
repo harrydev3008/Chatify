@@ -30,12 +30,17 @@ import com.hisu.zola.util.ObjectConvertUtil;
 import com.hisu.zola.util.OtpDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
+
 import java.io.IOException;
 import java.util.concurrent.Executors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 public class LoginFragment extends Fragment {
 
@@ -196,9 +201,21 @@ public class LoginFragment extends Fragment {
     }
 
     private boolean validateUserAccount(String phoneNumber, String password) {
-        //Todo: check phone number and password before calling api to verify user => Huy
+        //Todo: check phone number and password before calling api to verify user => Huy => done
         if (TextUtils.isEmpty(phoneNumber)) {
             mBinding.edtPhoneNo.setError(getString(R.string.empty_phone_no_err));
+            mBinding.edtPhoneNo.requestFocus();
+            return false;
+        }
+        //kiểm tra regex sdt
+        Pattern patternsdt = Pattern.compile("^(032|033|034|035|036|037|038|039|086|096|097|098|" +
+                "070|079|077|076|078|089|090|093|" +
+                "083|084|085|081|082|088|091|094|" +
+                "056|058|092|" +
+                "059|099)[0-9]{7}$");
+        Matcher matcher = patternsdt.matcher(phoneNumber);
+        if (!matcher.matches()){
+            mBinding.edtPhoneNo.setError(getString(R.string.invalid_phone_format_err));
             mBinding.edtPhoneNo.requestFocus();
             return false;
         }
@@ -208,6 +225,10 @@ public class LoginFragment extends Fragment {
             mBinding.edtPassword.requestFocus();
             return false;
         }
+
+
+//      Todo: Validate user info goes here
+
 
         return true;
     }

@@ -25,6 +25,8 @@ import com.hisu.zola.util.NotificationUtil;
 import com.hisu.zola.util.OtpDialog;
 
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RegisterFragment extends Fragment {
 
@@ -80,13 +82,22 @@ public class RegisterFragment extends Fragment {
     }
 
     private boolean validateUserRegisterAccount(String phoneNo, String displayName, String pwd, String confirmPwd) {
-        //Todo: verify user info => Huy
+        //Todo: verify user info => Huy => done
         if (TextUtils.isEmpty(phoneNo)) {
             mBinding.edtUsername.setError(getString(R.string.empty_phone_no_err));
             mBinding.edtUsername.requestFocus();
             return false;
         }
-
+        Pattern patternsdt = Pattern.compile("^(032|033|034|035|036|037|038|039|086|096|097|098|" +
+                "070|079|077|076|078|089|090|093|" +
+                "083|084|085|081|082|088|091|094|" +
+                "056|058|092|" +
+                "059|099)[0-9]{7}$");
+        if (!patternsdt.matcher(phoneNo).matches()){
+            mBinding.edtUsername.setError(getString(R.string.invalid_phone_format_err));
+            mBinding.edtUsername.requestFocus();
+            return false;
+        }
         if (TextUtils.isEmpty(displayName)) {
             mBinding.edtDisplayName.setError(getString(R.string.empty_display_name_err));
             mBinding.edtDisplayName.requestFocus();
@@ -98,7 +109,12 @@ public class RegisterFragment extends Fragment {
             mBinding.edtPassword.requestFocus();
             return false;
         }
-
+        Pattern patternpasswork = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?])[A-Za-z\\d@$!%*?]{8,}$");
+        if (!patternpasswork.matcher(pwd).matches()) {
+            mBinding.edtPassword.setError(getString(R.string.invalid_pwd_format_err));
+            mBinding.edtPassword.requestFocus();
+            return false;
+        }
         if (TextUtils.isEmpty(confirmPwd)) {
             mBinding.edtConfirmPassword.setError(getString(R.string.empty_confirm_pwd_err));
             mBinding.edtConfirmPassword.requestFocus();

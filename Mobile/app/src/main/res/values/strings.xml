@@ -119,9 +119,10 @@
     <string name="empty_display_name_err">Bạn chưa điền tên hiển thị!</string>
     <string name="invalid_phone_format_err">Số điện thoại sai định dạng!</string>
     <string name="empty_pwd_err">Bạn chưa nhập mật khẩu!</string>
-    <string name="invalid_pwd_format_err">Mật khẩu phải chứa ký tự hoa và số!</string>
+    <string name="invalid_pwd_format_err">Mật khẩu phải tối thiểu tám ký tự, ít nhất một ký tự hoa, một ký tự thường, một số và một ký tự đặc biệt (@$!%*?)!</string>
     <string name="empty_confirm_pwd_err">Vui lòng xác nhận lại mật khẩu!</string>
     <string name="not_match_confirm_pwd_err">Mật khẩu không trùng khớp!</string>
+    <string name="empty_nickname_err">Vui lòng nhập nickname!</string>
 
     <!--Notification Channels-->
     <string name="system_noty_channel_id">zola notification id</string>
