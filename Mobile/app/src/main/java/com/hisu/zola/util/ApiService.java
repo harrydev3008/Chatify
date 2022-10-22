@@ -16,6 +16,7 @@ import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
@@ -35,7 +36,7 @@ public interface ApiService {
     Call<Object> signUp(@Body User user);
 
     @POST("api/user/getAllFriends")
-    Call<List<User>> getAllFriendsOfUser();
+    Call<List<User>> getAllFriends(@Header("Authorization") String header);
 
     @Multipart
     @POST("/uploadFile")

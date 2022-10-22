@@ -10,7 +10,6 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.List;
 
-@Entity(tableName = "users")
 public class User implements Serializable {
 
     @PrimaryKey
@@ -22,8 +21,7 @@ public class User implements Serializable {
     private String avatarURL;
     private boolean isVerifyOTP;
 
-    @Ignore
-    private List<User> friends;
+    private List<String> friends;
 
     @Ignore
     public User() {
@@ -92,11 +90,11 @@ public class User implements Serializable {
         isVerifyOTP = verifyOTP;
     }
 
-    public List<User> getFriends() {
+    public List<String> getFriends() {
         return friends;
     }
 
-    public void setFriends(List<User> friends) {
+    public void setFriends(List<String> friends) {
         this.friends = friends;
     }
 

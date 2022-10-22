@@ -18,7 +18,6 @@ import java.util.concurrent.Executors;
 
 @androidx.room.Database(entities = {
         ConversationHolder.class,
-        User.class,
         Message.class,
         Conversation.class
 }, version = 1, exportSchema = false)
