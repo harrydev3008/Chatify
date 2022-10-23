@@ -1,120 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     tools:context=".fragments.authenticate.RegisterUserInfoFragment">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/cimv_avatar"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_marginTop="20dp"
-        android:src="@drawable/bg_profile"
-        app:civ_border_color="@color/gray"
-        app:civ_border_width="2dp"
-        app:layout_constraintEnd_toStartOf="@+id/guideline11"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="@+id/guideline10"
-        app:layout_constraintTop_toBottomOf="@+id/btn_skip" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/btn_skip"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:fontFamily="@font/be_vietnam"
-        android:text="@string/skip"
-        android:textColor="@color/primary_color"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/guideline11"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/guideline10"
-        app:layout_constraintTop_toTopOf="parent" />
+        <RelativeLayout
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:background="@color/primary_color"
+            android:paddingHorizontal="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline10"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_begin="8dp" />
+            <TextView
+                android:id="@+id/tv_toolbar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="@string/user_optional"
+                android:textColor="@color/white"
+                android:textSize="20sp"/>
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline11"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_end="8dp" />
+            <TextView
+                android:id="@+id/btn_skip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:text="@string/skip"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                tools:ignore="RelativeOverlap" />
+        </RelativeLayout>
 
-    <EditText
-        android:id="@+id/edt_dob"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:background="@drawable/border_bottom"
-        android:clickable="false"
-        android:cursorVisible="false"
-        android:drawableRight="@drawable/ic_edit_2_outline"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:focusedByDefault="false"
-        android:hint="@string/dob"
-        android:inputType="textPersonName"
-        android:paddingHorizontal="4dp"
-        android:paddingVertical="6dp"
-        android:textCursorDrawable="@drawable/edt_cursor"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toStartOf="@+id/guideline11"
-        app:layout_constraintStart_toStartOf="@+id/guideline10"
-        app:layout_constraintTop_toBottomOf="@+id/cimv_avatar"
-        tools:ignore="Autofill" />
+        <TextView
+            android:id="@+id/textView10"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/gray_f1"
+            android:padding="8dp"
+            android:text="@string/user_optional_desc"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
-    <RadioGroup
-        android:id="@+id/radioGroup2"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toStartOf="@+id/guideline11"
-        app:layout_constraintStart_toStartOf="@+id/guideline10"
-        app:layout_constraintTop_toBottomOf="@+id/edt_dob">
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/cimv_avatar"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:src="@drawable/bg_profile"
+            app:civ_border_color="@color/gray"
+            app:civ_border_width="2dp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintEnd_toStartOf="@+id/guideline11"
+            app:layout_constraintStart_toStartOf="@+id/guideline10"
+            app:layout_constraintTop_toBottomOf="@+id/textView10" />
 
-        <RadioButton
-            android:id="@+id/rBtn_gender_male"
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline10"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="40dp"
-            android:buttonTint="@color/primary_color"
-            android:checked="true"
-            android:text="@string/gender_m"
-            android:textSize="20sp" />
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="8dp" />
 
-        <RadioButton
-            android:id="@+id/rBtn_gender_female"
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline11"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:buttonTint="@color/primary_color"
-            android:text="@string/gender_f"
-            android:textSize="20sp" />
-    </RadioGroup>
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="8dp" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_save"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:backgroundTint="@color/primary_color"
-        android:padding="8dp"
-        android:text="@string/save"
-        android:textAllCaps="false"
-        android:textSize="18sp"
-        app:cornerRadius="20dp"
-        app:layout_constraintEnd_toStartOf="@+id/guideline11"
-        app:layout_constraintStart_toStartOf="@+id/guideline10"
-        app:layout_constraintTop_toBottomOf="@+id/radioGroup2" />
+        <RadioGroup
+            android:id="@+id/radioGroup2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toStartOf="@+id/guideline11"
+            app:layout_constraintStart_toStartOf="@+id/guideline10"
+            app:layout_constraintTop_toBottomOf="@+id/cimv_avatar">
 
+            <RadioButton
+                android:id="@+id/rBtn_gender_male"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="40dp"
+                android:buttonTint="@color/primary_color"
+                android:checked="true"
+                android:text="@string/gender_m"
+                android:textSize="20sp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <RadioButton
+                android:id="@+id/rBtn_gender_female"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="@color/primary_color"
+                android:text="@string/gender_f"
+                android:textSize="20sp" />
+        </RadioGroup>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_save"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/primary_color"
+            android:padding="8dp"
+            android:text="@string/save"
+            android:textAllCaps="false"
+            android:textSize="18sp"
+            app:cornerRadius="20dp"
+            app:layout_constraintEnd_toStartOf="@+id/guideline11"
+            app:layout_constraintStart_toStartOf="@+id/guideline10"
+            app:layout_constraintTop_toBottomOf="@+id/radioGroup2" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

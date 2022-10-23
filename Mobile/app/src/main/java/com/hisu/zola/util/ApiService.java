@@ -40,5 +40,5 @@ public interface ApiService {
 
     @Multipart
     @POST("/uploadFile")
-    Call<Message> postImage(@Part MultipartBody.Part image);
+    Call<Object> postImage(@Part MultipartBody.Part image);
 }

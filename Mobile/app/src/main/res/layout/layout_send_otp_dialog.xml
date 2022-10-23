@@ -35,9 +35,9 @@
             />
 
         <TextView
+            android:id="@+id/tv_dialog_desc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/otp_change_phone_no"
             android:textAlignment="center"
             android:textSize="18sp"
             android:fontFamily="@font/roboto"
@@ -51,6 +51,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingVertical="10dp"
+            android:background="@drawable/border_top"
             android:layout_marginTop="8dp">
 
             <TextView
@@ -63,6 +64,11 @@
                 android:textAllCaps="true"
                 android:textColor="@color/primary_color"
                 android:text="@string/change"/>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/gray_e5"/>
 
             <TextView
                 android:id="@+id/tv_confirm"

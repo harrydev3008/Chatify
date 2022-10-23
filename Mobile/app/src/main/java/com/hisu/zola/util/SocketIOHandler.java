@@ -2,7 +2,10 @@ package com.hisu.zola.util;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
+
 import com.hisu.zola.BuildConfig;
+import com.hisu.zola.entity.User;
+import com.hisu.zola.util.local.LocalDataManager;
 
 import java.net.URI;
 
@@ -13,7 +16,8 @@ public class SocketIOHandler {
 
     private SocketIOHandler() {
         IO.Options mOptions = new IO.Options();
-        mOptions.query = "userId=Harry";
+        User user = LocalDataManager.getCurrentUserInfo();
+        mOptions.query = "userId=" + user.getId() + "&phoneNumber=" + user.getPhoneNumber();
         mSocketIO = IO.socket(getConnectionURI(), mOptions);
     }
 

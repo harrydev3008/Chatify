@@ -17,6 +17,7 @@ import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.ConversationAdapter;
 import com.hisu.zola.databinding.FragmentContactGroupBinding;
+import com.hisu.zola.fragments.conversation.AddNewGroupFragment;
 import com.hisu.zola.fragments.conversation.ConversationFragment;
 import com.hisu.zola.view_model.ConversationListViewModel;
 
@@ -77,7 +78,7 @@ public class ContactGroupFragment extends Fragment {
 
     private void addNewGroupEvent() {
         mBinding.acNewGroup.setOnClickListener(view -> {
-            Toast.makeText(mainActivity, "new group", Toast.LENGTH_SHORT).show();
+            mainActivity.addFragmentToBackStack(new AddNewGroupFragment());
         });
     }
 }

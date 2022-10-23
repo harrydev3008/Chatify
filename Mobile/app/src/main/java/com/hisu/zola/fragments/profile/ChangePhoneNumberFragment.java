@@ -19,13 +19,13 @@ import android.widget.Toast;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentChangePhoneNumberBinding;
-import com.hisu.zola.util.ConfirmPhoneNumberDialog;
+import com.hisu.zola.util.dialog.ConfirmSendOTPDialog;
 
 public class ChangePhoneNumberFragment extends Fragment {
 
     private FragmentChangePhoneNumberBinding mBinding;
     private MainActivity mainActivity;
-    private ConfirmPhoneNumberDialog dialog;
+    private ConfirmSendOTPDialog dialog;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -103,7 +103,7 @@ public class ChangePhoneNumberFragment extends Fragment {
     }
 
     private void initDialog() {
-        dialog = new ConfirmPhoneNumberDialog(mainActivity, Gravity.CENTER);
+        dialog = new ConfirmSendOTPDialog(mainActivity, Gravity.CENTER, getString(R.string.otp_change_phone_no));
 
         dialog.addActionForBtnChange(view_change -> {
             dialog.dismissDialog();

@@ -4,13 +4,14 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -30,6 +31,7 @@ public class ConversationListFragment extends Fragment {
     private MainActivity mMainActivity;
     private ConversationListViewModel viewModel;
     private ConversationAdapter adapter;
+    private PopupMenu popupMenu;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -40,10 +42,14 @@ public class ConversationListFragment extends Fragment {
 
         initConversationListRecyclerView();
 
+        initPopupMenu();
+
         tapToCloseApp();
         toggleShowClearIconOnSearchEditText();
         clearTextOnSearchEditText();
         addMoreFriendEvent();
+
+        mMainActivity.setProgressbarVisibility(View.GONE);
 
         return mBinding.getRoot();
     }
@@ -139,17 +145,23 @@ public class ConversationListFragment extends Fragment {
 
     private void addMoreFriendEvent() {
         mBinding.mBtnAddFriend.setOnClickListener(view -> {
-            mMainActivity.setBottomNavVisibility(View.GONE);
-            mMainActivity.getSupportFragmentManager().beginTransaction()
-                    .setCustomAnimations(
-                            R.anim.slide_in_left, R.anim.slide_out_left,
-                            R.anim.slide_out_right, R.anim.slide_out_right)
-                    .replace(
-                            mMainActivity.getViewContainerID(),
-                            new AddFriendFragment()
-                    )
-                    .addToBackStack(null)
-                    .commit();
+            popupMenu.show();
+        });
+    }
+
+    private void initPopupMenu() {
+        popupMenu = new PopupMenu(mMainActivity, mBinding.mBtnAddFriend, Gravity.END, 0, R.style.MyPopupMenu);
+        popupMenu.setForceShowIcon(true);
+        popupMenu.getMenuInflater().inflate(R.menu.feature_menu, popupMenu.getMenu());
+
+        popupMenu.setOnMenuItemClickListener(item -> {
+
+            if (item.getItemId() == R.id.action_new_group)
+                mMainActivity.addFragmentToBackStack(new AddNewGroupFragment());
+            else if (item.getItemId() == R.id.action_new_friend)
+                mMainActivity.addFragmentToBackStack(new AddFriendFragment());
+
+            return true;
         });
     }
 }

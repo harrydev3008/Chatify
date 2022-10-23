@@ -9,11 +9,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -25,9 +22,8 @@ import com.hisu.zola.databinding.FragmentLoginBinding;
 import com.hisu.zola.entity.User;
 import com.hisu.zola.fragments.conversation.ConversationListFragment;
 import com.hisu.zola.util.ApiService;
-import com.hisu.zola.util.NotificationUtil;
 import com.hisu.zola.util.ObjectConvertUtil;
-import com.hisu.zola.util.OtpDialog;
+import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.io.IOException;
@@ -41,7 +37,7 @@ public class LoginFragment extends Fragment {
 
     private FragmentLoginBinding mBinding;
     private MainActivity mMainActivity;
-    private ProgressDialog progressDialog;
+    private LoadingDialog loadingDialog;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -56,7 +52,7 @@ public class LoginFragment extends Fragment {
     }
 
     private void init() {
-        progressDialog = new ProgressDialog(mMainActivity);
+        loadingDialog = new LoadingDialog(mMainActivity, Gravity.CENTER);
 
         addChangeBackgroundColorOnFocusForUserNameEditText();
         addChangeBackgroundColorOnFocusForPasswordEditText();
@@ -75,14 +71,7 @@ public class LoginFragment extends Fragment {
 
     private void addActionForBtnForgotPassword() {
         mBinding.tvForgotPwd.setOnClickListener(view -> {
-            new AlertDialog.Builder(mMainActivity)
-                    .setIcon(R.drawable.ic_alert)
-                    .setTitle(getString(R.string.change_password))
-                    .setMessage(getString(R.string.reset_phone_confirm))
-                    .setPositiveButton(getString(R.string.send_me_otp),
-                            (dialogInterface, i) -> showConfirmResetPwDialog())
-                    .setNegativeButton(getString(R.string.cancel), null)
-                    .show();
+            //Todo: feature in progress
         });
     }
 
@@ -145,17 +134,15 @@ public class LoginFragment extends Fragment {
         String password = mBinding.edtPassword.getText().toString();
 
         if (validateUserAccount(phoneNumber, password)) {
-
             Executors.newSingleThreadExecutor().execute(() -> {
 
                 mMainActivity.runOnUiThread(() -> {
-                    progressDialog.setMessage(getString(R.string.pls_wait));
-                    progressDialog.show();
+                    loadingDialog.showDialog();
                 });
 
                 User user = new User(phoneNumber, password);
 
-                ApiService.apiService.signIn(user).enqueue(new Callback<>() {
+                ApiService.apiService.signIn(user).enqueue(new Callback<Object>() {
                     @Override
                     public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
                         if (response.isSuccessful() && response.code() == 200) {
@@ -164,7 +151,7 @@ public class LoginFragment extends Fragment {
                             LocalDataManager.setCurrentUserInfo(ObjectConvertUtil.getResponseUser(response));
 
                             mMainActivity.runOnUiThread(() -> {
-                                progressDialog.dismiss();
+                                loadingDialog.dismissDialog();
                                 mMainActivity.setBottomNavVisibility(View.VISIBLE);
                                 mMainActivity.setFragment(new ConversationListFragment());
                             });
@@ -177,7 +164,7 @@ public class LoginFragment extends Fragment {
                                 String errorMsg = obj.get("message").getAsString();
 
                                 mMainActivity.runOnUiThread(() -> {
-                                    progressDialog.dismiss();
+                                    loadingDialog.dismissDialog();
                                     handleLoginError(errorCode, errorMsg);
                                 });
                             } catch (IOException e) {
@@ -221,52 +208,5 @@ public class LoginFragment extends Fragment {
 
         mBinding.edtPassword.setError(getString(R.string.wrong_pwd_err));
         mBinding.edtPassword.requestFocus();
-    }
-
-    private void showConfirmResetPwDialog() {
-        OtpDialog otpDialog = new OtpDialog(mMainActivity, Gravity.CENTER);
-
-        otpDialog.addActionForBtnCancel(view -> {
-            otpDialog.dismissDialog();
-        });
-
-        otpDialog.addActionForBtnConfirm(view -> {
-            if (verifyOTP(otpDialog.getEdtOtp(), "123")) {
-                otpDialog.dismissDialog();
-                mMainActivity.getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(mMainActivity.getViewContainerID(), new ResetPasswordFragment())
-                        .addToBackStack("reset_pwd")
-                        .commit();
-            }
-        });
-
-        otpDialog.addActionForBtnReSentOtp(view -> {
-            Toast.makeText(mMainActivity, "OTP not receive!", Toast.LENGTH_SHORT).show();
-        });
-
-        otpDialog.showDialog();
-
-        NotificationUtil.otpNotification(
-                mMainActivity, getString(R.string.system_noty_channel_id),
-                getString(R.string.otp), "123"
-        );
-    }
-
-    private boolean verifyOTP(EditText editText, String otpNumber) {
-
-        if (TextUtils.isEmpty(editText.getText().toString().trim())) {
-            editText.setError(getString(R.string.empty_otp_err));
-            editText.requestFocus();
-            return false;
-        }
-
-        if (!editText.getText().toString().trim().equals(otpNumber)) {
-            editText.setError(getString(R.string.wrong_otp_err));
-            editText.requestFocus();
-            return false;
-        }
-
-        return true;
     }
 }

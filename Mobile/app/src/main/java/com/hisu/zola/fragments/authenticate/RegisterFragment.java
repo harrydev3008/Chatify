@@ -1,6 +1,8 @@
 package com.hisu.zola.fragments.authenticate;
 
-import android.app.ProgressDialog;
+import android.app.DatePickerDialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.PasswordTransformationMethod;
@@ -11,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -21,16 +22,20 @@ import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentRegisterBinding;
 import com.hisu.zola.entity.User;
-import com.hisu.zola.util.NotificationUtil;
-import com.hisu.zola.util.OtpDialog;
+import com.hisu.zola.fragments.ConfirmOTPFragment;
+import com.hisu.zola.util.dialog.ConfirmSendOTPDialog;
 
-import java.util.concurrent.Executors;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class RegisterFragment extends Fragment {
 
     private FragmentRegisterBinding mBinding;
     private MainActivity mMainActivity;
     private User user;
+    private ConfirmSendOTPDialog dialog;
+    private Calendar mCalendar;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -41,12 +46,12 @@ public class RegisterFragment extends Fragment {
 
         init();
 
-
         return mBinding.getRoot();
     }
 
     private void init() {
         user = new User();
+        mCalendar = Calendar.getInstance();
 
         addToggleShowPasswordEvent(mBinding.edtPassword, mBinding.tvTogglePassword);
         addToggleShowPasswordEvent(mBinding.edtConfirmPassword, mBinding.tvToggleConfirmPassword);
@@ -55,9 +60,9 @@ public class RegisterFragment extends Fragment {
         addChangeBackgroundColorOnFocusForDisplayEditText();
 
         addChangeBackgroundColorOnFocusForPasswordEditText(mBinding.edtPassword, mBinding.linearLayout);
-
         addChangeBackgroundColorOnFocusForPasswordEditText(mBinding.edtConfirmPassword, mBinding.linearLayoutConfirm);
 
+        addActionForEditTextDateOfBirth();
         addSwitchToLoginEvent();
         addActionForBtnRegister();
     }
@@ -75,7 +80,11 @@ public class RegisterFragment extends Fragment {
         String confirmPwd = mBinding.edtConfirmPassword.getText().toString().trim();
 
         if (validateUserRegisterAccount(phoneNo, displayName, pwd, confirmPwd)) {
-            openConfirmOTPDialog(Gravity.CENTER);
+            if(dialog == null)
+                initDialog();
+
+            dialog.setNewPhoneNumber(phoneNo);
+            dialog.showDialog();
         }
     }
 
@@ -110,6 +119,13 @@ public class RegisterFragment extends Fragment {
             mBinding.edtConfirmPassword.requestFocus();
             return false;
         }
+//Todo: catch dob
+
+//        if(mBinding.edtDob.getText().toString().length() != 1) {
+//            mBinding.edtDob.setError(getString(R.string.not_match_confirm_pwd_err));
+//            mBinding.edtDob.requestFocus();
+//            return false;
+//        }
 
         user.setPhoneNumber(phoneNo);
         user.setPassword(pwd);
@@ -118,30 +134,17 @@ public class RegisterFragment extends Fragment {
         return true;
     }
 
-    private void openConfirmOTPDialog(int gravity) {
-        OtpDialog otpDialog = new OtpDialog(mMainActivity, Gravity.CENTER);
+    private void initDialog() {
+        dialog = new ConfirmSendOTPDialog(mMainActivity, Gravity.CENTER, getString(R.string.otp_change_phone_no));
 
-        otpDialog.addActionForBtnCancel(view -> {
-            otpDialog.dismissDialog();
+        dialog.addActionForBtnChange(view_change -> {
+            dialog.dismissDialog();
         });
 
-        otpDialog.addActionForBtnConfirm(view -> {
-            if (verifyOTP(otpDialog.getEdtOtp(), "123")) {
-                otpDialog.dismissDialog();
-                mMainActivity.setFragment(RegisterUserInfoFragment.newInstance(user));
-            }
+        dialog.addActionForBtnConfirm(view_confirm -> {
+            dialog.dismissDialog();
+            mMainActivity.setFragment(ConfirmOTPFragment.newInstance(ConfirmOTPFragment.REGISTER_ARGS, user));
         });
-
-        otpDialog.addActionForBtnReSentOtp(view -> {
-            Toast.makeText(mMainActivity, "OTP not receive!", Toast.LENGTH_SHORT).show();
-        });
-
-        otpDialog.showDialog();
-
-        NotificationUtil.otpNotification(
-                mMainActivity, getString(R.string.system_noty_channel_id),
-                getString(R.string.otp), "123"
-        );
     }
 
     private void addChangeBackgroundColorOnFocusForUserNameEditText() {
@@ -213,20 +216,33 @@ public class RegisterFragment extends Fragment {
         });
     }
 
-    private boolean verifyOTP(EditText editText, String otpNumber) {
 
-        if (TextUtils.isEmpty(editText.getText().toString().trim())) {
-            editText.setError(getString(R.string.empty_otp_err));
-            editText.requestFocus();
-            return false;
-        }
+    private void addActionForEditTextDateOfBirth() {
+        mBinding.edtDob.setOnClickListener(view -> {
 
-        if (!editText.getText().toString().trim().equals(otpNumber)) {
-            editText.setError(getString(R.string.wrong_otp_err));
-            editText.requestFocus();
-            return false;
-        }
+            Locale locale = new Locale("vi");
+            Locale.setDefault(locale);
 
-        return true;
+            DatePickerDialog datePickerDialog = new DatePickerDialog(mMainActivity,
+                    android.R.style.Theme_Holo_Light_Dialog_MinWidth,
+                    (datePicker, year, month, dayOfMonth) -> {
+                        mCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        mCalendar.set(Calendar.MONTH, month);
+                        mCalendar.set(Calendar.YEAR, year);
+                        updateDateOfBirthEditText();
+                    }, mCalendar.get(Calendar.YEAR), mCalendar.get(Calendar.MONTH),
+                    mCalendar.get(Calendar.DAY_OF_MONTH)
+            );
+
+            datePickerDialog.setTitle(getString(R.string.dob));
+            datePickerDialog.setIcon(R.drawable.ic_calendar);
+            datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            datePickerDialog.show();
+        });
+    }
+
+    private void updateDateOfBirthEditText() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
+        mBinding.edtDob.setText(dateFormat.format(mCalendar.getTime()));
     }
 }

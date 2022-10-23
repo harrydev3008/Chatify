@@ -18,6 +18,7 @@ import com.hisu.zola.R;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Locale;
 import java.util.Random;
 
 public class ImageConvertUtil {
@@ -84,7 +85,7 @@ public class ImageConvertUtil {
         int xPos = (canvas.getWidth() / 2);
         int yPos = (int) ((canvas.getHeight() / 2) - ((paintText.descent() + paintText.ascent()) / 2));
 
-        canvas.drawText(getLetterFromName(text), xPos, yPos, paintText);
+        canvas.drawText(getLetterFromName(text).toUpperCase(), xPos, yPos, paintText);
 
         return output;
     }

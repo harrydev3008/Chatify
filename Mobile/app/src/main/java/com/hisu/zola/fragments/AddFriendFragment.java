@@ -31,6 +31,8 @@ public class AddFriendFragment extends Fragment {
         mainActivity = (MainActivity) getActivity();
         mBinding = FragmentAddFriendBinding.inflate(inflater, container, false);
 
+        mainActivity.setBottomNavVisibility(View.GONE);
+
         backToPrevPage();
         showFriendRequestList();
         showFriendFromContact();

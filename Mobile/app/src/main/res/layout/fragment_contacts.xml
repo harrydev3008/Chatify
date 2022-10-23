@@ -34,6 +34,7 @@
             android:layout_gravity="center"
             android:paddingHorizontal="8dp"
             android:hint="@string/search_hint"
+            android:textCursorDrawable="@drawable/edt_cursor"
             android:maxLines="1"
             android:drawablePadding="10dp"
             android:importantForAutofill="no"

@@ -32,6 +32,8 @@ public class ProfileFragment extends Fragment {
         addActionForBtnEditProfile();
         addActionForBtnSetting();
 
+        mMainActivity.setProgressbarVisibility(View.GONE);
+
         return mBinding.getRoot();
     }
 
