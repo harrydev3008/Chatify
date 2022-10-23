@@ -36,7 +36,7 @@ public class SettingFragment extends Fragment {
 
         mainActivity.setBottomNavVisibility(View.GONE);
 
-        loadUserInfo();
+//        loadUserInfo();
 
         addActionForBtnBackToPrevPage();
         addActionForBtnLogout();

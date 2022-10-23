@@ -28,7 +28,7 @@ public class ProfileFragment extends Fragment {
 
         mBinding = FragmentProfileBinding.inflate(inflater, container, false);
 
-        loadUserInfo();
+//        loadUserInfo();
         addActionForBtnEditProfile();
         addActionForBtnSetting();
 

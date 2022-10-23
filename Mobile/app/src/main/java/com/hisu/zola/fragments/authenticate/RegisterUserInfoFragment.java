@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,7 +32,9 @@ import com.hisu.zola.util.ObjectConvertUtil;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.Executors;
 
@@ -49,7 +52,7 @@ public class RegisterUserInfoFragment extends Fragment {
     private Calendar mCalendar;
     private Uri avatarUri;
     private ActivityResultLauncher<Intent> resultLauncher;
-
+    private ProgressDialog dialog;
     public static RegisterUserInfoFragment newInstance(User user) {
         Bundle args = new Bundle();
         args.putSerializable(REGISTER_KEY, user);
@@ -156,43 +159,81 @@ public class RegisterUserInfoFragment extends Fragment {
     }
 
     private void saveUserInfo() {
-        Log.e("TETS", user.toString());
-        ProgressDialog dialog = new ProgressDialog(mainActivity);
+        dialog = new ProgressDialog(mainActivity);
 
-        Executors.newSingleThreadExecutor().execute(() -> {
+        if(validateUserInfo()){
+            Log.e("TETS", user.toString());
+
+
+//        Executors.newSingleThreadExecutor().execute(() -> {
 
             mainActivity.runOnUiThread(() -> {
                 dialog.setMessage(getString(R.string.pls_wait));
                 dialog.show();
             });
 
-            ApiService.apiService.signUp(user).enqueue(new Callback<Object>() {
-                @Override
-                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+//            ApiService.apiService.signUp(user).enqueue(new Callback<Object>() {
+//                @Override
+//                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+//
+//                    if (response.isSuccessful() && response.code() == 200) {
+//
+//                        LocalDataManager.setUserLoginState(true);
+//                        LocalDataManager.setCurrentUserInfo(ObjectConvertUtil.getResponseUser(response));
+//
+//                        mainActivity.runOnUiThread(() -> {
+//                            dialog.dismiss();
+            mainActivity.setBottomNavVisibility(View.VISIBLE);
+            mainActivity.addFragmentToBackStack(new ConversationListFragment());
+//                        });
+//                    }
+//              }
 
-                    if (response.isSuccessful() && response.code() == 200) {
-
-                        LocalDataManager.setUserLoginState(true);
-                        LocalDataManager.setCurrentUserInfo(ObjectConvertUtil.getResponseUser(response));
-
-                        mainActivity.runOnUiThread(() -> {
-                            dialog.dismiss();
-                            mainActivity.setBottomNavVisibility(View.VISIBLE);
-                            mainActivity.addFragmentToBackStack(new ConversationListFragment());
-                        });
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                    Log.e("API_ERR", t.getLocalizedMessage());
-                }
-            });
-        });
+//                @Override
+//                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+//                    Log.e("API_ERR", t.getLocalizedMessage());
+//                }
+//            });
+//        });
+        }
     }
 
     private boolean validateUserInfo() {
-        //Todo: Verify user info => Huy
+        if (TextUtils.isEmpty(mBinding.edtDob.getText().toString().trim())) {
+            dialog.dismiss();
+            mBinding.edtDob.setError(getString(R.string.empty_err_dob));
+            mBinding.edtDob.requestFocus();
+            return false;
+        }
+        //Todo: Verify user info => Huy => xử lý xong ngày sinh
+        String[] tests = mBinding.edtDob.getText().toString().trim().split("/");
+        Date bd = new Date(Integer.parseInt(tests[2]), Integer.parseInt(tests[1]),
+                Integer.parseInt(tests[0]));
+        if(getAge(bd)<15){
+            dialog.dismiss();
+            mBinding.edtDob.setError(getString(R.string.err_age));
+            mBinding.edtDob.requestFocus();
+            return false;
+        }
+
         return true;
+    }
+    private static int getAge(Date dateOfBirth) {
+        LocalDate today = LocalDate.now();
+        Calendar birthDate = Calendar.getInstance();
+        birthDate.setTime(dateOfBirth);
+        int age = today.getYear() - birthDate.get(Calendar.YEAR)+1900;
+        if (((birthDate.get(Calendar.MONTH)) > today.getMonthValue())){
+            age--;
+        }
+        else if ((birthDate.get(Calendar.MONTH) == today.getMonthValue()) &&
+                (birthDate.get(Calendar.DAY_OF_MONTH) > today.getDayOfMonth())){
+            age--;
+        }
+//        Log.e("now",today+"");
+//        Log.e("db",birthDate.get(Calendar.YEAR)+" "+ birthDate.get(Calendar.MONTH)+"  "
+//                +birthDate.get(Calendar.DAY_OF_MONTH) ) ;
+//        Log.e("age",age+"");
+        return age;
     }
 }

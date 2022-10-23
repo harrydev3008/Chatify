@@ -123,7 +123,9 @@
     <string name="empty_confirm_pwd_err">Vui lòng xác nhận lại mật khẩu!</string>
     <string name="not_match_confirm_pwd_err">Mật khẩu không trùng khớp!</string>
     <string name="empty_nickname_err">Vui lòng nhập nickname!</string>
-
+    <string name="empty_err_dob">Bạn chưa chọn ngày sinh!</string>
+    <string name="err_age">Bạn phải trên 15 tuổi!</string>
+    <string name="empty_err_displayname">Bạn chưa nhập tên hiển thị!</string>
     <!--Notification Channels-->
     <string name="system_noty_channel_id">zola notification id</string>
     <string name="system_noty_channel_name">zola notification</string>

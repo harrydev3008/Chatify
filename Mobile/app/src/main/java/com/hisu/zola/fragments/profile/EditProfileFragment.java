@@ -9,6 +9,8 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,8 +29,11 @@ import com.hisu.zola.databinding.FragmentEditProfileBinding;
 import com.hisu.zola.entity.User;
 import com.hisu.zola.util.local.LocalDataManager;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 public class EditProfileFragment extends Fragment {
@@ -38,6 +43,7 @@ public class EditProfileFragment extends Fragment {
     private Calendar mCalendar;
     private Uri newAvatarUri;
     private ActivityResultLauncher<Intent> resultLauncher;
+    private ProgressDialog dialog;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -47,7 +53,7 @@ public class EditProfileFragment extends Fragment {
         mBinding = FragmentEditProfileBinding.inflate(inflater, container, false);
 
         init();
-        loadUserInfo();
+//        loadUserInfo();
         addActionForBtnBackToPrevPage();
         addActionToPickImageFromGallery();
         addActionForEditTextDateOfBirth();
@@ -76,7 +82,7 @@ public class EditProfileFragment extends Fragment {
 
         mBinding.edtDisplayName.setText(user.getUsername());
 
-        if(user.isVerifyOTP())
+        if (user.isVerifyOTP())
             mBinding.rBtnGenderM.setChecked(true);
         else
             mBinding.rBtnGenderF.setChecked(true);
@@ -151,18 +157,59 @@ public class EditProfileFragment extends Fragment {
 
 
     private void updateProfile() {
-        ProgressDialog dialog = new ProgressDialog(getContext());
+        dialog = new ProgressDialog(getContext());
         dialog.setMessage(getString(R.string.pls_wait));
         dialog.show();
 
-        if(validateUserUpdateData()) {
+        if (validateUserUpdateData()) {
             dialog.dismiss();
             mBinding.iBtnBack.performClick();
         }
     }
 
     private boolean validateUserUpdateData() {
-        //Todo: validate user data before save => Huy
+        //Todo: validate user data before save => Huy => chưa chọn ảnh k biết xử lý
+        if (TextUtils.isEmpty(mBinding.edtDisplayName.getText().toString().trim())) {
+            dialog.dismiss();
+            mBinding.edtDisplayName.setError(getString(R.string.empty_err_displayname));
+            mBinding.edtDisplayName.requestFocus();
+            return false;
+        }
+
+        if (TextUtils.isEmpty(mBinding.edtDob.getText().toString().trim())) {
+            dialog.dismiss();
+            mBinding.edtDob.setError(getString(R.string.empty_err_dob));
+            mBinding.edtDob.requestFocus();
+            return false;
+        }
+        String[] tests = mBinding.edtDob.getText().toString().trim().split("/");
+        Date bd = new Date(Integer.parseInt(tests[2]), Integer.parseInt(tests[1]),
+                Integer.parseInt(tests[0]));
+        if(getAge(bd)<15){
+            dialog.dismiss();
+            mBinding.edtDob.setError(getString(R.string.err_age));
+            mBinding.edtDob.requestFocus();
+            return false;
+        }
         return true;
+    }
+
+    private static int getAge(Date dateOfBirth) {
+        LocalDate today = LocalDate.now();
+        Calendar birthDate = Calendar.getInstance();
+        birthDate.setTime(dateOfBirth);
+        int age = today.getYear() - birthDate.get(Calendar.YEAR)+1900;
+        if (((birthDate.get(Calendar.MONTH)) > today.getMonthValue())){
+            age--;
+        }
+        else if ((birthDate.get(Calendar.MONTH) == today.getMonthValue()) &&
+                (birthDate.get(Calendar.DAY_OF_MONTH) > today.getDayOfMonth())){
+            age--;
+        }
+//        Log.e("now",today+"");
+//        Log.e("db",birthDate.get(Calendar.YEAR)+" "+ birthDate.get(Calendar.MONTH)+"  "
+//                +birthDate.get(Calendar.DAY_OF_MONTH) ) ;
+//        Log.e("age",age+"");
+        return age;
     }
 }

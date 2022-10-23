@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.PasswordTransformationMethod;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,26 +16,13 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentLoginBinding;
-import com.hisu.zola.entity.User;
 import com.hisu.zola.fragments.conversation.ConversationListFragment;
-import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.NotificationUtil;
-import com.hisu.zola.util.ObjectConvertUtil;
 import com.hisu.zola.util.OtpDialog;
 import com.hisu.zola.util.local.LocalDataManager;
-
-
-import java.io.IOException;
-import java.util.concurrent.Executors;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -149,56 +135,66 @@ public class LoginFragment extends Fragment {
         String phoneNumber = mBinding.edtPhoneNo.getText().toString();
         String password = mBinding.edtPassword.getText().toString();
 
-        if (validateUserAccount(phoneNumber, password)) {
+        LocalDataManager.setUserLoginState(true);
+//                            LocalDataManager.setCurrentUserInfo(ObjectConvertUtil.getResponseUser(response));
 
-            Executors.newSingleThreadExecutor().execute(() -> {
+        mMainActivity.runOnUiThread(() -> {
+            progressDialog.dismiss();
+            mMainActivity.setBottomNavVisibility(View.VISIBLE);
+            mMainActivity.setFragment(new ConversationListFragment());
+        });
 
-                mMainActivity.runOnUiThread(() -> {
-                    progressDialog.setMessage(getString(R.string.pls_wait));
-                    progressDialog.show();
-                });
+//        if (validateUserAccount(phoneNumber, password)) {
+//
+//            Executors.newSingleThreadExecutor().execute(() -> {
+//
+//                mMainActivity.runOnUiThread(() -> {
+//                    progressDialog.setMessage(getString(R.string.pls_wait));
+//                    progressDialog.show();
+//                });
+//
+//                User user = new User(phoneNumber, password);
+//
+//                ApiService.apiService.signIn(user).enqueue(new Callback<>() {
+//                    @Override
+//                    public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+//                        if (response.isSuccessful() && response.code() == 200) {
+//
+//                            LocalDataManager.setUserLoginState(true);
+//                            LocalDataManager.setCurrentUserInfo(ObjectConvertUtil.getResponseUser(response));
+//
+//                            mMainActivity.runOnUiThread(() -> {
+//                                progressDialog.dismiss();
+//                                mMainActivity.setBottomNavVisibility(View.VISIBLE);
+//                                mMainActivity.setFragment(new ConversationListFragment());
+//                            });
+//
+//                        } else if (response.code() == 400) {
+//                            try {
+//                                JsonObject obj = new Gson().fromJson(response.errorBody().string(), JsonObject.class);
+//
+//                                int errorCode = obj.get("errorCode").getAsInt();
+//                                String errorMsg = obj.get("message").getAsString();
+//
+//                                mMainActivity.runOnUiThread(() -> {
+//                                    progressDialog.dismiss();
+//                                    handleLoginError(errorCode, errorMsg);
+//                                });
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+//                        Log.e("API_ERR", t.getLocalizedMessage());
+//                    }
+//                });
+//            });
+//    }
 
-                User user = new User(phoneNumber, password);
-
-                ApiService.apiService.signIn(user).enqueue(new Callback<>() {
-                    @Override
-                    public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                        if (response.isSuccessful() && response.code() == 200) {
-
-                            LocalDataManager.setUserLoginState(true);
-                            LocalDataManager.setCurrentUserInfo(ObjectConvertUtil.getResponseUser(response));
-
-                            mMainActivity.runOnUiThread(() -> {
-                                progressDialog.dismiss();
-                                mMainActivity.setBottomNavVisibility(View.VISIBLE);
-                                mMainActivity.setFragment(new ConversationListFragment());
-                            });
-
-                        } else if (response.code() == 400) {
-                            try {
-                                JsonObject obj = new Gson().fromJson(response.errorBody().string(), JsonObject.class);
-
-                                int errorCode = obj.get("errorCode").getAsInt();
-                                String errorMsg = obj.get("message").getAsString();
-
-                                mMainActivity.runOnUiThread(() -> {
-                                    progressDialog.dismiss();
-                                    handleLoginError(errorCode, errorMsg);
-                                });
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                        Log.e("API_ERR", t.getLocalizedMessage());
-                    }
-                });
-            });
-        }
-    }
+}
 
     private boolean validateUserAccount(String phoneNumber, String password) {
         //Todo: check phone number and password before calling api to verify user => Huy => done
@@ -214,7 +210,7 @@ public class LoginFragment extends Fragment {
                 "056|058|092|" +
                 "059|099)[0-9]{7}$");
         Matcher matcher = patternsdt.matcher(phoneNumber);
-        if (!matcher.matches()){
+        if (!matcher.matches()) {
             mBinding.edtPhoneNo.setError(getString(R.string.invalid_phone_format_err));
             mBinding.edtPhoneNo.requestFocus();
             return false;
