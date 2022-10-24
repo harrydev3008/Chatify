@@ -14,6 +14,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -22,6 +23,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentRegisterUserInfoBinding;
@@ -34,6 +37,7 @@ import com.hisu.zola.util.ObjectConvertUtil;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -80,6 +84,8 @@ public class RegisterUserInfoFragment extends Fragment {
         mBinding = FragmentRegisterUserInfoBinding.inflate(inflater, container, false);
 
         init();
+
+        Log.e("user data", user.toString());
 
         return mBinding.getRoot();
     }
@@ -136,34 +142,28 @@ public class RegisterUserInfoFragment extends Fragment {
     }
 
     private void saveUserInfo() {
+
+        uploadAvatar();
+        user.setGender(mBinding.rBtnGenderMale.isChecked());
+
         Executors.newSingleThreadExecutor().execute(() -> {
 
             mainActivity.runOnUiThread(() -> {
                 loadingDialog.showDialog();
             });
 
-            ApiService.apiService.signUp(user).enqueue(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+            LocalDataManager.setUserLoginState(true);
+            LocalDataManager.setCurrentUserInfo(user);
 
-                    if (response.isSuccessful() && response.code() == 200) {
-
-                        LocalDataManager.setUserLoginState(true);
-                        LocalDataManager.setCurrentUserInfo(ObjectConvertUtil.getResponseUser(response));
-
-                        mainActivity.runOnUiThread(() -> {
-                            loadingDialog.dismissDialog();
-                            mainActivity.setBottomNavVisibility(View.VISIBLE);
-                            mainActivity.addFragmentToBackStack(new ConversationListFragment());
-                        });
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                    Log.e("API_ERR", t.getLocalizedMessage());
-                }
+            mainActivity.runOnUiThread(() -> {
+                loadingDialog.dismissDialog();
+                mainActivity.setBottomNavVisibility(View.GONE);
+                mainActivity.addFragmentToBackStack(new WelcomeOnBoardingFragment());
             });
         });
+    }
+
+    private void uploadAvatar() {
+        //Todo: upload default generated pfp
     }
 }

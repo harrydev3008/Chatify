@@ -119,7 +119,6 @@ public class ContactFriendFragment extends Fragment {
             public void onResponse(Call<List<User>> call, Response<List<User>> response) {
                 if(response.isSuccessful() && response.code() == 200) {
                     List<User> users = response.body();
-                    Log.e("API_RES", users.get(0).toString());
                 }
             }
 

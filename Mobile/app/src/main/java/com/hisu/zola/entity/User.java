@@ -20,26 +20,47 @@ public class User implements Serializable {
     private String password;
     private String avatarURL;
     private boolean isVerifyOTP;
+    private String dob;
+    private boolean gender;//T -> male, false -> female
 
+    @Ignore
     private List<String> friends;
 
     @Ignore
     public User() {
     }
 
-    public User(@NonNull String _id, String username, String phoneNumber, String password, String avatarURL, boolean isVerifyOTP) {
+    public User(@NonNull String _id, String username, String phoneNumber, String password, String avatarURL, boolean isVerifyOTP, String dob, boolean gender) {
         this._id = _id;
         this.username = username;
         this.phoneNumber = phoneNumber;
         this.password = password;
         this.avatarURL = avatarURL;
         this.isVerifyOTP = isVerifyOTP;
+        this.dob = dob;
+        this.gender = gender;
     }
 
     @Ignore
     public User(String phoneNumber, String password) {
         this.phoneNumber = phoneNumber;
         this.password = password;
+    }
+
+    public String getDob() {
+        return dob;
+    }
+
+    public void setDob(String dob) {
+        this.dob = dob;
+    }
+
+    public boolean isGender() {
+        return gender;
+    }
+
+    public void setGender(boolean gender) {
+        this.gender = gender;
     }
 
     public String getId() {
@@ -107,6 +128,8 @@ public class User implements Serializable {
                 ", password='" + password + '\'' +
                 ", avatarURL='" + avatarURL + '\'' +
                 ", isVerifyOTP=" + isVerifyOTP +
+                ", dob='" + dob + '\'' +
+                ", gender=" + gender +
                 ", friends=" + friends +
                 '}';
     }

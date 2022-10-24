@@ -83,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         mainBinding.navigationMenu.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             setProgressbarVisibility(View.VISIBLE);
+
             if (itemId == R.id.action_message)
                 addFragmentToBackStack(new ConversationListFragment());
             else if (itemId == R.id.action_contact)

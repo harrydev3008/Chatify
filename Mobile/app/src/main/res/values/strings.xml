@@ -142,9 +142,13 @@
     <string name="empty_display_name_err">Bạn chưa điền tên hiển thị!</string>
     <string name="invalid_phone_format_err">Số điện thoại sai định dạng!</string>
     <string name="empty_pwd_err">Bạn chưa nhập mật khẩu!</string>
-    <string name="invalid_pwd_format_err">Mật khẩu phải chứa ký tự hoa và số!</string>
+    <string name="invalid_pwd_format_err">Mật khẩu ít nhất 8 ký tự, phải gồm 1 ký tự hoa, 1 ký tự thường, 1 số và một ký tự đặc biệt (@$!%*?)!</string>
     <string name="empty_confirm_pwd_err">Vui lòng xác nhận lại mật khẩu!</string>
     <string name="not_match_confirm_pwd_err">Mật khẩu không trùng khớp!</string>
+    <string name="err_age">Bạn phải trên 15 tuổi!</string>
+    <string name="empty_dob_err">Bạn chưa chọn ngày sinh!</string>
+    <string name="empty_nickname_err">Bạn vui lòng nhập tên gợi nhớ!</string>
+    <string name="empty_err_displayname">Bạn chưa nhập tên hiển thị!</string>
 
     <!--Notification Channels-->
     <string name="system_noty_channel_id">zola notification id</string>

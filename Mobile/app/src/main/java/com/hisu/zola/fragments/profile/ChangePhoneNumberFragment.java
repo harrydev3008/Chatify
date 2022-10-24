@@ -21,6 +21,8 @@ import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentChangePhoneNumberBinding;
 import com.hisu.zola.util.dialog.ConfirmSendOTPDialog;
 
+import java.util.regex.Pattern;
+
 public class ChangePhoneNumberFragment extends Fragment {
 
     private FragmentChangePhoneNumberBinding mBinding;
@@ -127,8 +129,21 @@ public class ChangePhoneNumberFragment extends Fragment {
         });
     }
 
+    /*
+    * @author Huy
+    * */
     private boolean verifyPhoneNumber(String phoneNumber) {
-        //Todo: validate phone number => Huy
+        Pattern patternPhoneNumber = Pattern.compile("^(032|033|034|035|036|037|038|039|086|096|097|098|" +
+                "070|079|077|076|078|089|090|093|" +
+                "083|084|085|081|082|088|091|094|" +
+                "056|058|092|" +
+                "059|099)[0-9]{7}$");
+
+        if (!patternPhoneNumber.matcher(phoneNumber).matches()){
+            mBinding.edtNewPhoneNo.setError(getString(R.string.invalid_phone_format_err));
+            mBinding.edtNewPhoneNo.requestFocus();
+            return false;
+        }
         return true;
     }
 }

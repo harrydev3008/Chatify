@@ -18,6 +18,8 @@ import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentResetPasswordBinding;
 
+import java.util.regex.Pattern;
+
 public class ResetPasswordFragment extends Fragment {
 
     private FragmentResetPasswordBinding mBinding;
@@ -105,10 +107,19 @@ public class ResetPasswordFragment extends Fragment {
         });
     }
 
+    /**
+     * @author Huy
+     */
     private boolean validateNewPassword(String newPwd, String confirmPwd) {
-        //Todo: Verify password => Huy
         if (TextUtils.isEmpty(newPwd)) {
             mBinding.edtNewPwd.setError(getString(R.string.empty_pwd_err));
+            mBinding.edtNewPwd.requestFocus();
+            return false;
+        }
+
+        Pattern patternPwd = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?])[A-Za-z\\d@$!%*?]{8,}$");
+        if (!patternPwd.matcher(newPwd).matches()) {
+            mBinding.edtNewPwd.setError(getString(R.string.invalid_pwd_format_err));
             mBinding.edtNewPwd.requestFocus();
             return false;
         }
