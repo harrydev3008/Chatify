@@ -10,26 +10,34 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentRegisterUserInfoBinding;
 import com.hisu.zola.entity.User;
 import com.hisu.zola.fragments.conversation.ConversationListFragment;
+import com.hisu.zola.fragments.greet_new_user.WelcomeOnBoardingFragment;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.ImageConvertUtil;
 import com.hisu.zola.util.ObjectConvertUtil;
+import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -41,12 +49,12 @@ import retrofit2.Response;
 
 public class RegisterUserInfoFragment extends Fragment {
 
-    public static final String REGISTER_KEY  = "NEW_USER";
+    public static final String REGISTER_KEY = "NEW_USER";
     private User user;
+    private LoadingDialog loadingDialog;
 
     private FragmentRegisterUserInfoBinding mBinding;
     private MainActivity mainActivity;
-    private Calendar mCalendar;
     private Uri avatarUri;
     private ActivityResultLauncher<Intent> resultLauncher;
 
@@ -59,25 +67,31 @@ public class RegisterUserInfoFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (getArguments() != null)
+            user = (User) getArguments().getSerializable(REGISTER_KEY);
+        else
+            user = new User();
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         mainActivity = (MainActivity) getActivity();
         mBinding = FragmentRegisterUserInfoBinding.inflate(inflater, container, false);
 
-        if (getArguments() != null)
-            user = (User) getArguments().getSerializable(REGISTER_KEY);
-        else
-            user = new User();
-
         init();
+
+        Log.e("user data", user.toString());
 
         return mBinding.getRoot();
     }
 
-
     private void init() {
-        mCalendar = Calendar.getInstance();
+        loadingDialog = new LoadingDialog(mainActivity, Gravity.CENTER);
 
         resultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -88,42 +102,14 @@ public class RegisterUserInfoFragment extends Fragment {
                 });
 
         generateDefaultPfp();
-
-        addActionForEditTextDateOfBirth();
         addActionForBtnSkip();
         addActionForChangeAvatarButton();
         addActionForBtnSave();
     }
 
     private void generateDefaultPfp() {
-        Bitmap bitmap = ImageConvertUtil.createImageFromText(mainActivity,150,150, user.getUsername());
+        Bitmap bitmap = ImageConvertUtil.createImageFromText(mainActivity, 150, 150, user.getUsername());
         mBinding.cimvAvatar.setImageBitmap(bitmap);
-    }
-
-    private void addActionForEditTextDateOfBirth() {
-        mBinding.edtDob.setOnClickListener(view -> {
-
-            DatePickerDialog datePickerDialog = new DatePickerDialog(mainActivity,
-                    android.R.style.Theme_Holo_Light_Dialog_MinWidth,
-                    (datePicker, year, month, dayOfMonth) -> {
-                        mCalendar.set(Calendar.YEAR, year);
-                        mCalendar.set(Calendar.MONTH, month);
-                        mCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                        updateDateOfBirthEditText();
-                    }, mCalendar.get(Calendar.YEAR), mCalendar.get(Calendar.MONTH),
-                    mCalendar.get(Calendar.DAY_OF_MONTH)
-            );
-
-            datePickerDialog.setTitle(getString(R.string.dob));
-            datePickerDialog.setIcon(R.drawable.ic_calendar);
-            datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            datePickerDialog.show();
-        });
-    }
-
-    private void updateDateOfBirthEditText() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
-        mBinding.edtDob.setText(dateFormat.format(mCalendar.getTime()));
     }
 
     private void addActionForBtnSkip() {
@@ -156,43 +142,28 @@ public class RegisterUserInfoFragment extends Fragment {
     }
 
     private void saveUserInfo() {
-        Log.e("TETS", user.toString());
-        ProgressDialog dialog = new ProgressDialog(mainActivity);
+
+        uploadAvatar();
+        user.setGender(mBinding.rBtnGenderMale.isChecked());
 
         Executors.newSingleThreadExecutor().execute(() -> {
 
             mainActivity.runOnUiThread(() -> {
-                dialog.setMessage(getString(R.string.pls_wait));
-                dialog.show();
+                loadingDialog.showDialog();
             });
 
-            ApiService.apiService.signUp(user).enqueue(new Callback<Object>() {
-                @Override
-                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+            LocalDataManager.setUserLoginState(true);
+            LocalDataManager.setCurrentUserInfo(user);
 
-                    if (response.isSuccessful() && response.code() == 200) {
-
-                        LocalDataManager.setUserLoginState(true);
-                        LocalDataManager.setCurrentUserInfo(ObjectConvertUtil.getResponseUser(response));
-
-                        mainActivity.runOnUiThread(() -> {
-                            dialog.dismiss();
-                            mainActivity.setBottomNavVisibility(View.VISIBLE);
-                            mainActivity.addFragmentToBackStack(new ConversationListFragment());
-                        });
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                    Log.e("API_ERR", t.getLocalizedMessage());
-                }
+            mainActivity.runOnUiThread(() -> {
+                loadingDialog.dismissDialog();
+                mainActivity.setBottomNavVisibility(View.GONE);
+                mainActivity.addFragmentToBackStack(new WelcomeOnBoardingFragment());
             });
         });
     }
 
-    private boolean validateUserInfo() {
-        //Todo: Verify user info => Huy
-        return true;
+    private void uploadAvatar() {
+        //Todo: upload default generated pfp
     }
 }

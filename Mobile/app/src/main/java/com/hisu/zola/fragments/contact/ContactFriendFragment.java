@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,15 +18,24 @@ import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.ConversationAdapter;
 import com.hisu.zola.databinding.FragmentContactFriendBinding;
+import com.hisu.zola.entity.ConversationHolder;
+import com.hisu.zola.entity.User;
 import com.hisu.zola.fragments.conversation.ConversationFragment;
+import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.view_model.ConversationListViewModel;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ContactFriendFragment extends Fragment {
 
     private FragmentContactFriendBinding mBinding;
     private MainActivity mainActivity;
-    private ConversationListViewModel viewModel;
-    private ConversationAdapter adapter;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -75,22 +85,22 @@ public class ContactFriendFragment extends Fragment {
     }
 
     private void initConversationListRecyclerView() {
-        viewModel = new ViewModelProvider(mainActivity).get(ConversationListViewModel.class);
+//        viewModel = new ViewModelProvider(mainActivity).get(ConversationListViewModel.class);
 
-        adapter = new ConversationAdapter(mainActivity);
-        adapter.setOnConversationItemSelectedListener(conversationID -> {
-            mainActivity.setBottomNavVisibility(View.GONE);
-            mainActivity.getSupportFragmentManager().beginTransaction()
-                    .setCustomAnimations(
-                            R.anim.slide_in_left, R.anim.slide_out_left,
-                            R.anim.slide_out_right, R.anim.slide_out_right)
-                    .add(
-                            mainActivity.getViewContainerID(),
-                            ConversationFragment.newInstance(conversationID)
-                    )
-                    .addToBackStack("Single_Conversation")
-                    .commit();
-        });
+//        adapter = new ConversationAdapter(mainActivity);
+//        adapter.setOnConversationItemSelectedListener(conversationID -> {
+//            mainActivity.setBottomNavVisibility(View.GONE);
+//            mainActivity.getSupportFragmentManager().beginTransaction()
+//                    .setCustomAnimations(
+//                            R.anim.slide_in_left, R.anim.slide_out_left,
+//                            R.anim.slide_out_right, R.anim.slide_out_right)
+//                    .add(
+//                            mainActivity.getViewContainerID(),
+//                            ConversationFragment.newInstance(conversationID)
+//                    )
+//                    .addToBackStack("Single_Conversation")
+//                    .commit();
+//        });
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(
                 mainActivity, RecyclerView.VERTICAL, false
@@ -102,9 +112,20 @@ public class ContactFriendFragment extends Fragment {
     }
 
     private void loadConversationList() {
-        viewModel.getData().observe(mainActivity, conversation -> {
-            adapter.setConversations(conversation);
-            mBinding.rvFriend.setAdapter(adapter);
+        String token = "Bearer " + LocalDataManager.getUserToken();
+
+        ApiService.apiService.getAllFriends(token).enqueue(new Callback<List<User>>() {
+            @Override
+            public void onResponse(Call<List<User>> call, Response<List<User>> response) {
+                if(response.isSuccessful() && response.code() == 200) {
+                    List<User> users = response.body();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<User>> call, Throwable t) {
+                Log.e("API_ERR", t.getLocalizedMessage());
+            }
         });
     }
 }

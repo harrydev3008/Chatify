@@ -8,9 +8,9 @@ import com.hisu.zola.entity.User;
 
 @Dao
 public interface UserDAO {
-    @Insert
-    void insert(User... user);
+//    @Insert
+//    void insert(User... user);
 
-    @Query("select * from users where _id = :id")
-    User getUser(String id);
+//    @Query("select * from users where _id = :id")
+//    User getUser(String id);
 }

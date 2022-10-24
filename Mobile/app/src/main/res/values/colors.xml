@@ -19,6 +19,7 @@
     <color name="gray_e5">#e5e5e5</color>
     <color name="gray_bf">#bfd4e7</color>
     <color name="gray_f1">#f1f3f5</color>
+    <color name="dark_green">#38a3a5</color>
 
 <!-- chat ui colors   -->
     <color name="chat_bg">#e5e7f6</color>

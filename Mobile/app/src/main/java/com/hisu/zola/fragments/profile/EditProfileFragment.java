@@ -9,6 +9,8 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,8 +30,11 @@ import com.hisu.zola.entity.User;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.Executors;
 
 public class EditProfileFragment extends Fragment {
 
@@ -76,7 +81,7 @@ public class EditProfileFragment extends Fragment {
 
         mBinding.edtDisplayName.setText(user.getUsername());
 
-        if(user.isVerifyOTP())
+        if (user.isVerifyOTP())
             mBinding.rBtnGenderM.setChecked(true);
         else
             mBinding.rBtnGenderF.setChecked(true);
@@ -105,6 +110,9 @@ public class EditProfileFragment extends Fragment {
 
     private void addActionForEditTextDateOfBirth() {
         mBinding.edtDob.setOnClickListener(view -> {
+
+            Locale locale = new Locale("vi");
+            Locale.setDefault(locale);
 
             DatePickerDialog datePickerDialog = new DatePickerDialog(mainActivity,
                     android.R.style.Theme_Holo_Light_Dialog_MinWidth, new DatePickerDialog.OnDateSetListener() {
@@ -138,31 +146,96 @@ public class EditProfileFragment extends Fragment {
     }
 
     private void confirmUpdateProfile() {
-        new AlertDialog.Builder(getContext())
-                .setTitle(getString(R.string.confirm_update_profile))
-                .setMessage(getString(R.string.confirm_update_profile_desc))
-                .setIcon(R.drawable.ic_alert)
-                .setPositiveButton(getString(R.string.confirm), (dialogInterface, i) ->
-                        updateProfile()
-                )
-                .setNegativeButton(getString(R.string.cancel), null)
-                .show();
-    }
 
-
-    private void updateProfile() {
-        ProgressDialog dialog = new ProgressDialog(getContext());
-        dialog.setMessage(getString(R.string.pls_wait));
-        dialog.show();
-
-        if(validateUserUpdateData()) {
-            dialog.dismiss();
-            mBinding.iBtnBack.performClick();
+        if (validateUserUpdateData()) {
+            new AlertDialog.Builder(getContext())
+                    .setTitle(getString(R.string.confirm_update_profile))
+                    .setMessage(getString(R.string.confirm_update_profile_desc))
+                    .setIcon(R.drawable.ic_alert)
+                    .setPositiveButton(getString(R.string.confirm), (dialogInterface, i) ->
+                            updateProfile()
+                    )
+                    .setNegativeButton(getString(R.string.cancel), null)
+                    .show();
         }
     }
 
+    private void updateProfile() {
+        //Todo: call update api
+        uploadAvatar();
+        User user = LocalDataManager.getCurrentUserInfo();
+        user.setUsername(mBinding.edtDisplayName.getText().toString().trim());
+        user.setDob(getDobFormat());
+
+        Log.e("user update", user.toString());
+        mBinding.iBtnBack.performClick();
+    }
+
+    private String getDobFormat() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
+        return dateFormat.format(mCalendar.getTime());
+    }
+
+    private void uploadAvatar() {
+        //Todo: upload default generated pfp
+    }
+
+    /**
+     * @author Huy
+     */
     private boolean validateUserUpdateData() {
-        //Todo: validate user data before save => Huy
+
+        if (TextUtils.isEmpty(mBinding.edtDisplayName.getText().toString().trim())) {
+            mBinding.edtDisplayName.setError(getString(R.string.empty_err_displayname));
+            mBinding.edtDisplayName.requestFocus();
+            return false;
+        }
+
+        if (TextUtils.isEmpty(mBinding.edtDob.getText().toString().trim())) {
+            new androidx.appcompat.app.AlertDialog.Builder(mainActivity)
+                    .setIcon(R.drawable.ic_alert)
+                    .setMessage(getString(R.string.empty_dob_err))
+                    .setPositiveButton(getString(R.string.confirm), null)
+                    .show();
+            return false;
+        }
+
+        if (calculateAge(mBinding.edtDob.getText().toString()) < 15) {
+            new androidx.appcompat.app.AlertDialog.Builder(mainActivity)
+                    .setIcon(R.drawable.ic_alert)
+                    .setMessage(getString(R.string.err_age))
+                    .setPositiveButton(getString(R.string.confirm), null)
+                    .show();
+
+            return false;
+        }
+
         return true;
     }
+
+    private static int calculateAge(String dobStr) {
+
+        String[] dates = dobStr.trim().split("/");
+
+        Date dob = new Date(
+                Integer.parseInt(dates[2]),
+                Integer.parseInt(dates[1]),
+                Integer.parseInt(dates[0])
+        );
+
+        LocalDate today = LocalDate.now();
+        Calendar birthDate = Calendar.getInstance();
+        birthDate.setTime(dob);
+
+        int age = today.getYear() - birthDate.get(Calendar.YEAR) + 1900;
+        if (((birthDate.get(Calendar.MONTH)) > today.getMonthValue())) {
+            age--;
+        } else if ((birthDate.get(Calendar.MONTH) == today.getMonthValue()) &&
+                (birthDate.get(Calendar.DAY_OF_MONTH) > today.getDayOfMonth())) {
+            age--;
+        }
+
+        return age;
+    }
+
 }

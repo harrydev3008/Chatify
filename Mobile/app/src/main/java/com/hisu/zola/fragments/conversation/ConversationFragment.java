@@ -105,7 +105,7 @@ public class ConversationFragment extends Fragment {
     }
 
     private void initEmojiKeyboard() {
-        emojiPopup = EmojiPopup.Builder.fromRootView(mBinding.test).build(mBinding.edtChat);
+        emojiPopup = EmojiPopup.Builder.fromRootView(mBinding.edtChat.getRootView()).build(mBinding.edtChat);
         mBinding.btnEmoji.setOnClickListener(view -> {
             isToggleEmojiButton = !isToggleEmojiButton;
 
@@ -137,23 +137,23 @@ public class ConversationFragment extends Fragment {
         RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
         MultipartBody.Part part = MultipartBody.Part.createFormData("image", file.getName(), requestBody);
 
-        ApiService.apiService.postImage(part).enqueue(new Callback<Message>() {
-            @Override
-            public void onResponse(@NonNull Call<Message> call, @NonNull Response<Message> response) {
-                if(response.isSuccessful()) {
-                    Message message = response.body();
-                    if (message != null) {
-                        message.setSender("1");
-                        sendMessage(message);
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Message> call, @NonNull Throwable t) {
-                Log.e("ERR", t.getLocalizedMessage());
-            }
-        });
+//        ApiService.apiService.postImage(part).enqueue(new Callback<Message>() {
+//            @Override
+//            public void onResponse(@NonNull Call<Message> call, @NonNull Response<Message> response) {
+//                if(response.isSuccessful()) {
+//                    Message message = response.body();
+//                    if (message != null) {
+//                        message.setSender("1");
+//                        sendMessage(message);
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(@NonNull Call<Message> call, @NonNull Throwable t) {
+//                Log.e("ERR", t.getLocalizedMessage());
+//            }
+//        });
     }
 
     private void initProgressBar() {

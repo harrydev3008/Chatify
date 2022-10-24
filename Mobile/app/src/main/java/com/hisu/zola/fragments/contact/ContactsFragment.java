@@ -3,8 +3,10 @@ package com.hisu.zola.fragments.contact;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
 
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,12 +18,14 @@ import com.hisu.zola.R;
 import com.hisu.zola.adapters.ContactViewPagerAdapter;
 import com.hisu.zola.databinding.FragmentContactsBinding;
 import com.hisu.zola.fragments.AddFriendFragment;
+import com.hisu.zola.fragments.conversation.AddNewGroupFragment;
 
 public class ContactsFragment extends Fragment {
 
     private FragmentContactsBinding mBinding;
     private MainActivity mMainActivity;
     private ContactViewPagerAdapter adapter;
+    private PopupMenu popupMenu;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -30,9 +34,12 @@ public class ContactsFragment extends Fragment {
         mMainActivity = (MainActivity) getActivity();
         mBinding = FragmentContactsBinding.inflate(inflater, container, false);
 
+        initPopupMenu();
         tapToCloseApp();
         initTabLabLayout();
         addMoreFriendEvent();
+
+        mMainActivity.setProgressbarVisibility(View.GONE);
 
         return mBinding.getRoot();
     }
@@ -65,17 +72,23 @@ public class ContactsFragment extends Fragment {
 
     private void addMoreFriendEvent() {
         mBinding.mBtnAddFriend.setOnClickListener(view -> {
-            mMainActivity.setBottomNavVisibility(View.GONE);
-            mMainActivity.getSupportFragmentManager().beginTransaction()
-                    .setCustomAnimations(
-                            R.anim.slide_in_left, R.anim.slide_out_left,
-                            R.anim.slide_out_right, R.anim.slide_out_right)
-                    .replace(
-                            mMainActivity.getViewContainerID(),
-                            new AddFriendFragment()
-                    )
-                    .addToBackStack(null)
-                    .commit();
+            popupMenu.show();
+        });
+    }
+
+    private void initPopupMenu() {
+        popupMenu = new PopupMenu(mMainActivity, mBinding.mBtnAddFriend, Gravity.END, 0, R.style.MyPopupMenu);
+        popupMenu.setForceShowIcon(true);
+        popupMenu.getMenuInflater().inflate(R.menu.feature_menu, popupMenu.getMenu());
+
+        popupMenu.setOnMenuItemClickListener(item -> {
+
+            if (item.getItemId() == R.id.action_new_group)
+                mMainActivity.addFragmentToBackStack(new AddNewGroupFragment());
+            else if (item.getItemId() == R.id.action_new_friend)
+                mMainActivity.addFragmentToBackStack(new AddFriendFragment());
+
+            return true;
         });
     }
 }

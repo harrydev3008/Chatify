@@ -1,4 +1,4 @@
-package com.hisu.zola.util;
+package com.hisu.zola.util.dialog;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -11,17 +11,19 @@ import android.widget.TextView;
 
 import com.hisu.zola.R;
 
-public class ConfirmPhoneNumberDialog {
+public class ConfirmSendOTPDialog {
 
     private Dialog dialog;
     private final Context context;
     private final int gravity;
+    private String dialogDesc;
 
-    private TextView tvPhoneNumber, tvChange, tvConfirm;
+    private TextView tvPhoneNumber, tvChange, tvConfirm, tvDialogDesc;
 
-    public ConfirmPhoneNumberDialog(Context context, int gravity) {
+    public ConfirmSendOTPDialog(Context context, int gravity, String dialogDesc) {
         this.context = context;
         this.gravity = gravity;
+        this.dialogDesc = dialogDesc;
         initDialog();
     }
 
@@ -40,7 +42,7 @@ public class ConfirmPhoneNumberDialog {
     private void initDialog() {
         dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.layout_change_phone_number);
+        dialog.setContentView(R.layout.layout_send_otp_dialog);
         dialog.setCancelable(false);
 
         Window window = dialog.getWindow();
@@ -62,6 +64,8 @@ public class ConfirmPhoneNumberDialog {
         tvPhoneNumber = dialog.findViewById(R.id.tv_new_phone_no);
         tvChange = dialog.findViewById(R.id.tv_change);
         tvConfirm = dialog.findViewById(R.id.tv_confirm);
+        tvDialogDesc = dialog.findViewById(R.id.tv_dialog_desc);
+        tvDialogDesc.setText(dialogDesc);
     }
 
     public void showDialog() {

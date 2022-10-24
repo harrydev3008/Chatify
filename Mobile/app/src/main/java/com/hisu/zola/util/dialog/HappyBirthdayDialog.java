@@ -1,4 +1,4 @@
-package com.hisu.zola.util;
+package com.hisu.zola.util.dialog;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -7,23 +7,19 @@ import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.ImageButton;
 
 import com.hisu.zola.R;
 
-public class OtpDialog {
+public class HappyBirthdayDialog {
 
     private Dialog dialog;
     private final Context context;
     private final int gravity;
 
-    private EditText edtOtp;
-    private Button btnCancel, btnConfirm;
-    private TextView tvOtpNotReceive;
+    private ImageButton btnClose;
 
-    public OtpDialog(Context context, int gravity) {
+    public HappyBirthdayDialog(Context context, int gravity) {
         this.context = context;
         this.gravity = gravity;
         initDialog();
@@ -33,14 +29,10 @@ public class OtpDialog {
         return dialog;
     }
 
-    public EditText getEdtOtp() {
-        return edtOtp;
-    }
-
     private void initDialog() {
         dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.layout_otp_dialog);
+        dialog.setContentView(R.layout.layout_send_otp_dialog);
         dialog.setCancelable(false);
 
         Window window = dialog.getWindow();
@@ -59,10 +51,7 @@ public class OtpDialog {
     }
 
     private void initUIComponent() {
-         edtOtp = dialog.findViewById(R.id.edt_otp);
-         btnCancel = dialog.findViewById(R.id.mBtn_cancel);
-         btnConfirm = dialog.findViewById(R.id.mBtn_confirm);
-         tvOtpNotReceive = dialog.findViewById(R.id.tv_otp_not_receive);
+        btnClose = dialog.findViewById(R.id.iBtn_close_pop_up);
     }
 
     public void showDialog() {
@@ -73,19 +62,7 @@ public class OtpDialog {
         dialog.dismiss();
     }
 
-    public String getEditTextInput() {
-        return edtOtp != null ? edtOtp.getText().toString().trim() : "";
-    }
-
-    public void addActionForBtnCancel(View.OnClickListener onClickListener) {
-        btnCancel.setOnClickListener(onClickListener);
-    }
-
-    public void addActionForBtnConfirm(View.OnClickListener onClickListener) {
-        btnConfirm.setOnClickListener(onClickListener);
-    }
-
-    public void addActionForBtnReSentOtp(View.OnClickListener onClickListener) {
-        tvOtpNotReceive.setOnClickListener(onClickListener);
+    public void addActionForBtnClosePopup(View.OnClickListener onClickListener) {
+        btnClose.setOnClickListener(onClickListener);
     }
 }

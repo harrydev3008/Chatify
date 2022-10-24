@@ -1,9 +1,12 @@
 package com.hisu.zola.fragments.authenticate;
 
-import android.app.ProgressDialog;
+import android.app.DatePickerDialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,23 +17,45 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentRegisterBinding;
 import com.hisu.zola.entity.User;
-import com.hisu.zola.util.NotificationUtil;
-import com.hisu.zola.util.OtpDialog;
+import com.hisu.zola.fragments.ConfirmOTPFragment;
+import com.hisu.zola.fragments.greet_new_user.WelcomeOnBoardingFragment;
+import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.ObjectConvertUtil;
+import com.hisu.zola.util.dialog.ConfirmSendOTPDialog;
+import com.hisu.zola.util.dialog.LoadingDialog;
+import com.hisu.zola.util.local.LocalDataManager;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class RegisterFragment extends Fragment {
 
     private FragmentRegisterBinding mBinding;
     private MainActivity mMainActivity;
     private User user;
+    private ConfirmSendOTPDialog dialog;
+    private Calendar mCalendar;
+    private LoadingDialog loadingDialog;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -41,23 +66,24 @@ public class RegisterFragment extends Fragment {
 
         init();
 
-
         return mBinding.getRoot();
     }
 
     private void init() {
         user = new User();
+        mCalendar = Calendar.getInstance();
+        loadingDialog = new LoadingDialog(mMainActivity, Gravity.CENTER);
 
         addToggleShowPasswordEvent(mBinding.edtPassword, mBinding.tvTogglePassword);
         addToggleShowPasswordEvent(mBinding.edtConfirmPassword, mBinding.tvToggleConfirmPassword);
 
-        addChangeBackgroundColorOnFocusForUserNameEditText();
+        addChangeBackgroundColorOnFocusForPhoneNumberEditText();
         addChangeBackgroundColorOnFocusForDisplayEditText();
 
         addChangeBackgroundColorOnFocusForPasswordEditText(mBinding.edtPassword, mBinding.linearLayout);
-
         addChangeBackgroundColorOnFocusForPasswordEditText(mBinding.edtConfirmPassword, mBinding.linearLayoutConfirm);
 
+        addActionForEditTextDateOfBirth();
         addSwitchToLoginEvent();
         addActionForBtnRegister();
     }
@@ -69,21 +95,86 @@ public class RegisterFragment extends Fragment {
     }
 
     private void register() {
-        String phoneNo = mBinding.edtUsername.getText().toString().trim();
+        String phoneNo = mBinding.edtPhoneNumber.getText().toString().trim();
         String displayName = mBinding.edtDisplayName.getText().toString().trim();
         String pwd = mBinding.edtPassword.getText().toString().trim();
         String confirmPwd = mBinding.edtConfirmPassword.getText().toString().trim();
 
         if (validateUserRegisterAccount(phoneNo, displayName, pwd, confirmPwd)) {
-            openConfirmOTPDialog(Gravity.CENTER);
+            saveUserInfo();
         }
     }
 
+    private void saveUserInfo() {
+        Executors.newSingleThreadExecutor().execute(() -> {
+
+            mMainActivity.runOnUiThread(() -> {
+                loadingDialog.showDialog();
+            });
+
+            ApiService.apiService.signUp(user).enqueue(new Callback<>() {
+                @Override
+                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+
+                    if (response.isSuccessful() && response.code() == 200) {
+
+                        LocalDataManager.setUserLoginState(true);
+                        LocalDataManager.setCurrentUserInfo(ObjectConvertUtil.getResponseUser(response));
+
+                        mMainActivity.runOnUiThread(() -> {
+                            loadingDialog.dismissDialog();
+
+                            if (dialog == null)
+                                initDialog();
+
+                            dialog.setNewPhoneNumber(user.getPhoneNumber());
+                            dialog.showDialog();
+                        });
+
+                    } else if (response.code() == 400) {
+                        try {
+                            JsonObject obj = new Gson().fromJson(response.errorBody().string(), JsonObject.class);
+
+                            String errorMsg = obj.get("message").getAsString();
+
+                            mMainActivity.runOnUiThread(() -> {
+                                loadingDialog.dismissDialog();
+                                mBinding.edtPhoneNumber.setError(errorMsg);
+                                mBinding.edtPhoneNumber.requestFocus();
+                            });
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                    Log.e("API_ERR", t.getLocalizedMessage());
+                }
+            });
+        });
+    }
+
+    /**
+     * @author Huy
+     */
     private boolean validateUserRegisterAccount(String phoneNo, String displayName, String pwd, String confirmPwd) {
-        //Todo: verify user info => Huy
         if (TextUtils.isEmpty(phoneNo)) {
-            mBinding.edtUsername.setError(getString(R.string.empty_phone_no_err));
-            mBinding.edtUsername.requestFocus();
+            mBinding.edtPhoneNumber.setError(getString(R.string.empty_phone_no_err));
+            mBinding.edtPhoneNumber.requestFocus();
+            return false;
+        }
+
+        Pattern patternPhoneNumber = Pattern.compile("^(032|033|034|035|036|037|038|039|086|096|097|098|" +
+                "070|079|077|076|078|089|090|093|" +
+                "083|084|085|081|082|088|091|094|" +
+                "056|058|092|" +
+                "059|099)[0-9]{7}$");
+
+        if (!patternPhoneNumber.matcher(phoneNo).matches()) {
+            mBinding.edtPhoneNumber.setError(getString(R.string.invalid_phone_format_err));
+            mBinding.edtPhoneNumber.requestFocus();
             return false;
         }
 
@@ -93,8 +184,35 @@ public class RegisterFragment extends Fragment {
             return false;
         }
 
+        if (TextUtils.isEmpty(mBinding.edtDob.getText().toString())) {
+            new AlertDialog.Builder(mMainActivity)
+                    .setIcon(R.drawable.ic_alert)
+                    .setMessage(getString(R.string.empty_dob_err))
+                    .setPositiveButton(getString(R.string.confirm), null)
+                    .show();
+
+            return false;
+        }
+
+        if (calculateAge(mBinding.edtDob.getText().toString()) < 15) {
+            new AlertDialog.Builder(mMainActivity)
+                    .setIcon(R.drawable.ic_alert)
+                    .setMessage(getString(R.string.err_age))
+                    .setPositiveButton(getString(R.string.confirm), null)
+                    .show();
+
+            return false;
+        }
+
         if (TextUtils.isEmpty(pwd)) {
             mBinding.edtPassword.setError(getString(R.string.empty_pwd_err));
+            mBinding.edtPassword.requestFocus();
+            return false;
+        }
+
+        Pattern patternPwd = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?])[A-Za-z\\d@$!%*?]{8,}$");
+        if (!patternPwd.matcher(pwd).matches()) {
+            mBinding.edtPassword.setError(getString(R.string.invalid_pwd_format_err));
             mBinding.edtPassword.requestFocus();
             return false;
         }
@@ -114,44 +232,63 @@ public class RegisterFragment extends Fragment {
         user.setPhoneNumber(phoneNo);
         user.setPassword(pwd);
         user.setUsername(displayName);
+        user.setDob(getDobFormat());
 
         return true;
     }
 
-    private void openConfirmOTPDialog(int gravity) {
-        OtpDialog otpDialog = new OtpDialog(mMainActivity, Gravity.CENTER);
-
-        otpDialog.addActionForBtnCancel(view -> {
-            otpDialog.dismissDialog();
-        });
-
-        otpDialog.addActionForBtnConfirm(view -> {
-            if (verifyOTP(otpDialog.getEdtOtp(), "123")) {
-                otpDialog.dismissDialog();
-                mMainActivity.setFragment(RegisterUserInfoFragment.newInstance(user));
-            }
-        });
-
-        otpDialog.addActionForBtnReSentOtp(view -> {
-            Toast.makeText(mMainActivity, "OTP not receive!", Toast.LENGTH_SHORT).show();
-        });
-
-        otpDialog.showDialog();
-
-        NotificationUtil.otpNotification(
-                mMainActivity, getString(R.string.system_noty_channel_id),
-                getString(R.string.otp), "123"
-        );
+    private String getDobFormat() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
+        return dateFormat.format(mCalendar.getTime());
     }
 
-    private void addChangeBackgroundColorOnFocusForUserNameEditText() {
-        mBinding.edtUsername.setOnFocusChangeListener((view, isFocus) -> {
+    private static int calculateAge(String dobStr) {
+
+        String[] dates = dobStr.trim().split("/");
+
+        Date dob = new Date(
+                Integer.parseInt(dates[2]),
+                Integer.parseInt(dates[1]),
+                Integer.parseInt(dates[0])
+        );
+
+        LocalDate today = LocalDate.now();
+        Calendar birthDate = Calendar.getInstance();
+        birthDate.setTime(dob);
+
+        int age = today.getYear() - birthDate.get(Calendar.YEAR) + 1900;
+        if (((birthDate.get(Calendar.MONTH)) > today.getMonthValue())) {
+            age--;
+        } else if ((birthDate.get(Calendar.MONTH) == today.getMonthValue()) &&
+                (birthDate.get(Calendar.DAY_OF_MONTH) > today.getDayOfMonth())) {
+            age--;
+        }
+
+        return age;
+    }
+
+    private void initDialog() {
+        dialog = new ConfirmSendOTPDialog(mMainActivity, Gravity.CENTER, getString(R.string.otp_change_phone_no));
+
+        dialog.addActionForBtnChange(view_change -> {
+            dialog.dismissDialog();
+        });
+
+        dialog.addActionForBtnConfirm(view_confirm -> {
+            Log.e("user", user.toString());
+            dialog.dismissDialog();
+            mMainActivity.setFragment(ConfirmOTPFragment.newInstance(ConfirmOTPFragment.REGISTER_ARGS, user));
+        });
+    }
+
+    private void addChangeBackgroundColorOnFocusForPhoneNumberEditText() {
+        mBinding.edtPhoneNumber.setOnFocusChangeListener((view, isFocus) -> {
             if (isFocus)
-                mBinding.edtUsername.setBackground(
+                mBinding.edtPhoneNumber.setBackground(
                         ContextCompat.getDrawable(mMainActivity.getApplicationContext(),
                                 R.drawable.edit_text_outline_focus));
             else
-                mBinding.edtUsername.setBackground(
+                mBinding.edtPhoneNumber.setBackground(
                         ContextCompat.getDrawable(mMainActivity.getApplicationContext(),
                                 R.drawable.edit_text_outline));
         });
@@ -213,20 +350,33 @@ public class RegisterFragment extends Fragment {
         });
     }
 
-    private boolean verifyOTP(EditText editText, String otpNumber) {
 
-        if (TextUtils.isEmpty(editText.getText().toString().trim())) {
-            editText.setError(getString(R.string.empty_otp_err));
-            editText.requestFocus();
-            return false;
-        }
+    private void addActionForEditTextDateOfBirth() {
+        mBinding.edtDob.setOnClickListener(view -> {
 
-        if (!editText.getText().toString().trim().equals(otpNumber)) {
-            editText.setError(getString(R.string.wrong_otp_err));
-            editText.requestFocus();
-            return false;
-        }
+            Locale locale = new Locale("vi");
+            Locale.setDefault(locale);
 
-        return true;
+            DatePickerDialog datePickerDialog = new DatePickerDialog(mMainActivity,
+                    android.R.style.Theme_Holo_Light_Dialog_MinWidth,
+                    (datePicker, year, month, dayOfMonth) -> {
+                        mCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        mCalendar.set(Calendar.MONTH, month);
+                        mCalendar.set(Calendar.YEAR, year);
+                        updateDateOfBirthEditText();
+                    }, mCalendar.get(Calendar.YEAR), mCalendar.get(Calendar.MONTH),
+                    mCalendar.get(Calendar.DAY_OF_MONTH)
+            );
+
+            datePickerDialog.setTitle(getString(R.string.dob));
+            datePickerDialog.setIcon(R.drawable.ic_calendar);
+            datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            datePickerDialog.show();
+        });
+    }
+
+    private void updateDateOfBirthEditText() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
+        mBinding.edtDob.setText(dateFormat.format(mCalendar.getTime()));
     }
 }

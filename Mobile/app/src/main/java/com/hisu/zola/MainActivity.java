@@ -10,6 +10,9 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.github.ybq.android.spinkit.sprite.Sprite;
+import com.github.ybq.android.spinkit.style.ThreeBounce;
+import com.github.ybq.android.spinkit.style.WanderingCubes;
 import com.google.android.material.badge.BadgeDrawable;
 import com.hisu.zola.databinding.ActivityMainBinding;
 import com.hisu.zola.fragments.SplashScreenFragment;
@@ -39,17 +42,29 @@ public class MainActivity extends AppCompatActivity {
 
         mainBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mainBinding.getRoot());
+
+        initProgressBar();
+
 //        Database db = Database.getDatabase(this);
 //        Database.dbExecutor.execute(() -> {
 //            db.conversationDAO().insert(new ConversationHolder("1", false, R.drawable.cat, "Chí Hiếu","Iem ăn cơm chưa?!", 1));
 //            db.conversationDAO().insert(new ConversationHolder("2", false, R.drawable.ganyu, "Văn Thành","Tối đi net k bro??", 1));
 //            db.conversationDAO().insert(new ConversationHolder("3", false, R.drawable.pepe, "Linh","Sao ko rep em :<", 1));
 //        });
-        initSocket();
         addSelectedActionForNavItem();
         messageBadge();
 
         setFragment(new SplashScreenFragment());
+    }
+
+    private void initProgressBar() {
+        Sprite cubes = new WanderingCubes();
+        cubes.setColor(ContextCompat.getColor(this, R.color.primary_color));
+        mainBinding.progressBarLoading.setIndeterminateDrawable(cubes);
+    }
+
+    public void setProgressbarVisibility(int visibility) {
+        mainBinding.progressBarLoading.setVisibility(visibility);
     }
 
     public void setBottomNavVisibility(int hide) {
@@ -67,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
     private void addSelectedActionForNavItem() {
         mainBinding.navigationMenu.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
+            setProgressbarVisibility(View.VISIBLE);
 
             if (itemId == R.id.action_message)
                 addFragmentToBackStack(new ConversationListFragment());
@@ -88,10 +104,6 @@ public class MainActivity extends AppCompatActivity {
                 .replace(getViewContainerID(), fragment)
                 .addToBackStack(null)
                 .commit();
-    }
-
-    private void initSocket() {
-        SocketIOHandler.getInstance().establishSocketConnection();
     }
 
     public void setFragment(Fragment fragment) {
@@ -142,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        SocketIOHandler.close();
     }
 
     @Override
