@@ -40,7 +40,6 @@ public class ConversationDetailFragment extends Fragment {
 
     private void addActionForBackBtn() {
         mBinding.iBtnBack.setOnClickListener(view -> {
-            mainActivity.setBottomNavVisibility(View.VISIBLE);
             mainActivity.getSupportFragmentManager().popBackStackImmediate();
         });
     }

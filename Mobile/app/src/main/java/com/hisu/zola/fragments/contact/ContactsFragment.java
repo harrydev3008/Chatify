@@ -19,6 +19,7 @@ import com.hisu.zola.adapters.ContactViewPagerAdapter;
 import com.hisu.zola.databinding.FragmentContactsBinding;
 import com.hisu.zola.fragments.AddFriendFragment;
 import com.hisu.zola.fragments.conversation.AddNewGroupFragment;
+import com.hisu.zola.util.EditTextUtil;
 
 public class ContactsFragment extends Fragment {
 
@@ -38,6 +39,9 @@ public class ContactsFragment extends Fragment {
         tapToCloseApp();
         initTabLabLayout();
         addMoreFriendEvent();
+
+        EditTextUtil.toggleShowClearIconOnEditText(mMainActivity, mBinding.edtSearch);
+        EditTextUtil.clearTextOnSearchEditText(mBinding.edtSearch);
 
         mMainActivity.setProgressbarVisibility(View.GONE);
 

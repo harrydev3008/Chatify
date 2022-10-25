@@ -8,9 +8,10 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="primary_color">#008cfd</color>
+    <color name="primary_color">#0978f5</color>
     <color name="secondaryColor">#AB2153</color>
     <color name="lightBlue">#e9f4ff</color>
+    <color name="darkerBlue">#0978f5</color>
     <color name="danger">#d90429</color>
     <color name="darkBlue">#03045e</color>
     <color name="darkBlack">#000000</color>

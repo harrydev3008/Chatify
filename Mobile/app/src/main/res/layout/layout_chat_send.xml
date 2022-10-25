@@ -11,12 +11,13 @@
     <TextView
         android:id="@+id/tv_msg_send"
         android:background="@drawable/message_send"
-        android:padding="12dp"
+        android:paddingVertical="6dp"
+        android:paddingHorizontal="12dp"
         android:maxWidth="360dp"
         android:text="@string/slogan"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/chat_text_color"
+        android:textColor="@color/white"
         android:fontFamily="@font/roboto"
         android:textSize="22sp"/>
 
@@ -31,6 +32,7 @@
             android:layout_width="wrap_content"
             android:adjustViewBounds="true"
             android:maxHeight="200dp"
+            android:visibility="gone"
             android:src="@drawable/bg_profile"
             android:maxWidth="350dp"
             android:scaleType="centerCrop"

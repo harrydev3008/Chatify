@@ -29,6 +29,7 @@ import com.hisu.zola.databinding.FragmentEditProfileBinding;
 import com.hisu.zola.entity.User;
 import com.hisu.zola.util.local.LocalDataManager;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Calendar;
@@ -80,11 +81,26 @@ public class EditProfileFragment extends Fragment {
         Glide.with(mainActivity).load(user.getAvatarURL()).into(mBinding.imvAvatar);
 
         mBinding.edtDisplayName.setText(user.getUsername());
+        //Todo: change this with user.getDob()
+
+        try {
+            Date dateObj = parseDate("13/02/2001");
+            if(dateObj != null) {
+                mCalendar.setTime(dateObj);
+                updateDateOfBirthEditText();
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
         if (user.isVerifyOTP())
             mBinding.rBtnGenderM.setChecked(true);
         else
             mBinding.rBtnGenderF.setChecked(true);
+    }
+
+    private Date parseDate(String date) throws ParseException {
+        return new SimpleDateFormat("dd/MM/yyyy", Locale.US).parse(date);
     }
 
     private void addActionForBtnBackToPrevPage() {

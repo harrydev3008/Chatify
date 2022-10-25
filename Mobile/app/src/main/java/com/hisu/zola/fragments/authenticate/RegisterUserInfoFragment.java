@@ -1,12 +1,8 @@
 package com.hisu.zola.fragments.authenticate;
 
 import android.app.Activity;
-import android.app.DatePickerDialog;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,7 +10,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -23,29 +18,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentRegisterUserInfoBinding;
 import com.hisu.zola.entity.User;
-import com.hisu.zola.fragments.conversation.ConversationListFragment;
 import com.hisu.zola.fragments.greet_new_user.WelcomeOnBoardingFragment;
-import com.hisu.zola.util.ApiService;
-import com.hisu.zola.util.ImageConvertUtil;
-import com.hisu.zola.util.ObjectConvertUtil;
+import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
 import java.util.concurrent.Executors;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class RegisterUserInfoFragment extends Fragment {
 

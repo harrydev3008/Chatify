@@ -1,9 +1,13 @@
 package com.hisu.zola.fragments.authenticate;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.method.PasswordTransformationMethod;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -17,6 +21,7 @@ import androidx.fragment.app.Fragment;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentResetPasswordBinding;
+import com.hisu.zola.util.EditTextUtil;
 
 import java.util.regex.Pattern;
 
@@ -33,25 +38,25 @@ public class ResetPasswordFragment extends Fragment {
 
         mBinding = FragmentResetPasswordBinding.inflate(inflater, container, false);
 
-        addChangeBackgroundColorOnFocusForPasswordEditText(
-                mBinding.edtNewPwd,
-                mBinding.linearLayout
-        );
+        addChangeBackgroundColorOnFocusForPasswordEditText(mBinding.edtNewPwd, mBinding.linearLayout);
 
-        addChangeBackgroundColorOnFocusForPasswordEditText(
-                mBinding.edtConfirmNewPwd,
-                mBinding.linearLayout2
-        );
+        addChangeBackgroundColorOnFocusForPasswordEditText(mBinding.edtConfirmNewPwd, mBinding.linearLayout2);
 
-        addToggleShowPasswordEvent(
-                mBinding.tvTogglePassword,
-                mBinding.edtNewPwd
-        );
+        addChangeBackgroundColorOnFocusForPasswordEditText(mBinding.edtOldPwd, mBinding.linearLayout3);
 
-        addToggleShowPasswordEvent(
-                mBinding.tvToggleConfirmPassword,
-                mBinding.edtConfirmNewPwd
-        );
+        addToggleShowPasswordEvent(mBinding.tvTogglePassword, mBinding.edtNewPwd);
+
+        addToggleShowPasswordEvent(mBinding.tvToggleConfirmPassword, mBinding.edtConfirmNewPwd);
+
+        addToggleShowPasswordEvent(mBinding.tvToggleOldPassword, mBinding.edtConfirmNewPwd);
+
+        EditTextUtil.toggleShowClearIconOnEditText(mainActivity, mBinding.edtOldPwd);
+        EditTextUtil.toggleShowClearIconOnEditText(mainActivity, mBinding.edtNewPwd);
+        EditTextUtil.toggleShowClearIconOnEditText(mainActivity, mBinding.edtConfirmNewPwd);
+
+        EditTextUtil.clearTextOnSearchEditText(mBinding.edtOldPwd);
+        EditTextUtil.clearTextOnSearchEditText(mBinding.edtNewPwd);
+        EditTextUtil.clearTextOnSearchEditText(mBinding.edtConfirmNewPwd);
 
         addActionForBtnBack();
         addActionForBtnSaveChangePwd();

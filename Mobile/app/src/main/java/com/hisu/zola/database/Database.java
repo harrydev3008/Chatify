@@ -17,9 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @androidx.room.Database(entities = {
-        ConversationHolder.class,
-        Message.class,
-        Conversation.class
+        ConversationHolder.class
 }, version = 1, exportSchema = false)
 public abstract class Database extends RoomDatabase {
 

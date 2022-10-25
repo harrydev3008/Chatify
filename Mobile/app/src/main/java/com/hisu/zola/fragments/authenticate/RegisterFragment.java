@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -28,9 +27,9 @@ import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentRegisterBinding;
 import com.hisu.zola.entity.User;
 import com.hisu.zola.fragments.ConfirmOTPFragment;
-import com.hisu.zola.fragments.greet_new_user.WelcomeOnBoardingFragment;
 import com.hisu.zola.util.ApiService;
-import com.hisu.zola.util.ObjectConvertUtil;
+import com.hisu.zola.util.EditTextUtil;
+import com.hisu.zola.util.converter.ObjectConvertUtil;
 import com.hisu.zola.util.dialog.ConfirmSendOTPDialog;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
@@ -86,6 +85,16 @@ public class RegisterFragment extends Fragment {
         addActionForEditTextDateOfBirth();
         addSwitchToLoginEvent();
         addActionForBtnRegister();
+
+        EditTextUtil.toggleShowClearIconOnEditText(mMainActivity, mBinding.edtPhoneNumber);
+        EditTextUtil.toggleShowClearIconOnEditText(mMainActivity, mBinding.edtDisplayName);
+        EditTextUtil.toggleShowClearIconOnEditText(mMainActivity, mBinding.edtPassword);
+        EditTextUtil.toggleShowClearIconOnEditText(mMainActivity, mBinding.edtConfirmPassword);
+
+        EditTextUtil.clearTextOnSearchEditText(mBinding.edtPhoneNumber);
+        EditTextUtil.clearTextOnSearchEditText(mBinding.edtDisplayName);
+        EditTextUtil.clearTextOnSearchEditText(mBinding.edtPassword);
+        EditTextUtil.clearTextOnSearchEditText(mBinding.edtConfirmPassword);
     }
 
     private void addActionForBtnRegister() {

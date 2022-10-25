@@ -16,8 +16,9 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/iv_user_pfp"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_gravity="bottom"
             android:src="@mipmap/app_launcher_icon"
             app:civ_border_width="1dp"
             app:civ_border_color="@color/gray_e5"/>
@@ -35,7 +36,8 @@
                 android:background="@drawable/message_receive"
                 android:fontFamily="@font/roboto"
                 android:maxWidth="360dp"
-                android:padding="12dp"
+                android:paddingVertical="6dp"
+                android:paddingHorizontal="12dp"
                 android:text="@string/slogan"
                 android:textColor="@color/chat_text_color"
                 android:textSize="22sp" />
@@ -47,10 +49,11 @@
                 app:cardCornerRadius="10dp">
                 <ImageView
                     android:id="@+id/img_msg_receive"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
                     android:adjustViewBounds="true"
                     android:maxHeight="200dp"
+                    android:visibility="gone"
                     android:src="@drawable/bg_profile"
                     android:maxWidth="320dp"
                     android:scaleType="centerCrop"

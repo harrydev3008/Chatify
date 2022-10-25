@@ -112,9 +112,8 @@ public class ContactFriendFragment extends Fragment {
     }
 
     private void loadConversationList() {
-        String token = "Bearer " + LocalDataManager.getUserToken();
 
-        ApiService.apiService.getAllFriends(token).enqueue(new Callback<List<User>>() {
+        ApiService.apiService.getAllFriends().enqueue(new Callback<List<User>>() {
             @Override
             public void onResponse(Call<List<User>> call, Response<List<User>> response) {
                 if(response.isSuccessful() && response.code() == 200) {

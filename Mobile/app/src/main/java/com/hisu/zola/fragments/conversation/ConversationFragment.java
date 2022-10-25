@@ -13,6 +13,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,6 +21,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.ThreeBounce;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.MessageAdapter;
@@ -30,11 +34,13 @@ import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.RealPathUtil;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
-import com.vanniktech.emoji.EmojiPopup;
 
 import java.io.File;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import gun0912.tedimagepicker.builder.TedImagePicker;
 import io.socket.client.Socket;
@@ -49,23 +55,36 @@ import retrofit2.Response;
 public class ConversationFragment extends Fragment {
 
     public static final String CONVERSATION_ID_ARGS = "CONVERSATION_ID";
+    public static final String CONVERSATION_NAME_ARGS = "CONVERSATION_NAME";
 
     private FragmentConversationBinding mBinding;
     private MainActivity mMainActivity;
     private List<Message> messages;
     private MessageAdapter messageAdapter;
     private Socket mSocket;
-    private EmojiPopup emojiPopup;
+    private String conversationID;
+    private String conversationName;
     private boolean isToggleEmojiButton = false;
 
-    public static ConversationFragment newInstance(String conversationID) {
+    public static ConversationFragment newInstance(String conversationID, String conversationName) {
         Bundle args = new Bundle();
         args.putString(CONVERSATION_ID_ARGS, conversationID);
+        args.putString(CONVERSATION_NAME_ARGS, conversationName);
 
         ConversationFragment fragment = new ConversationFragment();
         fragment.setArguments(args);
 
         return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (getArguments() != null) {
+            conversationID = getArguments().getString(CONVERSATION_ID_ARGS);
+            conversationName = getArguments().getString(CONVERSATION_NAME_ARGS);
+        }
     }
 
     @Override
@@ -85,7 +104,7 @@ public class ConversationFragment extends Fragment {
         initEmojiKeyboard();
         initProgressBar();
 
-        getConversationInfo();
+        setConversationInfo(conversationName, getString(R.string.user_active));
         addActionForBackBtn();
         addActionForAudioCallBtn();
         addActionForVideoCallBtn();
@@ -96,21 +115,18 @@ public class ConversationFragment extends Fragment {
 
         mBinding.btnSendImg.setOnClickListener(view -> openBottomImagePicker());
 
-        String conversationID = getArguments() != null ?
-                getArguments().getString(CONVERSATION_ID_ARGS) : "";
-
         loadConversation(conversationID);
 
         return mBinding.getRoot();
     }
 
     private void initEmojiKeyboard() {
-        emojiPopup = EmojiPopup.Builder.fromRootView(mBinding.edtChat.getRootView()).build(mBinding.edtChat);
+//        emojiPopup = EmojiPopup.Builder.fromRootView(mBinding.edtChat.getRootView()).build(mBinding.edtChat);
         mBinding.btnEmoji.setOnClickListener(view -> {
             isToggleEmojiButton = !isToggleEmojiButton;
 
             toggleEmojiButtonIcon();
-            emojiPopup.toggle();
+//            emojiPopup.toggle();
         });
     }
 
@@ -174,10 +190,9 @@ public class ConversationFragment extends Fragment {
         );
     }
 
-    private void getConversationInfo() {
-        User currentUser = LocalDataManager.getCurrentUserInfo();
-        mBinding.tvUsername.setText(currentUser.getUsername());
-        mBinding.tvLastActive.setText(getString(R.string.user_active));
+    private void setConversationInfo(String conversationName, String conversationStatus) {
+        mBinding.tvUsername.setText(conversationName);
+        mBinding.tvLastActive.setText(conversationStatus);
     }
 
     private void addActionForBackBtn() {
@@ -221,7 +236,7 @@ public class ConversationFragment extends Fragment {
     }
 
     private void sendMessage(Message message) {
-        if(!mSocket.connected()) {
+        if (!mSocket.connected()) {
             mSocket.connect();
         }
 
@@ -274,8 +289,37 @@ public class ConversationFragment extends Fragment {
 
     private void loadConversation(String conversationID) {
 
-        messageAdapter.setMessages(messages);
-        mBinding.rvConversation.setAdapter(messageAdapter);
+        Executors.newSingleThreadExecutor().execute(() -> {
+
+            JsonObject object = new JsonObject();
+            object.addProperty("conversation", conversationID);
+
+            RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+
+            ApiService.apiService.getConversationMessages(body).enqueue(new Callback<Object>() {
+                @Override
+                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                    Gson gson = new Gson();
+
+                    String json = gson.toJson(response.body());
+
+                    JsonObject obj = gson.fromJson(json, JsonObject.class);
+                    JsonArray array = obj.getAsJsonArray("data");
+
+                    Message[] listArr = new Gson().fromJson(array, Message[].class);
+
+                    messages.addAll(Arrays.asList(listArr));
+                    messageAdapter.setMessages(messages);
+                    mBinding.rvConversation.setAdapter(messageAdapter);
+                    smoothScrollToLatestMsg();
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                    Log.e("API_ERR", t.getLocalizedMessage());
+                }
+            });
+        });
     }
 
     private void smoothScrollToLatestMsg() {

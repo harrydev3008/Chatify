@@ -1,4 +1,4 @@
-package com.hisu.zola.util;
+package com.hisu.zola.util.converter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -23,7 +23,7 @@ import java.util.Random;
 
 public class ImageConvertUtil {
 
-    private static int[] backgroundColors = {
+    private static final int[] backgroundColors = {
             R.color.primary_color,
             R.color.secondaryColor,
             R.color.danger,
