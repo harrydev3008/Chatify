@@ -1,0 +1,21 @@
+package com.hisu.zola.fragments.profile;
+
+import android.os.Bundle;
+
+import androidx.fragment.app.Fragment;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import com.hisu.zola.R;
+
+public class ChangeNewPhoneNumberFragment extends Fragment {
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_change_new_phone_number, container, false);
+    }
+}

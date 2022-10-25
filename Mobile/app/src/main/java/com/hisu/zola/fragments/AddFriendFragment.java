@@ -1,25 +1,38 @@
 package com.hisu.zola.fragments;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+
+import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentAddFriendBinding;
+import com.hisu.zola.entity.User;
 import com.hisu.zola.fragments.contact.FriendFromContactFragment;
 import com.hisu.zola.fragments.contact.FriendRequestFragment;
+import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.dialog.AddFriendDialog;
 
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
+
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class AddFriendFragment extends Fragment {
 
@@ -107,7 +120,41 @@ public class AddFriendFragment extends Fragment {
     private void addActionForBtnFind() {
         mBinding.btnFind.setOnClickListener(view -> {
             if (verifyPhoneNumber(mBinding.edtPhoneNumber.getText().toString())) {
-                Toast.makeText(mainActivity, "find", Toast.LENGTH_SHORT).show();
+                Executors.newSingleThreadExecutor().execute(() -> {
+
+                    JsonObject object = new JsonObject();
+                    object.addProperty("phoneNumber", mBinding.edtPhoneNumber.getText().toString());
+                    RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+
+                    ApiService.apiService.findFriendByPhoneNumber(body).enqueue(new Callback<User>() {
+                        @Override
+                        public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                            if (response.isSuccessful() && response.code() == 200) {
+                                User foundUser = response.body();
+
+                                if (foundUser != null) {
+                                    mainActivity.runOnUiThread(() -> {
+                                        AddFriendDialog dialog = new AddFriendDialog(mainActivity, Gravity.CENTER, foundUser);
+                                        dialog.showDialog();
+                                    });
+                                } else {
+                                    mainActivity.runOnUiThread(() -> {
+                                        new AlertDialog.Builder(mainActivity)
+                                                .setIcon(R.drawable.ic_alert)
+                                                .setMessage(getString(R.string.user_not_found))
+                                                .setPositiveButton(getString(R.string.confirm), null)
+                                                .show();
+                                    });
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                            Log.e("API_ERR", t.getLocalizedMessage());
+                        }
+                    });
+                });
             }
         });
     }

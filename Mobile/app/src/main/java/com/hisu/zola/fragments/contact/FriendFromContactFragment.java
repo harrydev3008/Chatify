@@ -1,22 +1,11 @@
 package com.hisu.zola.fragments.contact;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -25,16 +14,14 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.hisu.zola.MainActivity;
-import com.hisu.zola.R;
 import com.hisu.zola.adapters.FriendFromContactAdapter;
 import com.hisu.zola.databinding.FragmentFriendFromContactBinding;
 import com.hisu.zola.entity.ContactUser;
-import com.hisu.zola.util.ImageConvertUtil;
+import com.hisu.zola.util.converter.ImageConvertUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import jagerfield.mobilecontactslibrary.Contact.Contact;
 import jagerfield.mobilecontactslibrary.ImportContactsAsync;
 
 public class FriendFromContactFragment extends Fragment {

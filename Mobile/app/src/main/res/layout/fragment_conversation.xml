@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:background="@color/primary_color"
+        android:background="@color/darkerBlue"
         android:elevation="4dp"
         android:paddingHorizontal="10dp">
 
@@ -86,7 +86,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="10dp"
-        android:background="@color/chat_bg"
+        android:background="@color/white"
         android:clipToPadding="false"
         android:paddingHorizontal="6dp"
         android:paddingVertical="?actionBarSize"
@@ -97,7 +97,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
-        android:background="@color/chat_msg_box_bg"
+        android:background="@drawable/border_top_white_bg"
         android:elevation="4dp"
         android:orientation="horizontal"
         android:paddingHorizontal="8dp">

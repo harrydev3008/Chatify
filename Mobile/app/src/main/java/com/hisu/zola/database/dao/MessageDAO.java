@@ -11,9 +11,9 @@ import java.util.List;
 
 @Dao
 public interface MessageDAO {
-    @Insert
-    void insert(Message... messages);
+//    @Insert
+//    void insert(Message... messages);
 
-    @Query("select * from messages where conversation = :conversationID")
-    LiveData<List<Message>> getMessages(String conversationID);
+//    @Query("select * from messages where conversation = :conversationID")
+//    LiveData<List<Message>> getMessages(String conversationID);
 }

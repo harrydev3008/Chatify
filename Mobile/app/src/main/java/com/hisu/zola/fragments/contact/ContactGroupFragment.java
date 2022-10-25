@@ -45,7 +45,7 @@ public class ContactGroupFragment extends Fragment {
         viewModel = new ViewModelProvider(mainActivity).get(ConversationListViewModel.class);
 
         adapter = new ConversationAdapter(mainActivity);
-        adapter.setOnConversationItemSelectedListener(conversationID -> {
+        adapter.setOnConversationItemSelectedListener((conversationID, conversationName)  -> {
             mainActivity.setBottomNavVisibility(View.GONE);
             mainActivity.getSupportFragmentManager().beginTransaction()
                     .setCustomAnimations(
@@ -53,7 +53,7 @@ public class ContactGroupFragment extends Fragment {
                             R.anim.slide_out_right, R.anim.slide_out_right)
                     .add(
                             mainActivity.getViewContainerID(),
-                            ConversationFragment.newInstance(conversationID)
+                            ConversationFragment.newInstance(conversationID, conversationName)
                     )
                     .addToBackStack("Group_Conversation")
                     .commit();
@@ -69,10 +69,10 @@ public class ContactGroupFragment extends Fragment {
     }
 
     private void loadConversationList() {
-        viewModel.getData().observe(mainActivity, conversation -> {
-            adapter.setConversations(conversation);
-            mBinding.rvGroup.setAdapter(adapter);
-        });
+//        viewModel.getData().observe(mainActivity, conversation -> {
+//            adapter.setConversations(conversation);
+//            mBinding.rvGroup.setAdapter(adapter);
+//        });
     }
 
 

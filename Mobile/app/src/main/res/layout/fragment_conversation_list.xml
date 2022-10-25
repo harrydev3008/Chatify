@@ -54,7 +54,6 @@
         android:id="@+id/rv_conversation_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="2dp"
         android:paddingHorizontal="8dp"
         android:layout_marginBottom="?actionBarSize"
         android:clipToPadding="false"

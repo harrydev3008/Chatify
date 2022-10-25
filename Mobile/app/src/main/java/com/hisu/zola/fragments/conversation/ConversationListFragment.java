@@ -4,11 +4,13 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.PopupMenu;
@@ -22,14 +24,26 @@ import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.ConversationAdapter;
 import com.hisu.zola.databinding.FragmentConversationListBinding;
+import com.hisu.zola.entity.Conversation;
+import com.hisu.zola.entity.User;
 import com.hisu.zola.fragments.AddFriendFragment;
+import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.EditTextUtil;
+import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.view_model.ConversationListViewModel;
+
+import java.util.List;
+import java.util.concurrent.Executors;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ConversationListFragment extends Fragment {
 
     private FragmentConversationListBinding mBinding;
     private MainActivity mMainActivity;
-    private ConversationListViewModel viewModel;
+//    private ConversationListViewModel viewModel;
     private ConversationAdapter adapter;
     private PopupMenu popupMenu;
 
@@ -45,8 +59,8 @@ public class ConversationListFragment extends Fragment {
         initPopupMenu();
 
         tapToCloseApp();
-        toggleShowClearIconOnSearchEditText();
-        clearTextOnSearchEditText();
+        EditTextUtil.toggleShowClearIconOnEditText(mMainActivity, mBinding.edtSearch);
+        EditTextUtil.clearTextOnSearchEditText(mBinding.edtSearch);
         addMoreFriendEvent();
 
         mMainActivity.setProgressbarVisibility(View.GONE);
@@ -55,10 +69,10 @@ public class ConversationListFragment extends Fragment {
     }
 
     private void initConversationListRecyclerView() {
-        viewModel = new ViewModelProvider(mMainActivity).get(ConversationListViewModel.class);
+//        viewModel = new ViewModelProvider(mMainActivity).get(ConversationListViewModel.class);
 
         adapter = new ConversationAdapter(mMainActivity);
-        adapter.setOnConversationItemSelectedListener(conversationID -> {
+        adapter.setOnConversationItemSelectedListener((conversationID, conversationName) -> {
             mMainActivity.setBottomNavVisibility(View.GONE);
             mMainActivity.getSupportFragmentManager().beginTransaction()
                     .setCustomAnimations(
@@ -66,7 +80,7 @@ public class ConversationListFragment extends Fragment {
                             R.anim.slide_out_right, R.anim.slide_out_right)
                     .replace(
                             mMainActivity.getViewContainerID(),
-                            ConversationFragment.newInstance(conversationID)
+                            ConversationFragment.newInstance(conversationID, conversationName)
                     )
                     .addToBackStack("Single_Conversation")
                     .commit();
@@ -82,64 +96,31 @@ public class ConversationListFragment extends Fragment {
     }
 
     private void loadConversationList() {
-        viewModel.getData().observe(mMainActivity, conversation -> {
-            adapter.setConversations(conversation);
-            mBinding.rvConversationList.setAdapter(adapter);
+        Executors.newSingleThreadExecutor().execute(() -> {
+            ApiService.apiService.getConversations().enqueue(new Callback<>() {
+                @Override
+                public void onResponse(@NonNull Call<List<Conversation>> call, @NonNull Response<List<Conversation>> response) {
+
+                    if (response.isSuccessful() && response.code() == 200) {
+                        List<Conversation> conversations = response.body();
+                        if (conversations != null && conversations.size() != 0) {
+                            adapter.setConversations(conversations);
+                            mBinding.rvConversationList.setAdapter(adapter);
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<List<Conversation>> call, @NonNull Throwable t) {
+                    Log.e("API_ERR", t.getLocalizedMessage());
+                }
+            });
         });
     }
 
     private void tapToCloseApp() {
         mBinding.mBtnCloseSearch.setOnClickListener(view -> {
             mMainActivity.onBackPressed();
-        });
-    }
-
-    private void toggleShowClearIconOnSearchEditText() {
-        mBinding.edtSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() > 0)
-                    mBinding.edtSearch.setCompoundDrawablesWithIntrinsicBounds(
-                            null, null,
-                            ContextCompat.getDrawable(
-                                    mMainActivity, R.drawable.ic_close), null
-                    );
-                else
-                    mBinding.edtSearch.setCompoundDrawablesWithIntrinsicBounds(
-                            null, null, null, null
-                    );
-            }
-        });
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private void clearTextOnSearchEditText() {
-        mBinding.edtSearch.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (mBinding.edtSearch.getCompoundDrawables()[2] == null) return false;
-
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    if (event.getRawX() >= (mBinding.edtSearch.getRight() -
-                            mBinding.edtSearch.getCompoundDrawables()[2]
-                                    .getBounds().width())) {
-
-                        mBinding.edtSearch.setText("");
-
-                        return true;
-                    }
-                }
-
-                return false;
-            }
         });
     }
 

@@ -10,22 +10,19 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-@Entity(tableName = "conversations")
 public class Conversation {
 
-    @PrimaryKey
-    @NonNull
     private String _id;
-    @TypeConverters(UserListConverter.class)
-    private List<String> member;
-    private String createdBy;
+    @Ignore
+    private List<User> member;
+    private User createdBy;
     private String label;
 
     @Ignore
     public Conversation() {
     }
 
-    public Conversation(@NonNull String _id, List<String> member, String createdBy, String label) {
+    public Conversation(@NonNull String _id, List<User> member, User createdBy, String label) {
         this._id = _id;
         this.member = member;
         this.createdBy = createdBy;
@@ -40,19 +37,19 @@ public class Conversation {
         this._id = id;
     }
 
-    public List<String> getMember() {
+    public List<User> getMember() {
         return member;
     }
 
-    public void setMember(List<String> member) {
+    public void setMember(List<User> member) {
         this.member = member;
     }
 
-    public String getCreatedBy() {
+    public User getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(String createdBy) {
+    public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -62,5 +59,15 @@ public class Conversation {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    @Override
+    public String toString() {
+        return "Conversation{" +
+                "_id='" + _id + '\'' +
+                ", member=" + member +
+                ", createdBy=" + createdBy +
+                ", label='" + label + '\'' +
+                '}';
     }
 }

@@ -10,13 +10,11 @@ import com.google.gson.annotations.SerializedName;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-@Entity(tableName = "messages")
 public class Message {
-    @PrimaryKey
-    @NonNull
+
     private String _id;
     private String conversation;
-    private String sender;
+    private User sender;
     private String text;
     private String type;
     private String createdAt;
@@ -26,7 +24,7 @@ public class Message {
     public Message() {
     }
 
-    public Message(@NonNull String _id, String conversation, String sender, String text, String type, String createdAt, String updatedAt) {
+    public Message(@NonNull String _id, String conversation, User sender, String text, String type, String createdAt, String updatedAt) {
         this._id = _id;
         this.conversation = conversation;
         this.sender = sender;
@@ -52,11 +50,11 @@ public class Message {
         this.conversation = conversation;
     }
 
-    public String getSender() {
+    public User getSender() {
         return sender;
     }
 
-    public void setSender(String sender) {
+    public void setSender(User sender) {
         this.sender = sender;
     }
 
@@ -90,5 +88,18 @@ public class Message {
 
     public void setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "_id='" + _id + '\'' +
+                ", conversation='" + conversation + '\'' +
+                ", sender=" + sender +
+                ", text='" + text + '\'' +
+                ", type='" + type + '\'' +
+                ", createdAt='" + createdAt + '\'' +
+                ", updatedAt='" + updatedAt + '\'' +
+                '}';
     }
 }
