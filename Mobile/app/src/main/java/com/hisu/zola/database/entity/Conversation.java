@@ -1,4 +1,4 @@
-package com.hisu.zola.entity;
+package com.hisu.zola.database.entity;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
@@ -6,17 +6,26 @@ import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
-import com.google.gson.annotations.SerializedName;
+import com.hisu.zola.database.type_converter.ListUserConverter;
+import com.hisu.zola.database.type_converter.MessageConverter;
+import com.hisu.zola.database.type_converter.UserConverter;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Conversation {
+@Entity(tableName = "conversations")
+public class Conversation implements Serializable {
 
+    @PrimaryKey
+    @NonNull
     private String _id;
-    @Ignore
+    @TypeConverters(ListUserConverter.class)
     private List<User> member;
+    @TypeConverters(UserConverter.class)
     private User createdBy;
     private String label;
+    @TypeConverters(MessageConverter.class)
+    private Message lastMessage;
 
     @Ignore
     public Conversation() {
@@ -59,6 +68,14 @@ public class Conversation {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    public Message getLastMessage() {
+        return lastMessage;
+    }
+
+    public void setLastMessage(Message lastMessage) {
+        this.lastMessage = lastMessage;
     }
 
     @Override

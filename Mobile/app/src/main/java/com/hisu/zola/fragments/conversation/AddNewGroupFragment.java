@@ -5,20 +5,16 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.hisu.zola.MainActivity;
-import com.hisu.zola.R;
 import com.hisu.zola.adapters.AddGroupMemberAdapter;
 import com.hisu.zola.databinding.FragmentAddNewGroupBinding;
-import com.hisu.zola.entity.User;
-import com.hisu.zola.listeners.IOnItemCheckedChangListener;
+import com.hisu.zola.database.entity.User;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.ArrayList;

@@ -3,6 +3,7 @@ package com.hisu.zola.fragments.contact;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,8 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.adapters.FriendFromContactAdapter;
 import com.hisu.zola.databinding.FragmentFriendFromContactBinding;
-import com.hisu.zola.entity.ContactUser;
-import com.hisu.zola.util.converter.ImageConvertUtil;
+import com.hisu.zola.database.entity.ContactUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,24 +84,39 @@ public class FriendFromContactFragment extends Fragment {
         new ImportContactsAsync(mainActivity, contacts -> {
             contactUsers.clear();
 
-            contacts.forEach(contact -> {
-                ContactUser contactUser = new ContactUser(
-                        contact.getDisplaydName(),
-                        contact.getNumbers().get(0).elementValue(), ""
-                );
+//            String res = "";
 
-                if (contact.getPhotoUri() != null)
-                    contactUser.setAvatar(contact.getPhotoUri());
-                else
-                    contactUser.setImageBitmap(
-                            ImageConvertUtil.createImageFromText(mainActivity,
-                                    150, 150, contactUser.getName())
-                    );
 
-                contactUsers.add(contactUser);
-            });
+//            contacts.forEach(contact -> {
 
-            adapter.setContactUsers(contactUsers);
+//                if (contact.getNumbers() != null) {
+//                    if (contact.getNumbers().get(0) != null)
+//                        Log.e("test", contact.getDisplaydName() + " - " + contact.getNumbers().get(0));
+//                }
+
+
+//                res += contact.toString();
+
+//
+//
+//
+////                ContactUser contactUser = new ContactUser(
+////                        contact.getDisplaydName(),
+////                        contact.getNumbers().size()+"!", ""
+////                );
+////
+////                if (contact.getPhotoUri() != null)
+////                    contactUser.setAvatar(contact.getPhotoUri());
+////                else
+////                    contactUser.setImageBitmap(
+////                            ImageConvertUtil.createImageFromText(mainActivity,
+////                                    150, 150, contactUser.getName())
+////                    );
+//
+////                contactUsers.add(contactUser);
+//            });
+            Log.e("test", contacts.size() + "!");
+//            adapter.setContactUsers(contactUsers);
         }).execute();
     }
 }

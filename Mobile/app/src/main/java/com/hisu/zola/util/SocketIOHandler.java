@@ -4,7 +4,7 @@ import io.socket.client.IO;
 import io.socket.client.Socket;
 
 import com.hisu.zola.BuildConfig;
-import com.hisu.zola.entity.User;
+import com.hisu.zola.database.entity.User;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.net.URI;

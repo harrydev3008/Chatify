@@ -15,7 +15,7 @@ import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.StarterSliderAdapter;
 import com.hisu.zola.databinding.FragmentStartScreenBinding;
-import com.hisu.zola.entity.StarterSliderItem;
+import com.hisu.zola.model.StarterSliderItem;
 import com.hisu.zola.fragments.authenticate.LoginFragment;
 import com.hisu.zola.fragments.authenticate.RegisterFragment;
 

@@ -1,21 +1,19 @@
 package com.hisu.zola.view_model;
 
 import android.app.Application;
-import android.content.Context;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.ViewModel;
 
+import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.repository.ConversationRepository;
-import com.hisu.zola.entity.ConversationHolder;
+import com.hisu.zola.model.ConversationHolder;
 
 import java.util.List;
 
 public class ConversationListViewModel extends AndroidViewModel {
-    private ConversationRepository repository;
-    private LiveData<List<ConversationHolder>> data;
-
+    private final ConversationRepository repository;
+    private final LiveData<List<Conversation>> data;
 
     public ConversationListViewModel(Application application) {
         super(application);
@@ -23,11 +21,11 @@ public class ConversationListViewModel extends AndroidViewModel {
         data = repository.getData();
     }
 
-    public LiveData<List<ConversationHolder>> getData() {
+    public LiveData<List<Conversation>> getData() {
         return data;
     }
 
-    public void insert(ConversationHolder holder) {
-        repository.insert(holder);
+    public void insertOrUpdate(Conversation conversation) {
+        repository.insertOrUpdate(conversation);
     }
 }

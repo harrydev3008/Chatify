@@ -3,14 +3,13 @@ package com.hisu.zola.adapters;
 import android.content.Context;
 import android.net.Uri;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hisu.zola.databinding.LayoutFriendFromContactBinding;
-import com.hisu.zola.entity.ContactUser;
+import com.hisu.zola.database.entity.ContactUser;
 
 import java.util.List;
 

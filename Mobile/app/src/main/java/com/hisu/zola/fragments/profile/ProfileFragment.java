@@ -9,10 +9,11 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentProfileBinding;
-import com.hisu.zola.entity.User;
+import com.hisu.zola.database.entity.User;
 import com.hisu.zola.util.local.LocalDataManager;
 
 public class ProfileFragment extends Fragment {
@@ -39,7 +40,8 @@ public class ProfileFragment extends Fragment {
 
     private void loadUserInfo() {
         User user = LocalDataManager.getCurrentUserInfo();
-        Glide.with(mMainActivity).load(user.getAvatarURL()).into(mBinding.cimvUserAvatar);
+        Glide.with(mMainActivity).load(user.getAvatarURL())
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(mBinding.cimvUserAvatar);
         mBinding.tvGender.setText(user.isVerifyOTP() ? getString(R.string.gender_m) : getString(R.string.gender_f));
         mBinding.tvDob.setText(user.getId());
         mBinding.tvDisplayName.setText(user.getUsername());

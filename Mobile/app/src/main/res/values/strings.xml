@@ -138,6 +138,7 @@
     <string name="ob_feature_sync_desc">Kết nối và giải quyết công việc trên mọi thiết bị với dữ liệu luôn được đồng bộ!</string>
     <string name="user_birthday">Cảm ơn bạn đã đồng hành cùng Zola trong suốt thời gian qua!</string>
     <string name="user_birthday_greeting">Chúc bạn có một tuổi mới thật bùng nổ! Hạnh phúc bên gia đình và những người yêu thương!</string>
+    <string name="change_phone_no_limit">Bạn chỉ có thể đổi số điện thoại 1 lần mỗi tháng.</string>
 
     <!--Error Messages-->
     <string name="empty_phone_no_err">Bạn chưa điền số điện thoại!</string>

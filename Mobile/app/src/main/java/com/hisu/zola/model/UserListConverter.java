@@ -1,4 +1,4 @@
-package com.hisu.zola.entity;
+package com.hisu.zola.model;
 
 import androidx.room.TypeConverter;
 

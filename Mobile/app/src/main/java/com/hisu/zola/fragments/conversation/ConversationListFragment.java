@@ -1,21 +1,16 @@
 package com.hisu.zola.fragments.conversation;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.PopupMenu;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,14 +19,14 @@ import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.ConversationAdapter;
 import com.hisu.zola.databinding.FragmentConversationListBinding;
-import com.hisu.zola.entity.Conversation;
-import com.hisu.zola.entity.User;
+import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.fragments.AddFriendFragment;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.EditTextUtil;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.view_model.ConversationListViewModel;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 
@@ -43,7 +38,7 @@ public class ConversationListFragment extends Fragment {
 
     private FragmentConversationListBinding mBinding;
     private MainActivity mMainActivity;
-//    private ConversationListViewModel viewModel;
+    private ConversationListViewModel viewModel;
     private ConversationAdapter adapter;
     private PopupMenu popupMenu;
 
@@ -64,15 +59,32 @@ public class ConversationListFragment extends Fragment {
         addMoreFriendEvent();
 
         mMainActivity.setProgressbarVisibility(View.GONE);
+        loadConversationList();
 
         return mBinding.getRoot();
     }
 
     private void initConversationListRecyclerView() {
-//        viewModel = new ViewModelProvider(mMainActivity).get(ConversationListViewModel.class);
-
         adapter = new ConversationAdapter(mMainActivity);
-        adapter.setOnConversationItemSelectedListener((conversationID, conversationName) -> {
+
+        viewModel = new ViewModelProvider(mMainActivity).get(ConversationListViewModel.class);
+        viewModel.getData().observe(mMainActivity, new Observer<List<Conversation>>() {
+            @Override
+            public void onChanged(List<Conversation> conversations) {
+                List<Conversation> curConversations = new ArrayList<>();
+                conversations.forEach(conversation -> {
+                    conversation.getMember().forEach(member -> {
+                        if (member.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId()))
+                            curConversations.add(conversation);
+                    });
+                });
+
+                adapter.setConversations(curConversations);
+                mBinding.rvConversationList.setAdapter(adapter);
+            }
+        });
+
+        adapter.setOnConversationItemSelectedListener((conversation, conversationName) -> {
             mMainActivity.setBottomNavVisibility(View.GONE);
             mMainActivity.getSupportFragmentManager().beginTransaction()
                     .setCustomAnimations(
@@ -80,7 +92,7 @@ public class ConversationListFragment extends Fragment {
                             R.anim.slide_out_right, R.anim.slide_out_right)
                     .replace(
                             mMainActivity.getViewContainerID(),
-                            ConversationFragment.newInstance(conversationID, conversationName)
+                            ConversationFragment.newInstance(conversation, conversationName)
                     )
                     .addToBackStack("Single_Conversation")
                     .commit();
@@ -91,8 +103,6 @@ public class ConversationListFragment extends Fragment {
         );
 
         mBinding.rvConversationList.setLayoutManager(linearLayoutManager);
-
-        loadConversationList();
     }
 
     private void loadConversationList() {
@@ -104,8 +114,9 @@ public class ConversationListFragment extends Fragment {
                     if (response.isSuccessful() && response.code() == 200) {
                         List<Conversation> conversations = response.body();
                         if (conversations != null && conversations.size() != 0) {
-                            adapter.setConversations(conversations);
-                            mBinding.rvConversationList.setAdapter(adapter);
+                            conversations.forEach(conversation -> {
+                                viewModel.insertOrUpdate(conversation);
+                            });
                         }
                     }
                 }
