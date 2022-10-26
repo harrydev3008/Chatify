@@ -10,16 +10,15 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.LayoutConversationBinding;
-import com.hisu.zola.entity.Conversation;
-import com.hisu.zola.entity.ConversationHolder;
-import com.hisu.zola.entity.User;
+import com.hisu.zola.database.entity.Conversation;
+import com.hisu.zola.database.entity.User;
 import com.hisu.zola.listeners.IOnConversationItemSelectedListener;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapter.ConversationViewHolder> {
 
@@ -62,7 +61,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         User conUser = getConversationAvatar(conversation.getMember());
 
         if(conversation.getLabel() == null) {
-            Glide.with(mContext).load(conUser.getAvatarURL()).into(holder.binding.ivConversationCoverPhoto);
+            Glide.with(mContext).load(conUser.getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(holder.binding.ivConversationCoverPhoto);
             holder.binding.tvConversationName.setText(conUser.getUsername());
         }
         else {
@@ -86,9 +85,9 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
 
         holder.binding.conversationParent.setOnClickListener(view -> {
             if(conversation.getLabel() != null)
-                onConversationItemSelectedListener.openConversation(conversation.getId(),conversation.getLabel());
+                onConversationItemSelectedListener.openConversation(conversation, conversation.getLabel());
             else
-                onConversationItemSelectedListener.openConversation(conversation.getId(), conUser.getUsername());
+                onConversationItemSelectedListener.openConversation(conversation, conUser.getUsername());
         });
     }
 

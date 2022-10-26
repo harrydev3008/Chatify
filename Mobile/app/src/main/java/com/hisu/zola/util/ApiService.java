@@ -1,9 +1,8 @@
 package com.hisu.zola.util;
 
-import com.google.gson.JsonObject;
 import com.hisu.zola.BuildConfig;
-import com.hisu.zola.entity.Conversation;
-import com.hisu.zola.entity.User;
+import com.hisu.zola.database.entity.Conversation;
+import com.hisu.zola.database.entity.User;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.List;
@@ -64,6 +63,9 @@ public interface ApiService {
 
     @POST("api/user/requestAddFriend")
     Call<Object> sendFriendRequest(@Body RequestBody friendID);
+
+    @POST("api/message/sendMessage")
+    Call<Object> sendMessage(@Body RequestBody message);
 
     @Multipart
     @POST("/uploadFile")

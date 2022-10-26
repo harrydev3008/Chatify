@@ -6,7 +6,6 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,7 +15,7 @@ import androidx.fragment.app.Fragment;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentConfirmOtpBinding;
-import com.hisu.zola.entity.User;
+import com.hisu.zola.database.entity.User;
 import com.hisu.zola.fragments.authenticate.RegisterUserInfoFragment;
 
 public class ConfirmOTPFragment extends Fragment {
@@ -195,7 +194,9 @@ public class ConfirmOTPFragment extends Fragment {
         if (argument.equals(REGISTER_ARGS)) {
             mainActivity.setFragment(RegisterUserInfoFragment.newInstance(user));
         } else if (argument.equals(CHANGE_PHONE_NO_ARGS)) {
-            Toast.makeText(mainActivity, "change phoneno", Toast.LENGTH_SHORT).show();
+            mainActivity.getSupportFragmentManager().popBackStackImmediate();
+            mainActivity.getSupportFragmentManager().popBackStackImmediate();
+            mainActivity.getSupportFragmentManager().popBackStackImmediate();
         }
     }
 }

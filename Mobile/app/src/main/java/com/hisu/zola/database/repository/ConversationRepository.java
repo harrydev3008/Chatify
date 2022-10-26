@@ -1,33 +1,48 @@
 package com.hisu.zola.database.repository;
 
 import android.app.Application;
-import android.content.Context;
 
 import androidx.lifecycle.LiveData;
 
 import com.hisu.zola.database.Database;
 import com.hisu.zola.database.dao.ConversationDAO;
-import com.hisu.zola.entity.ConversationHolder;
+import com.hisu.zola.database.entity.Conversation;
 
 import java.util.List;
 
 public class ConversationRepository {
-    private ConversationDAO dao;
-    private LiveData<List<ConversationHolder>> data;
+    private final ConversationDAO conversationDAO;
+    private final LiveData<List<Conversation>> data;
 
     public ConversationRepository(Application application) {
         Database database = Database.getDatabase(application);
-        dao = database.conversationDAO();
-        data = dao.getConversation();
+        conversationDAO = database.conversationDAO();
+        data = conversationDAO.getConversation();
     }
 
-    public LiveData<List<ConversationHolder>> getData() {
+    public LiveData<List<Conversation>> getData() {
         return data;
     }
 
-    public void insert(ConversationHolder holder) {
+    public void insertOrUpdate(Conversation conversation) {
         Database.dbExecutor.execute(() -> {
-            dao.insert(holder);
+            if(conversationDAO.getConversationById(conversation.getId()) == null)
+                insert(conversation);
+            else
+                update(conversation.getId(), conversation.getLabel());
+
+        });
+    }
+
+    private void insert(Conversation conversation) {
+        Database.dbExecutor.execute(() -> {
+            conversationDAO.insert(conversation);
+        });
+    }
+
+    private void update(String id, String label) {
+        Database.dbExecutor.execute(() -> {
+            conversationDAO.updateConversationName(id, label);
         });
     }
 }

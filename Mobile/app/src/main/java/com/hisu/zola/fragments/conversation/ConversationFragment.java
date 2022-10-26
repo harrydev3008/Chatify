@@ -16,6 +16,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.github.ybq.android.spinkit.sprite.Sprite;
@@ -23,23 +25,21 @@ import com.github.ybq.android.spinkit.style.ThreeBounce;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.MessageAdapter;
 import com.hisu.zola.databinding.FragmentConversationBinding;
-import com.hisu.zola.entity.Message;
-import com.hisu.zola.entity.User;
+import com.hisu.zola.database.entity.Conversation;
+import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.RealPathUtil;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
+import com.hisu.zola.view_model.ConversationViewModel;
 
 import java.io.File;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 
 import gun0912.tedimagepicker.builder.TedImagePicker;
@@ -54,21 +54,21 @@ import retrofit2.Response;
 
 public class ConversationFragment extends Fragment {
 
-    public static final String CONVERSATION_ID_ARGS = "CONVERSATION_ID";
+    public static final String CONVERSATION_ARGS = "CONVERSATION_INFO";
     public static final String CONVERSATION_NAME_ARGS = "CONVERSATION_NAME";
 
     private FragmentConversationBinding mBinding;
     private MainActivity mMainActivity;
-    private List<Message> messages;
-    private MessageAdapter messageAdapter;
+    private ConversationViewModel viewModel;
     private Socket mSocket;
-    private String conversationID;
+    private Conversation conversation;
     private String conversationName;
     private boolean isToggleEmojiButton = false;
+    private int conversationLength = 0;
 
-    public static ConversationFragment newInstance(String conversationID, String conversationName) {
+    public static ConversationFragment newInstance(Conversation conversation, String conversationName) {
         Bundle args = new Bundle();
-        args.putString(CONVERSATION_ID_ARGS, conversationID);
+        args.putSerializable(CONVERSATION_ARGS, conversation);
         args.putString(CONVERSATION_NAME_ARGS, conversationName);
 
         ConversationFragment fragment = new ConversationFragment();
@@ -82,7 +82,7 @@ public class ConversationFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            conversationID = getArguments().getString(CONVERSATION_ID_ARGS);
+            conversation = (Conversation) getArguments().getSerializable(CONVERSATION_ARGS);
             conversationName = getArguments().getString(CONVERSATION_NAME_ARGS);
         }
     }
@@ -115,18 +115,16 @@ public class ConversationFragment extends Fragment {
 
         mBinding.btnSendImg.setOnClickListener(view -> openBottomImagePicker());
 
-        loadConversation(conversationID);
+        loadConversation(conversation.getId());
 
         return mBinding.getRoot();
     }
 
     private void initEmojiKeyboard() {
-//        emojiPopup = EmojiPopup.Builder.fromRootView(mBinding.edtChat.getRootView()).build(mBinding.edtChat);
         mBinding.btnEmoji.setOnClickListener(view -> {
             isToggleEmojiButton = !isToggleEmojiButton;
 
             toggleEmojiButtonIcon();
-//            emojiPopup.toggle();
         });
     }
 
@@ -179,9 +177,19 @@ public class ConversationFragment extends Fragment {
     }
 
     private void initRecyclerView() {
+        MessageAdapter messageAdapter = new MessageAdapter(mMainActivity);
 
-        messages = new ArrayList<>();
-        messageAdapter = new MessageAdapter(messages, mMainActivity);
+        viewModel = new ViewModelProvider(mMainActivity).get(ConversationViewModel.class);
+
+        viewModel.getData(conversation.getId()).observe(mMainActivity, new Observer<List<Message>>() {
+            @Override
+            public void onChanged(List<Message> messages) {
+                conversationLength = messages.size();
+                messageAdapter.setMessages(messages);
+                mBinding.rvConversation.setAdapter(messageAdapter);
+                smoothScrollToLatestMsg();
+            }
+        });
 
         mBinding.rvConversation.setLayoutManager(
                 new LinearLayoutManager(
@@ -231,7 +239,38 @@ public class ConversationFragment extends Fragment {
 
     private void addActionForSendMessageBtn() {
         mBinding.btnSend.setOnClickListener(view -> {
-//            sendMessage(new Message("1", mBinding.edtChat.getText().toString().trim(), "text"));
+            sendMessageViaApi(mBinding.edtChat.getText().toString().trim(), "text");
+        });
+    }
+
+    private void sendMessageViaApi(String text, String type) {
+
+        JsonObject object = new JsonObject();
+        Gson gson = new Gson();
+        object.addProperty("conversation", gson.toJson(conversation));
+        object.addProperty("sender", LocalDataManager.getCurrentUserInfo().getId());
+        object.addProperty("text", text);
+        object.addProperty("type", type);
+
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+
+        ApiService.apiService.sendMessage(body).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if (response.isSuccessful() && response.code() == 200) {
+                    String json = gson.toJson(response.body());
+
+                    JsonObject obj = gson.fromJson(json, JsonObject.class);
+
+                    Message message = gson.fromJson(obj.get("data"), Message.class);
+                    sendMessage(message);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                Log.e("API_ERR", t.getLocalizedMessage());
+            }
         });
     }
 
@@ -242,14 +281,10 @@ public class ConversationFragment extends Fragment {
 
         mSocket.emit("NewMessage", new Gson().toJson(message));
 
-        closeSoftKeyboard();
-
         mBinding.edtChat.setText("");
         mBinding.edtChat.requestFocus();
 
-        messages.add(message);
-        messageAdapter.setMessages(messages);
-        messageAdapter.notifyItemInserted(messages.indexOf(message));
+        viewModel.insertOrUpdate(message);
 
         smoothScrollToLatestMsg();
     }
@@ -308,10 +343,8 @@ public class ConversationFragment extends Fragment {
 
                     Message[] listArr = new Gson().fromJson(array, Message[].class);
 
-                    messages.addAll(Arrays.asList(listArr));
-                    messageAdapter.setMessages(messages);
-                    mBinding.rvConversation.setAdapter(messageAdapter);
-                    smoothScrollToLatestMsg();
+                    for (Message message : listArr)
+                        viewModel.insertOrUpdate(message);
                 }
 
                 @Override
@@ -323,7 +356,7 @@ public class ConversationFragment extends Fragment {
     }
 
     private void smoothScrollToLatestMsg() {
-        mBinding.rvConversation.smoothScrollToPosition(messages.size() - 1);
+           mBinding.rvConversation.scrollToPosition(conversationLength - 1);
     }
 
     private final Emitter.Listener onMessageReceive = new Emitter.Listener() {
@@ -333,9 +366,9 @@ public class ConversationFragment extends Fragment {
                 String data = (String) args[0];
                 if (data != null) {
                     Message message = new Gson().fromJson(data, Message.class);
-                    messages.add(message);
-                    messageAdapter.setMessages(messages);
-                    messageAdapter.notifyItemInserted(messages.indexOf(message));
+//                    messages.add(message);
+//                    messageAdapter.setMessages(messages);
+//                    messageAdapter.notifyItemInserted(messages.indexOf(message));
                     smoothScrollToLatestMsg();
                 }
             });

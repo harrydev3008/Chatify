@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.hisu.zola.databinding.LayoutAddMemberBinding;
-import com.hisu.zola.entity.User;
+import com.hisu.zola.database.entity.User;
 import com.hisu.zola.listeners.IOnItemCheckedChangListener;
 
 import java.util.List;

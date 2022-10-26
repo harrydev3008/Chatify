@@ -19,7 +19,9 @@ import android.widget.Toast;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentChangePhoneNumberBinding;
+import com.hisu.zola.fragments.ConfirmOTPFragment;
 import com.hisu.zola.util.dialog.ConfirmSendOTPDialog;
+import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.regex.Pattern;
 
@@ -113,7 +115,8 @@ public class ChangePhoneNumberFragment extends Fragment {
         });
 
         dialog.addActionForBtnConfirm(view_confirm -> {
-            Toast.makeText(mainActivity, "confirm", Toast.LENGTH_SHORT).show();
+            dialog.dismissDialog();
+            mainActivity.addFragmentToBackStack(ConfirmOTPFragment.newInstance(ConfirmOTPFragment.CHANGE_PHONE_NO_ARGS, LocalDataManager.getCurrentUserInfo()));
         });
     }
 

@@ -8,14 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.LayoutAddFriendBinding;
-import com.hisu.zola.entity.User;
+import com.hisu.zola.database.entity.User;
 import com.hisu.zola.util.local.LocalDataManager;
 
 public class AddFriendDialog {

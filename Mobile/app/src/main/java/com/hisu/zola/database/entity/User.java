@@ -1,15 +1,19 @@
-package com.hisu.zola.entity;
+package com.hisu.zola.database.entity;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
 
 import com.google.gson.annotations.SerializedName;
+import com.hisu.zola.database.type_converter.ListFriendConverter;
+import com.hisu.zola.database.type_converter.ListUserConverter;
 
 import java.io.Serializable;
 import java.util.List;
 
+@Entity(tableName = "users")
 public class User implements Serializable {
 
     @PrimaryKey
@@ -23,8 +27,11 @@ public class User implements Serializable {
     private String dob;
     private boolean gender;//T -> male, false -> female
 
-    @Ignore
+    @TypeConverters(ListFriendConverter.class)
     private List<String> friends;
+
+    @TypeConverters(ListFriendConverter.class)
+    private List<String> friendsQueue;
 
     @Ignore
     public User() {
@@ -65,10 +72,6 @@ public class User implements Serializable {
 
     public String getId() {
         return _id;
-    }
-
-    public void setId(String id) {
-        this._id = id;
     }
 
     public String getUsername() {
@@ -117,6 +120,14 @@ public class User implements Serializable {
 
     public void setFriends(List<String> friends) {
         this.friends = friends;
+    }
+
+    public List<String> getFriendsQueue() {
+        return friendsQueue;
+    }
+
+    public void setFriendsQueue(List<String> friendsQueue) {
+        this.friendsQueue = friendsQueue;
     }
 
     @Override

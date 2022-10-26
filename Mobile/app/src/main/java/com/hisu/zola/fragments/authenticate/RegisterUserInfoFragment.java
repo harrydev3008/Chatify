@@ -21,7 +21,7 @@ import androidx.fragment.app.Fragment;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentRegisterUserInfoBinding;
-import com.hisu.zola.entity.User;
+import com.hisu.zola.database.entity.User;
 import com.hisu.zola.fragments.greet_new_user.WelcomeOnBoardingFragment;
 import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.dialog.LoadingDialog;

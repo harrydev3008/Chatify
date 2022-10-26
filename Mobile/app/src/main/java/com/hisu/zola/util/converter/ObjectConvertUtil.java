@@ -2,7 +2,7 @@ package com.hisu.zola.util.converter;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.hisu.zola.entity.User;
+import com.hisu.zola.database.entity.User;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import retrofit2.Response;

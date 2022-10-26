@@ -3,7 +3,7 @@ package com.hisu.zola.util.local;
 import android.content.Context;
 
 import com.google.gson.Gson;
-import com.hisu.zola.entity.User;
+import com.hisu.zola.database.entity.User;
 
 public class LocalDataManager {
 

@@ -9,10 +9,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.hisu.zola.databinding.LayoutChatReceiveBinding;
 import com.hisu.zola.databinding.LayoutChatSendBinding;
-import com.hisu.zola.entity.Message;
-import com.hisu.zola.entity.User;
+import com.hisu.zola.database.entity.Message;
+import com.hisu.zola.database.entity.User;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.List;
@@ -67,7 +68,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         } else if (holder.getItemViewType() == MSG_RECEIVE_TYPE) {
 
-            Glide.with(mContext).load(message.getSender().getAvatarURL()).into(((MessageReceiveViewHolder) holder).binding.ivUserPfp);
+            Glide.with(mContext).load(message.getSender().getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(((MessageReceiveViewHolder) holder).binding.ivUserPfp);
 
             if(position == 0)
                 ((MessageReceiveViewHolder) holder).binding.ivUserPfp.setVisibility(View.VISIBLE);

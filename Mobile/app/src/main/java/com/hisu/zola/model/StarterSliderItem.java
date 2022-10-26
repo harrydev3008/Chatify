@@ -1,4 +1,4 @@
-package com.hisu.zola.entity;
+package com.hisu.zola.model;
 
 public class StarterSliderItem {
     private int coverImageID;

@@ -1,7 +1,6 @@
 package com.hisu.zola.fragments.authenticate;
 
 import android.os.Bundle;
-import android.text.Editable;
 import android.text.TextUtils;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
@@ -19,7 +18,7 @@ import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentLoginBinding;
-import com.hisu.zola.entity.User;
+import com.hisu.zola.database.entity.User;
 import com.hisu.zola.fragments.conversation.ConversationListFragment;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.EditTextUtil;

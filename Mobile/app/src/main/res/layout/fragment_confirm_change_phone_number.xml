@@ -88,13 +88,29 @@
         android:drawableLeft="@drawable/ic_information_circle"
         android:drawablePadding="10dp"
         android:justificationMode="inter_word"
-        android:textSize="17sp"
-        android:textColor="@color/black"
         android:text="@string/change_phone_no_for_account_desc_friend"
+        android:textColor="@color/black"
+        android:textSize="17sp"
         app:layout_constraintEnd_toStartOf="@+id/guideline17"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/guideline16"
         app:layout_constraintTop_toBottomOf="@+id/textView16" />
+
+    <TextView
+        android:id="@+id/tv_change_phone_limit"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:drawableLeft="@drawable/ic_information_circle_yellow"
+        android:drawablePadding="10dp"
+        android:justificationMode="inter_word"
+        android:text="@string/change_phone_no_limit"
+        android:textColor="@color/black"
+        android:textSize="17sp"
+        app:layout_constraintEnd_toStartOf="@+id/guideline17"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/textView17"
+        app:layout_constraintTop_toBottomOf="@+id/textView17" />
 
     <TextView
         android:id="@+id/tv_start"
@@ -106,7 +122,7 @@
         android:textColor="@color/primary_color"
         app:layout_constraintEnd_toStartOf="@+id/guideline17"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/guideline16"
-        app:layout_constraintTop_toBottomOf="@+id/textView17" />
+        app:layout_constraintStart_toStartOf="@+id/tv_change_phone_limit"
+        app:layout_constraintTop_toBottomOf="@+id/tv_change_phone_limit" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

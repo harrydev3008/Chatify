@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hisu.zola.databinding.LayoutStarterSliderBinding;
-import com.hisu.zola.entity.StarterSliderItem;
+import com.hisu.zola.model.StarterSliderItem;
 
 import java.util.List;
 

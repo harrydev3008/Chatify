@@ -1,19 +1,22 @@
-package com.hisu.zola.entity;
+package com.hisu.zola.database.entity;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
 
-import com.google.gson.annotations.SerializedName;
+import com.hisu.zola.database.type_converter.UserConverter;
 
-import java.time.LocalDateTime;
-import java.util.Date;
+import java.io.Serializable;
 
-public class Message {
-
+@Entity(tableName = "messages")
+public class Message implements Serializable {
+    @PrimaryKey
+    @NonNull
     private String _id;
     private String conversation;
+    @TypeConverters(UserConverter.class)
     private User sender;
     private String text;
     private String type;

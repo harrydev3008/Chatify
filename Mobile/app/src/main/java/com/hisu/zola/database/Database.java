@@ -8,16 +8,16 @@ import androidx.room.RoomDatabase;
 import com.hisu.zola.database.dao.ConversationDAO;
 import com.hisu.zola.database.dao.MessageDAO;
 import com.hisu.zola.database.dao.UserDAO;
-import com.hisu.zola.entity.Conversation;
-import com.hisu.zola.entity.ConversationHolder;
-import com.hisu.zola.entity.Message;
-import com.hisu.zola.entity.User;
+import com.hisu.zola.database.entity.Conversation;
+import com.hisu.zola.database.entity.Message;
+import com.hisu.zola.database.entity.User;
+import com.hisu.zola.model.ConversationHolder;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @androidx.room.Database(entities = {
-        ConversationHolder.class
+        User.class, Message.class, Conversation.class
 }, version = 1, exportSchema = false)
 public abstract class Database extends RoomDatabase {
 
