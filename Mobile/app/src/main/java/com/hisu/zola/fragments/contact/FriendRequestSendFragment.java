@@ -31,7 +31,7 @@ public class FriendRequestSendFragment extends Fragment {
         mBinding = FragmentFriendRequestSendBinding.inflate(inflater, container, false);
 
         mBinding.rvFriendRequestSend.setAdapter(
-                new FriendRequestSendAdapter(List.of("Harry Nguyen", "John Doe", "Marry Jane"), mainActivity)
+                new FriendRequestSendAdapter(List.of(), mainActivity)
         );
 
         mBinding.rvFriendRequestSend.setLayoutManager(
@@ -40,6 +40,15 @@ public class FriendRequestSendFragment extends Fragment {
                 )
         );
 
+        getSentRequests();
+
         return mBinding.getRoot();
+    }
+
+    private void getSentRequests() {
+        if(mBinding.rvFriendRequestSend.getAdapter().getItemCount() != 0)
+            mBinding.imvNoRequestSend.setVisibility(View.GONE);
+        else
+            mBinding.imvNoRequestSend.setVisibility(View.VISIBLE);
     }
 }

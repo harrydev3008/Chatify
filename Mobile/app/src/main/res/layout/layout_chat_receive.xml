@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:gravity="start"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:layout_marginVertical="2dp"
+    android:gravity="start"
     android:orientation="vertical">
 
     <LinearLayout
@@ -20,14 +20,14 @@
             android:layout_height="25dp"
             android:layout_gravity="bottom"
             android:src="@mipmap/app_launcher_icon"
-            app:civ_border_width="1dp"
-            app:civ_border_color="@color/gray_e5"/>
+            app:civ_border_color="@color/gray_e5"
+            app:civ_border_width="1dp" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginStart="6dp">
+            android:layout_marginStart="6dp"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tv_msg_receive"
@@ -36,31 +36,23 @@
                 android:background="@drawable/message_receive"
                 android:fontFamily="@font/roboto"
                 android:maxWidth="360dp"
-                android:paddingVertical="6dp"
                 android:paddingHorizontal="12dp"
+                android:paddingVertical="6dp"
                 android:text="@string/slogan"
                 android:textColor="@color/chat_text_color"
                 android:textSize="22sp" />
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/img_msg_receive_holder"
+            <com.makeramen.roundedimageview.RoundedImageView
+                android:id="@+id/img_msg_receive"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="10dp">
-                <ImageView
-                    android:id="@+id/img_msg_receive"
-                    android:layout_height="match_parent"
-                    android:layout_width="match_parent"
-                    android:adjustViewBounds="true"
-                    android:maxHeight="200dp"
-                    android:visibility="gone"
-                    android:src="@drawable/bg_profile"
-                    android:maxWidth="320dp"
-                    android:scaleType="centerCrop"
-                    tools:ignore="ContentDescription" />
-            </com.google.android.material.card.MaterialCardView>
+                android:adjustViewBounds="true"
+                android:maxWidth="320dp"
+                android:maxHeight="200dp"
+                app:riv_corner_radius="10dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/bg_profile"
+                tools:ignore="ContentDescription" />
         </LinearLayout>
-
-
     </LinearLayout>
 </LinearLayout>

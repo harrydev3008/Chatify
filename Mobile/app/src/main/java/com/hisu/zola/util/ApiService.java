@@ -68,6 +68,6 @@ public interface ApiService {
     Call<Object> sendMessage(@Body RequestBody message);
 
     @Multipart
-    @POST("/uploadFile")
+    @POST("api/message/uploadFile")
     Call<Object> postImage(@Part MultipartBody.Part image);
 }

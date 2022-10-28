@@ -45,12 +45,6 @@ public class MainActivity extends AppCompatActivity {
 
         initProgressBar();
 
-//        Database db = Database.getDatabase(this);
-//        Database.dbExecutor.execute(() -> {
-//            db.conversationDAO().insert(new ConversationHolder("1", false, R.drawable.cat, "Chí Hiếu","Iem ăn cơm chưa?!", 1));
-//            db.conversationDAO().insert(new ConversationHolder("2", false, R.drawable.ganyu, "Văn Thành","Tối đi net k bro??", 1));
-//            db.conversationDAO().insert(new ConversationHolder("3", false, R.drawable.pepe, "Linh","Sao ko rep em :<", 1));
-//        });
         addSelectedActionForNavItem();
         messageBadge();
 
@@ -166,5 +160,6 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         clearFragmentList();
         SocketIOHandler.disconnect();
+        SocketIOHandler.close();
     }
 }

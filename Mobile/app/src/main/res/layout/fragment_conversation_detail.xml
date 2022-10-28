@@ -43,7 +43,7 @@
         </RelativeLayout>
 
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/imageView4"
+            android:id="@+id/imv_friend_pfp"
             android:layout_width="90dp"
             android:layout_height="90dp"
             android:layout_marginTop="16dp"
@@ -62,9 +62,9 @@
             android:textColor="@color/black"
             android:fontFamily="@font/be_vietnam"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="@+id/imageView4"
-            app:layout_constraintStart_toStartOf="@+id/imageView4"
-            app:layout_constraintTop_toBottomOf="@+id/imageView4" />
+            app:layout_constraintEnd_toEndOf="@+id/imv_friend_pfp"
+            app:layout_constraintStart_toStartOf="@+id/imv_friend_pfp"
+            app:layout_constraintTop_toBottomOf="@+id/imv_friend_pfp" />
 
         <View
             android:id="@+id/view"

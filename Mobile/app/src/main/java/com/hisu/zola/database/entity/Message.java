@@ -6,9 +6,11 @@ import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
+import com.hisu.zola.database.type_converter.ListMediaConverter;
 import com.hisu.zola.database.type_converter.UserConverter;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Entity(tableName = "messages")
 public class Message implements Serializable {
@@ -22,12 +24,14 @@ public class Message implements Serializable {
     private String type;
     private String createdAt;
     private String updatedAt;
+    @TypeConverters(ListMediaConverter.class)
+    private List<Media> media;
 
     @Ignore
     public Message() {
     }
 
-    public Message(@NonNull String _id, String conversation, User sender, String text, String type, String createdAt, String updatedAt) {
+    public Message(@NonNull String _id, String conversation, User sender, String text, String type, String createdAt, String updatedAt, List<Media> media) {
         this._id = _id;
         this.conversation = conversation;
         this.sender = sender;
@@ -35,6 +39,7 @@ public class Message implements Serializable {
         this.type = type;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.media = media;
     }
 
     public String getId() {
@@ -93,6 +98,14 @@ public class Message implements Serializable {
         this.updatedAt = updatedAt;
     }
 
+    public List<Media> getMedia() {
+        return media;
+    }
+
+    public void setMedia(List<Media> media) {
+        this.media = media;
+    }
+
     @Override
     public String toString() {
         return "Message{" +
@@ -103,6 +116,7 @@ public class Message implements Serializable {
                 ", type='" + type + '\'' +
                 ", createdAt='" + createdAt + '\'' +
                 ", updatedAt='" + updatedAt + '\'' +
+                ", media=" + media +
                 '}';
     }
 }

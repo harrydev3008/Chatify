@@ -110,7 +110,7 @@
             android:src="@drawable/ic_sticker"
             tools:ignore="ContentDescription" />
 
-        <com.vanniktech.emoji.EmojiEditText
+        <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/edt_chat"
             android:layout_width="0dp"
             android:layout_height="match_parent"

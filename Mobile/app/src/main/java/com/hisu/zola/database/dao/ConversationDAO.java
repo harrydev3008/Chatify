@@ -7,7 +7,6 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 import com.hisu.zola.database.entity.Conversation;
-import com.hisu.zola.model.ConversationHolder;
 
 import java.util.List;
 
@@ -17,7 +16,7 @@ public interface ConversationDAO {
     void insert(Conversation...conversations);
 
     @Query("select * from conversations where _id = :conversationID")
-    List<Conversation> getConversationById(String conversationID);
+    Conversation getConversationById(String conversationID);
 
     @Query("Select * from conversations")
     LiveData<List<Conversation>> getConversation();

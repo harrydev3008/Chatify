@@ -1,15 +1,18 @@
 package com.hisu.zola.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.hisu.zola.database.entity.Media;
 import com.hisu.zola.databinding.LayoutChatReceiveBinding;
 import com.hisu.zola.databinding.LayoutChatSendBinding;
 import com.hisu.zola.database.entity.Message;
@@ -70,14 +73,14 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             Glide.with(mContext).load(message.getSender().getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(((MessageReceiveViewHolder) holder).binding.ivUserPfp);
 
-            if(position == 0)
+            if (position == 0)
                 ((MessageReceiveViewHolder) holder).binding.ivUserPfp.setVisibility(View.VISIBLE);
             else if (position == messages.size() - 1)
                 ((MessageReceiveViewHolder) holder).binding.ivUserPfp.setVisibility(View.VISIBLE);
-            else if(messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
-            && !messages.get(position + 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
+            else if (messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
+                    && !messages.get(position + 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
                 ((MessageReceiveViewHolder) holder).binding.ivUserPfp.setVisibility(View.VISIBLE);
-            else if(!messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
+            else if (!messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
                     && !messages.get(position + 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
                 ((MessageReceiveViewHolder) holder).binding.ivUserPfp.setVisibility(View.VISIBLE);
             else
@@ -109,16 +112,17 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
 
         private void displayMessageContent(Context context, Message message) {
-//            if (message.getType().equalsIgnoreCase("text")) {
-
-            binding.imgMsgSendHolder.setVisibility(View.GONE);
-            binding.tvMsgSend.setVisibility(View.VISIBLE);
-            binding.tvMsgSend.setText(message.getText());
-//            } else {
-//                binding.tvMsgSend.setVisibility(View.GONE);
-//                binding.imgMsgSendHolder.setVisibility(View.VISIBLE);
-//                Glide.with(context).load(message.getText()).into(binding.imgMsgSend);
-//            }
+            if (message.getType().equalsIgnoreCase("text")) {
+                binding.imgMsgSend.setVisibility(View.GONE);
+                binding.tvMsgSend.setVisibility(View.VISIBLE);
+                binding.tvMsgSend.setText(message.getText());
+            }
+            else {
+                binding.tvMsgSend.setVisibility(View.GONE);
+                binding.imgMsgSend.setVisibility(View.VISIBLE);
+                Media media = message.getMedia().get(0);
+                Glide.with(context).load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(binding.imgMsgSend);
+            }
         }
     }
 
@@ -132,16 +136,18 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
 
         private void displayMessageContent(Context context, Message message) {
-//            if (message.getType().equalsIgnoreCase("text")) {
+            if (message.getType().equalsIgnoreCase("text")) {
+                binding.imgMsgReceive.setVisibility(View.GONE);
+                binding.tvMsgReceive.setVisibility(View.VISIBLE);
+                binding.tvMsgReceive.setText(message.getText());
+            }
+            else {
+                binding.tvMsgReceive.setVisibility(View.GONE);
+                binding.imgMsgReceive.setVisibility(View.VISIBLE);
 
-            binding.imgMsgReceiveHolder.setVisibility(View.GONE);
-            binding.tvMsgReceive.setVisibility(View.VISIBLE);
-            binding.tvMsgReceive.setText(message.getText());
-//            } else {
-//                binding.tvMsgReceive.setVisibility(View.GONE);
-//                binding.imgMsgReceiveHolder.setVisibility(View.VISIBLE);
-//                Glide.with(context).load(message.getText()).into(binding.imgMsgReceive);
-//            }
+                Media media = message.getMedia().get(0);
+                Glide.with(context).load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(binding.imgMsgReceive);
+            }
         }
     }
 }

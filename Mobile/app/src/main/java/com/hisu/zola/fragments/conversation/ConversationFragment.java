@@ -25,21 +25,26 @@ import com.github.ybq.android.spinkit.style.ThreeBounce;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.MessageAdapter;
-import com.hisu.zola.databinding.FragmentConversationBinding;
 import com.hisu.zola.database.entity.Conversation;
+import com.hisu.zola.database.entity.Media;
 import com.hisu.zola.database.entity.Message;
+import com.hisu.zola.database.entity.User;
+import com.hisu.zola.databinding.FragmentConversationBinding;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.RealPathUtil;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.view_model.ConversationViewModel;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Executors;
 
 import gun0912.tedimagepicker.builder.TedImagePicker;
@@ -64,7 +69,6 @@ public class ConversationFragment extends Fragment {
     private Conversation conversation;
     private String conversationName;
     private boolean isToggleEmojiButton = false;
-    private int conversationLength = 0;
 
     public static ConversationFragment newInstance(Conversation conversation, String conversationName) {
         Bundle args = new Bundle();
@@ -94,9 +98,11 @@ public class ConversationFragment extends Fragment {
         mMainActivity = (MainActivity) getActivity();
         mBinding = FragmentConversationBinding.inflate(inflater, container, false);
 
+        SocketIOHandler.getInstance().establishSocketConnection();
+
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
 
-        mSocket.on("ReceiveMessage", onMessageReceive);
+        mSocket.on("msg-receive", onMessageReceive);
         mSocket.on("typing", onTyping);
 
         initRecyclerView();
@@ -149,25 +155,28 @@ public class ConversationFragment extends Fragment {
 
         File file = new File(RealPathUtil.getRealPath(mMainActivity, uri));
         RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-        MultipartBody.Part part = MultipartBody.Part.createFormData("image", file.getName(), requestBody);
+        String fileName = file.getName();
+        MultipartBody.Part part = MultipartBody.Part.createFormData("media", fileName, requestBody);
 
-//        ApiService.apiService.postImage(part).enqueue(new Callback<Message>() {
-//            @Override
-//            public void onResponse(@NonNull Call<Message> call, @NonNull Response<Message> response) {
-//                if(response.isSuccessful()) {
-//                    Message message = response.body();
-//                    if (message != null) {
-//                        message.setSender("1");
-//                        sendMessage(message);
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(@NonNull Call<Message> call, @NonNull Throwable t) {
-//                Log.e("ERR", t.getLocalizedMessage());
-//            }
-//        });
+        ApiService.apiService.postImage(part).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if (response.isSuccessful()) {
+
+                    Gson gson = new Gson();
+
+                    String json = gson.toJson(response.body());
+                    JsonObject obj = gson.fromJson(json, JsonObject.class);
+
+                    sendMessageViaApi("", obj.get("data").toString().replaceAll("\"", ""), "image/" + fileName.substring(fileName.lastIndexOf('.') + 1), "image");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                Log.e("ERR post img", t.getLocalizedMessage());
+            }
+        });
     }
 
     private void initProgressBar() {
@@ -184,17 +193,16 @@ public class ConversationFragment extends Fragment {
         viewModel.getData(conversation.getId()).observe(mMainActivity, new Observer<List<Message>>() {
             @Override
             public void onChanged(List<Message> messages) {
-                conversationLength = messages.size();
                 messageAdapter.setMessages(messages);
                 mBinding.rvConversation.setAdapter(messageAdapter);
-                smoothScrollToLatestMsg();
             }
         });
 
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mMainActivity);
+        linearLayoutManager.setStackFromEnd(true);
+
         mBinding.rvConversation.setLayoutManager(
-                new LinearLayoutManager(
-                        mMainActivity, LinearLayoutManager.VERTICAL, false
-                )
+                linearLayoutManager
         );
     }
 
@@ -205,6 +213,7 @@ public class ConversationFragment extends Fragment {
 
     private void addActionForBackBtn() {
         mBinding.btnBack.setOnClickListener(view -> {
+            mMainActivity.setProgressbarVisibility(View.VISIBLE);
             mMainActivity.setBottomNavVisibility(View.VISIBLE);
             mMainActivity.getSupportFragmentManager().popBackStackImmediate();
         });
@@ -230,27 +239,40 @@ public class ConversationFragment extends Fragment {
                             R.anim.slide_out_right, R.anim.slide_out_right)
                     .replace(
                             mMainActivity.getViewContainerID(),
-                            new ConversationDetailFragment()
+                            ConversationDetailFragment.newInstance(getFriendInfo())
                     )
                     .addToBackStack(null)
                     .commit();
         });
     }
 
+    private User getFriendInfo() {
+        return conversation.getMember().stream()
+                .filter(member -> !member.getId()
+                        .equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId()))
+                .findAny().orElse(null);
+    }
+
     private void addActionForSendMessageBtn() {
         mBinding.btnSend.setOnClickListener(view -> {
-            sendMessageViaApi(mBinding.edtChat.getText().toString().trim(), "text");
+            sendMessageViaApi(mBinding.edtChat.getText().toString().trim(), "", "", "text");
         });
     }
 
-    private void sendMessageViaApi(String text, String type) {
+    private void sendMessageViaApi(String text, String url, String imgType, String type) {
 
         JsonObject object = new JsonObject();
         Gson gson = new Gson();
-        object.addProperty("conversation", gson.toJson(conversation));
+        object.add("conversation", gson.toJsonTree(conversation));
         object.addProperty("sender", LocalDataManager.getCurrentUserInfo().getId());
         object.addProperty("text", text);
         object.addProperty("type", type);
+
+        JsonObject media = new JsonObject();
+        media.addProperty("url", url);
+        media.addProperty("type", imgType);
+
+        object.add("media", gson.toJsonTree(media));
 
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
 
@@ -279,14 +301,20 @@ public class ConversationFragment extends Fragment {
             mSocket.connect();
         }
 
-        mSocket.emit("NewMessage", new Gson().toJson(message));
+        Gson gson = new Gson();
+        viewModel.insertOrUpdate(message);
+
+        JsonObject emitMsg = new JsonObject();
+        emitMsg.add("conversation", gson.toJsonTree(conversation));
+        emitMsg.add("sender", gson.toJsonTree(LocalDataManager.getCurrentUserInfo()));
+        emitMsg.addProperty("text", message.getText());
+        emitMsg.addProperty("type", message.getType());
+        emitMsg.add("media", gson.toJsonTree(message.getMedia()));
+
+        mSocket.emit("send-msg", emitMsg);
 
         mBinding.edtChat.setText("");
         mBinding.edtChat.requestFocus();
-
-        viewModel.insertOrUpdate(message);
-
-        smoothScrollToLatestMsg();
     }
 
     private void closeSoftKeyboard() {
@@ -355,21 +383,32 @@ public class ConversationFragment extends Fragment {
         });
     }
 
-    private void smoothScrollToLatestMsg() {
-           mBinding.rvConversation.scrollToPosition(conversationLength - 1);
-    }
-
     private final Emitter.Listener onMessageReceive = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
             mMainActivity.runOnUiThread(() -> {
-                String data = (String) args[0];
+                JSONObject data = (JSONObject) args[0];
                 if (data != null) {
-                    Message message = new Gson().fromJson(data, Message.class);
-//                    messages.add(message);
-//                    messageAdapter.setMessages(messages);
-//                    messageAdapter.notifyItemInserted(messages.indexOf(message));
-                    smoothScrollToLatestMsg();
+
+                    try {
+
+                        Gson gson = new Gson();
+
+                        Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
+
+                        User sender = gson.fromJson(data.getString("sender"), User.class);
+
+                        List<Media> media = gson.fromJson(data.get("media").toString(), new TypeToken<List<Media>>() {
+                        }.getType());
+
+                        Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
+                                data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media);
+
+                        viewModel.insertOrUpdate(message);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
         }
