@@ -7,7 +7,6 @@ import androidx.lifecycle.LiveData;
 
 import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.repository.ConversationRepository;
-import com.hisu.zola.model.ConversationHolder;
 
 import java.util.List;
 

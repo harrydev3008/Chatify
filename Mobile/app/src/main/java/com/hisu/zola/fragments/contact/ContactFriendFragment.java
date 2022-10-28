@@ -4,6 +4,8 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -14,10 +16,14 @@ import android.view.ViewGroup;
 
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
+import com.hisu.zola.adapters.ConversationAdapter;
+import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.databinding.FragmentContactFriendBinding;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.util.ApiService;
+import com.hisu.zola.view_model.ConversationListViewModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -28,6 +34,8 @@ public class ContactFriendFragment extends Fragment {
 
     private FragmentContactFriendBinding mBinding;
     private MainActivity mainActivity;
+    private ConversationAdapter adapter;
+    private ConversationListViewModel viewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -77,10 +85,25 @@ public class ContactFriendFragment extends Fragment {
     }
 
     private void initConversationListRecyclerView() {
-//        viewModel = new ViewModelProvider(mainActivity).get(ConversationListViewModel.class);
+        viewModel = new ViewModelProvider(mainActivity).get(ConversationListViewModel.class);
+        adapter = new ConversationAdapter(mainActivity);
 
-//        adapter = new ConversationAdapter(mainActivity);
-//        adapter.setOnConversationItemSelectedListener(conversationID -> {
+        viewModel.getData().observe(mainActivity, new Observer<List<Conversation>>() {
+            @Override
+            public void onChanged(List<Conversation> conversations) {
+                List<Conversation> friendConversations = new ArrayList<>();
+
+                conversations.forEach(conversation -> {
+                    if(conversation.getLabel() == null || conversation.getLabel().isEmpty())
+                        friendConversations.add(conversation);
+                });
+
+                adapter.setConversations(friendConversations);
+                mBinding.rvFriend.setAdapter(adapter);
+            }
+        });
+
+//        adapter.setOnConversationItemSelectedListener((conversation, conversationName) -> {
 //            mainActivity.setBottomNavVisibility(View.GONE);
 //            mainActivity.getSupportFragmentManager().beginTransaction()
 //                    .setCustomAnimations(
@@ -88,7 +111,7 @@ public class ContactFriendFragment extends Fragment {
 //                            R.anim.slide_out_right, R.anim.slide_out_right)
 //                    .add(
 //                            mainActivity.getViewContainerID(),
-//                            ConversationFragment.newInstance(conversationID)
+//                            ConversationFragment.newInstance(conversation, conversationName)
 //                    )
 //                    .addToBackStack("Single_Conversation")
 //                    .commit();

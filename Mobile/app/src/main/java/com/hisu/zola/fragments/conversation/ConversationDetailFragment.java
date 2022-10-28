@@ -3,6 +3,7 @@ package com.hisu.zola.fragments.conversation;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -10,14 +11,35 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.hisu.zola.MainActivity;
+import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.FragmentConversationDetailBinding;
 
 public class ConversationDetailFragment extends Fragment {
 
-   private FragmentConversationDetailBinding mBinding;
-   private MainActivity mainActivity;
+    public static final String USER_ARGS = "USER_DETAIL";
+    private FragmentConversationDetailBinding mBinding;
+    private MainActivity mainActivity;
+    private User user;
+
+    public static ConversationDetailFragment newInstance(User user) {
+        Bundle args = new Bundle();
+        args.putSerializable(USER_ARGS, user);
+        ConversationDetailFragment fragment = new ConversationDetailFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            user = (User) getArguments().getSerializable(USER_ARGS);
+        }
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -25,10 +47,9 @@ public class ConversationDetailFragment extends Fragment {
 
         mainActivity = (MainActivity) getActivity();
 
-        mBinding = FragmentConversationDetailBinding.inflate(
-                inflater, container, false
-        );
+        mBinding = FragmentConversationDetailBinding.inflate(inflater, container, false);
 
+        loadUserDetail(user);
         addActionForBackBtn();
         addActionForEventChangeNickName();
         addActionForEventViewSentFiles();
@@ -36,6 +57,12 @@ public class ConversationDetailFragment extends Fragment {
         addActionForEventUnfriend();
 
         return mBinding.getRoot();
+    }
+
+    private void loadUserDetail(User user) {
+        mBinding.tvFriendName.setText(user.getUsername());
+        Glide.with(mainActivity).load(user.getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                .into(mBinding.imvFriendPfp);
     }
 
     private void addActionForBackBtn() {

@@ -1,6 +1,7 @@
 package com.hisu.zola.database.repository;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 
@@ -30,7 +31,6 @@ public class ConversationRepository {
                 insert(conversation);
             else
                 update(conversation.getId(), conversation.getLabel());
-
         });
     }
 

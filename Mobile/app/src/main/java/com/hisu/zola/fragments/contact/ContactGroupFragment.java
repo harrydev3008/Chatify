@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,10 +17,15 @@ import android.widget.Toast;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.ConversationAdapter;
+import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.databinding.FragmentContactGroupBinding;
 import com.hisu.zola.fragments.conversation.AddNewGroupFragment;
 import com.hisu.zola.fragments.conversation.ConversationFragment;
 import com.hisu.zola.view_model.ConversationListViewModel;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ContactGroupFragment extends Fragment {
 
@@ -43,9 +49,24 @@ public class ContactGroupFragment extends Fragment {
 
     private void initConversationListRecyclerView() {
         viewModel = new ViewModelProvider(mainActivity).get(ConversationListViewModel.class);
-
         adapter = new ConversationAdapter(mainActivity);
-        adapter.setOnConversationItemSelectedListener((conversationID, conversationName)  -> {
+
+        viewModel.getData().observe(mainActivity, new Observer<List<Conversation>>() {
+            @Override
+            public void onChanged(List<Conversation> conversations) {
+                List<Conversation> groupConversations = new ArrayList<>();
+
+                conversations.forEach(conversation -> {
+                    if(conversation.getLabel() != null)
+                        groupConversations.add(conversation);
+                });
+
+                adapter.setConversations(groupConversations);
+                mBinding.rvGroup.setAdapter(adapter);
+            }
+        });
+
+        adapter.setOnConversationItemSelectedListener((conversationID, conversationName) -> {
             mainActivity.setBottomNavVisibility(View.GONE);
             mainActivity.getSupportFragmentManager().beginTransaction()
                     .setCustomAnimations(
@@ -64,17 +85,7 @@ public class ContactGroupFragment extends Fragment {
         );
 
         mBinding.rvGroup.setLayoutManager(linearLayoutManager);
-
-        loadConversationList();
     }
-
-    private void loadConversationList() {
-//        viewModel.getData().observe(mainActivity, conversation -> {
-//            adapter.setConversations(conversation);
-//            mBinding.rvGroup.setAdapter(adapter);
-//        });
-    }
-
 
     private void addNewGroupEvent() {
         mBinding.acNewGroup.setOnClickListener(view -> {

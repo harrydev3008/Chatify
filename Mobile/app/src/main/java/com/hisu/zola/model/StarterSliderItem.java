@@ -5,9 +5,6 @@ public class StarterSliderItem {
     private String feature;
     private String featureDesc;
 
-    public StarterSliderItem() {
-    }
-
     public StarterSliderItem(int coverImageID, String feature, String featureDesc) {
         this.coverImageID = coverImageID;
         this.feature = feature;

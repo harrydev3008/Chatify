@@ -17,7 +17,7 @@ public class SocketIOHandler {
     private SocketIOHandler() {
         IO.Options mOptions = new IO.Options();
         User user = LocalDataManager.getCurrentUserInfo();
-        mOptions.query = "userId=" + user.getId() + "&phoneNumber=" + user.getPhoneNumber();
+        mOptions.query = "_id=" + user.getId();
         mSocketIO = IO.socket(getConnectionURI(), mOptions);
     }
 

@@ -6,14 +6,14 @@
     android:layout_marginTop="6dp"
     android:background="@color/white"
     android:orientation="horizontal"
-    android:gravity="center">
+    android:gravity="top">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/cimv_request_avatar"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:src="@drawable/app_logo"
-        app:civ_border_color="@color/gray_70"
+        app:civ_border_color="@color/gray_f1"
         app:civ_border_width="1dp" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -21,54 +21,58 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:paddingBottom="4dp">
+        android:layout_marginStart="10dp">
 
         <TextView
             android:id="@+id/tv_request_name"
-            android:layout_width="160dp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:fontFamily="@font/be_vietnam"
             android:maxLines="1"
             android:text="@string/app_name"
             android:textColor="@color/black"
-            android:textSize="20sp"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/container"
             app:layout_constraintTop_toTopOf="@+id/container" />
 
-        <Button
-            android:id="@+id/btn_accept"
-            android:layout_width="120dp"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_decline"
+            android:layout_width="130dp"
             android:layout_height="40dp"
-            android:layout_marginTop="2dp"
-            android:backgroundTint="@color/primary_color"
+            android:backgroundTint="@color/gray_f1"
+            android:padding="2dp"
+            android:layout_marginTop="4dp"
+            android:stateListAnimator="@null"
+            android:text="@string/friend_request_decline"
+            android:textAllCaps="false"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            app:cornerRadius="20dp"
+            app:layout_constraintStart_toStartOf="@+id/tv_request_name"
+            app:layout_constraintTop_toBottomOf="@+id/tv_receive_date" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_accept"
+            android:layout_width="130dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="16dp"
+            android:backgroundTint="@color/lightBlue"
+            android:padding="2dp"
+            android:stateListAnimator="@null"
             android:text="@string/friend_request_accept"
             android:textAllCaps="false"
-            android:textColor="@color/white"
+            android:textColor="@color/darkerBlue"
             android:textSize="14sp"
-            android:padding="2dp"
-            app:layout_constraintStart_toStartOf="@+id/tv_request_name"
-            app:layout_constraintTop_toBottomOf="@+id/tv_request_name" />
-
-        <Button
-            android:id="@+id/btn_decline"
-            android:layout_width="120dp"
-            android:layout_height="40dp"
-            android:backgroundTint="@color/gray"
-            android:text="@string/friend_request_delete"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:textSize="14sp"
-            android:padding="2dp"
-            app:layout_constraintBottom_toBottomOf="@+id/btn_accept"
-            app:layout_constraintEnd_toEndOf="@+id/container"
-            app:layout_constraintTop_toTopOf="@+id/btn_accept"
-            app:layout_constraintVertical_bias="0.0" />
+            app:cornerRadius="20dp"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_decline"
+            app:layout_constraintStart_toEndOf="@+id/btn_decline"
+            app:layout_constraintTop_toTopOf="@+id/btn_decline" />
 
         <TextView
             android:id="@+id/tv_receive_date"
-            android:layout_width="70dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/be_vietnam"
             android:gravity="end"
@@ -76,9 +80,7 @@
             android:text="@string/app_name"
             android:textColor="@color/gray_70"
             android:textSize="16sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_request_name"
-            app:layout_constraintEnd_toEndOf="@+id/btn_decline"
-            app:layout_constraintTop_toTopOf="@+id/tv_request_name" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_request_name" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>
