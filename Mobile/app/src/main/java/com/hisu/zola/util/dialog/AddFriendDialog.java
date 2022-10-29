@@ -1,26 +1,38 @@
 package com.hisu.zola.util.dialog;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
+
 import com.bumptech.glide.Glide;
+import com.google.gson.JsonObject;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.LayoutAddFriendBinding;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.local.LocalDataManager;
+
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class AddFriendDialog {
 
     private Dialog dialog;
     private final Context context;
-    private int gravity;
-    private User findUser;
+    private final int gravity;
+    private final User findUser;
     private LayoutAddFriendBinding binding;
 
     public AddFriendDialog(Context context, int gravity, User findUser) {
@@ -63,8 +75,8 @@ public class AddFriendDialog {
 
         User currentUser = LocalDataManager.getCurrentUserInfo();
 
-        for (String friend : currentUser.getFriends())
-            if (findUser.getId().equalsIgnoreCase(friend)) {
+        for (User friend : currentUser.getFriends())
+            if (findUser.getId().equalsIgnoreCase(friend.getId())) {
                 binding.btnSentRequest.setVisibility(View.GONE);
                 break;
             }
@@ -80,8 +92,30 @@ public class AddFriendDialog {
     }
 
     private void addActionForBtnAddFriend() {
-        //Todo: call api to add friend
         binding.btnSentRequest.setOnClickListener(view -> {
+
+            JsonObject object = new JsonObject();
+            object.addProperty("userId", findUser.getId());
+            RequestBody body = RequestBody.create(MediaType.parse("application/json"),object.toString());
+
+            ApiService.apiService.sendFriendRequest(body).enqueue(new Callback<Object>() {
+                @Override
+                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                    if (response.isSuccessful() && response.code() == 200) {
+                        new AlertDialog.Builder(context)
+                                .setMessage(context.getString(R.string.friend_request_sent_success))
+                                .setPositiveButton(context.getString(R.string.confirm), (dialogInterface, i) -> {
+                                    dismissDialog();
+                                }).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                    Log.e("API_ERR", t.getLocalizedMessage());
+                }
+            });
+
             dialog.dismiss();
         });
     }

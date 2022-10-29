@@ -26,12 +26,13 @@ public class Message implements Serializable {
     private String updatedAt;
     @TypeConverters(ListMediaConverter.class)
     private List<Media> media;
+    private boolean isDelete;
 
     @Ignore
     public Message() {
     }
 
-    public Message(@NonNull String _id, String conversation, User sender, String text, String type, String createdAt, String updatedAt, List<Media> media) {
+    public Message(@NonNull String _id, String conversation, User sender, String text, String type, String createdAt, String updatedAt, List<Media> media, boolean isDelete) {
         this._id = _id;
         this.conversation = conversation;
         this.sender = sender;
@@ -40,6 +41,7 @@ public class Message implements Serializable {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.media = media;
+        this.isDelete = isDelete;
     }
 
     public String getId() {
@@ -106,6 +108,14 @@ public class Message implements Serializable {
         this.media = media;
     }
 
+    public boolean isDelete() {
+        return isDelete;
+    }
+
+    public void setDelete(boolean delete) {
+        isDelete = delete;
+    }
+
     @Override
     public String toString() {
         return "Message{" +
@@ -117,6 +127,7 @@ public class Message implements Serializable {
                 ", createdAt='" + createdAt + '\'' +
                 ", updatedAt='" + updatedAt + '\'' +
                 ", media=" + media +
+                ", isDelete=" + isDelete +
                 '}';
     }
 }

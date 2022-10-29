@@ -1,24 +1,26 @@
 package com.hisu.zola.adapters;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.hisu.zola.R;
 import com.hisu.zola.database.entity.Media;
-import com.hisu.zola.databinding.LayoutChatReceiveBinding;
-import com.hisu.zola.databinding.LayoutChatSendBinding;
 import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.databinding.LayoutChatReceiveBinding;
+import com.hisu.zola.databinding.LayoutChatSendBinding;
 import com.hisu.zola.util.local.LocalDataManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -31,6 +33,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     public MessageAdapter(Context mContext) {
         this.mContext = mContext;
+        messages = new ArrayList<>();
     }
 
     public MessageAdapter(List<Message> messages, Context context) {
@@ -44,7 +47,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     public void setMessages(List<Message> mMessages) {
-        this.messages = mMessages;
+        this.messages.clear();
+        this.messages.addAll(mMessages);
         notifyDataSetChanged();
     }
 
@@ -67,33 +71,38 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         Message message = messages.get(position);
 
         if (holder.getItemViewType() == MSG_SEND_TYPE) {
-            ((MessageSendViewHolder) holder).displayMessageContent(mContext, message);
+
+            final MessageSendViewHolder sendViewHolder = ((MessageSendViewHolder) holder);
+            sendViewHolder.displayMessageContent(mContext, message);
 
         } else if (holder.getItemViewType() == MSG_RECEIVE_TYPE) {
 
-            Glide.with(mContext).load(message.getSender().getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(((MessageReceiveViewHolder) holder).binding.ivUserPfp);
+            final MessageReceiveViewHolder receiveViewHolder = ((MessageReceiveViewHolder) holder);
+
+            Glide.with(mContext).load(message.getSender().getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(receiveViewHolder.binding.ivUserPfp);
 
             if (position == 0)
-                ((MessageReceiveViewHolder) holder).binding.ivUserPfp.setVisibility(View.VISIBLE);
+                receiveViewHolder.binding.ivUserPfp.setVisibility(View.VISIBLE);
             else if (position == messages.size() - 1)
-                ((MessageReceiveViewHolder) holder).binding.ivUserPfp.setVisibility(View.VISIBLE);
+                receiveViewHolder.binding.ivUserPfp.setVisibility(View.VISIBLE);
             else if (messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
                     && !messages.get(position + 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
-                ((MessageReceiveViewHolder) holder).binding.ivUserPfp.setVisibility(View.VISIBLE);
+                receiveViewHolder.binding.ivUserPfp.setVisibility(View.VISIBLE);
             else if (!messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
                     && !messages.get(position + 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
-                ((MessageReceiveViewHolder) holder).binding.ivUserPfp.setVisibility(View.VISIBLE);
+                receiveViewHolder.binding.ivUserPfp.setVisibility(View.VISIBLE);
             else
-                ((MessageReceiveViewHolder) holder).binding.ivUserPfp.setVisibility(View.INVISIBLE);
+                receiveViewHolder.binding.ivUserPfp.setVisibility(View.INVISIBLE);
 
-            ((MessageReceiveViewHolder) holder).displayMessageContent(mContext, message);
+            receiveViewHolder.displayMessageContent(mContext, message);
         }
     }
 
     @Override
     public int getItemViewType(int position) {
         User currentUser = LocalDataManager.getCurrentUserInfo();
-        return messages.get(position).getSender().getId().equalsIgnoreCase(currentUser.getId()) ?
+        User sender = messages.get(position).getSender();
+        return currentUser.getId().equalsIgnoreCase(sender.getId()) ?
                 MSG_SEND_TYPE : MSG_RECEIVE_TYPE;
     }
 
@@ -102,7 +111,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         return messages != null ? messages.size() : 0;
     }
 
-    private static class MessageSendViewHolder extends RecyclerView.ViewHolder {
+    public static class MessageSendViewHolder extends RecyclerView.ViewHolder {
 
         private final LayoutChatSendBinding binding;
 
@@ -112,21 +121,38 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
 
         private void displayMessageContent(Context context, Message message) {
-            if (message.getType().equalsIgnoreCase("text")) {
+
+            if (message.isDelete()) {
                 binding.imgMsgSend.setVisibility(View.GONE);
                 binding.tvMsgSend.setVisibility(View.VISIBLE);
+                binding.tvMsgSend.setTextColor(context.getColor(R.color.gray));
+                binding.tvMsgSend.setBackground(ContextCompat.getDrawable(context, R.drawable.message_removed));
+                binding.tvMsgSend.setText(context.getString(R.string.message_removed));
+            } else if (message.getType().equalsIgnoreCase("text")) {
+                binding.imgMsgSend.setVisibility(View.GONE);
+                binding.tvMsgSend.setVisibility(View.VISIBLE);
+                binding.tvMsgSend.setTextColor(context.getColor(R.color.white));
+                binding.tvMsgSend.setBackground(ContextCompat.getDrawable(context, R.drawable.message_send));
                 binding.tvMsgSend.setText(message.getText());
-            }
-            else {
-                binding.tvMsgSend.setVisibility(View.GONE);
-                binding.imgMsgSend.setVisibility(View.VISIBLE);
-                Media media = message.getMedia().get(0);
-                Glide.with(context).load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(binding.imgMsgSend);
+            } else {
+                if (message.getMedia().size() == 1) {
+                    binding.tvMsgSend.setVisibility(View.GONE);
+                    binding.imgMsgSend.setVisibility(View.VISIBLE);
+                    binding.groupImg.setVisibility(View.GONE);
+                    Media media = message.getMedia().get(0);
+                    Glide.with(context).load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(binding.imgMsgSend);
+                } else {
+                    binding.tvMsgSend.setVisibility(View.GONE);
+                    binding.imgMsgSend.setVisibility(View.GONE);
+                    binding.groupImg.setVisibility(View.VISIBLE);
+                    binding.groupImg.setLayoutManager(new GridLayoutManager(context, 2));
+                    binding.groupImg.setAdapter(new ImageGroupAdapter(message.getMedia(), context));
+                }
             }
         }
     }
 
-    private static class MessageReceiveViewHolder extends RecyclerView.ViewHolder {
+    public static class MessageReceiveViewHolder extends RecyclerView.ViewHolder {
 
         private final LayoutChatReceiveBinding binding;
 
@@ -136,17 +162,31 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
 
         private void displayMessageContent(Context context, Message message) {
-            if (message.getType().equalsIgnoreCase("text")) {
+
+            if (message.isDelete()) {
+                binding.imgMsgReceive.setVisibility(View.GONE);
+                binding.tvMsgReceive.setVisibility(View.VISIBLE);
+                binding.tvMsgReceive.setTextColor(context.getColor(R.color.gray));
+                binding.tvMsgReceive.setBackground(ContextCompat.getDrawable(context, R.drawable.message_removed));
+                binding.tvMsgReceive.setText(context.getString(R.string.message_removed));
+            } else if (message.getType().equalsIgnoreCase("text")) {
                 binding.imgMsgReceive.setVisibility(View.GONE);
                 binding.tvMsgReceive.setVisibility(View.VISIBLE);
                 binding.tvMsgReceive.setText(message.getText());
-            }
-            else {
-                binding.tvMsgReceive.setVisibility(View.GONE);
-                binding.imgMsgReceive.setVisibility(View.VISIBLE);
-
-                Media media = message.getMedia().get(0);
-                Glide.with(context).load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(binding.imgMsgReceive);
+            } else {
+                if (message.getMedia().size() == 1) {
+                    binding.tvMsgReceive.setVisibility(View.GONE);
+                    binding.imgMsgReceive.setVisibility(View.VISIBLE);
+                    binding.groupImg.setVisibility(View.GONE);
+                    Media media = message.getMedia().get(0);
+                    Glide.with(context).load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(binding.imgMsgReceive);
+                } else {
+                    binding.tvMsgReceive.setVisibility(View.GONE);
+                    binding.imgMsgReceive.setVisibility(View.GONE);
+                    binding.groupImg.setVisibility(View.VISIBLE);
+                    binding.groupImg.setLayoutManager(new GridLayoutManager(context, 2));
+                    binding.groupImg.setAdapter(new ImageGroupAdapter(message.getMedia(), context));
+                }
             }
         }
     }

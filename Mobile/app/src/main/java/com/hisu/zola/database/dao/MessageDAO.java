@@ -5,6 +5,7 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import com.hisu.zola.database.entity.Message;
 
@@ -18,9 +19,12 @@ public interface MessageDAO {
     @Query("select * from messages where _id = :messageID")
     Message getMessageById(String messageID);
 
-    @Query("select * from messages where conversation = :conversationID")
+    @Query("select * from messages where conversation = :conversationID order by createdAt")
     LiveData<List<Message>> getMessages(String conversationID);
 
-    @Query("update messages set text = :text where _id = :id")
-    void updateMessage(String id, String text);
+    @Update
+    void updateMessage(Message message);
+
+    @Query("update messages set isDelete = :isDelete where _id = :id")
+    void unsent(String id, boolean isDelete);
 }

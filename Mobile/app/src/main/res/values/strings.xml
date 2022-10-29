@@ -103,6 +103,8 @@
     <string name="friend_request_delete">Xoá</string>
     <string name="friend_request_decline">Từ chối</string>
     <string name="friend_request_cancel">Thu hồi</string>
+    <string name="friend_request_sent_success">Gửi lời mời kết bạn thành công!</string>
+    <string name="friend_request_accept_success">Chúc mừng! Bạn vừa có thêm 1 người bạn mới! Giờ đây các bạn có thể trò chuyện với nhau bất cứ lúc nào!</string>
     <string name="friend_from_contact">Danh bạ máy</string>
     <string name="friend_from_contact_desc">Các liên hệ có dùng Zola</string>
     <string name="typing">Đang nhập &#8230;</string>
@@ -154,6 +156,7 @@
     <string name="empty_nickname_err">Bạn vui lòng nhập tên gợi nhớ!</string>
     <string name="empty_err_displayname">Bạn chưa nhập tên hiển thị!</string>
     <string name="user_not_found">Số điện thoại bạn tìm kiếm chưa đăng ký tài khoản!</string>
+    <string name="message_removed">Tin nhắn đã thu hồi</string>
 
     <!--Notification Channels-->
     <string name="system_noty_channel_id">zola notification id</string>
@@ -163,5 +166,7 @@
     <string name="action_message">Tin nhắn</string>
     <string name="action_contact">Danh bạ</string>
     <string name="action_profile">Cá nhân</string>
+    <string name="action_remove_msg">Thu hồi</string>
+    <string name="action_forward_msg">Chuyển tiếp</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

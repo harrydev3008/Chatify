@@ -1,6 +1,7 @@
 package com.hisu.zola.fragments.conversation;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -18,7 +19,9 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.ThreeBounce;
@@ -44,12 +47,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 
 import gun0912.tedimagepicker.builder.TedImagePicker;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -69,6 +74,8 @@ public class ConversationFragment extends Fragment {
     private Conversation conversation;
     private String conversationName;
     private boolean isToggleEmojiButton = false;
+    private MessageAdapter messageAdapter;
+    private List<Message> currentMessageList;
 
     public static ConversationFragment newInstance(Conversation conversation, String conversationName) {
         Bundle args = new Bundle();
@@ -103,6 +110,7 @@ public class ConversationFragment extends Fragment {
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
 
         mSocket.on("msg-receive", onMessageReceive);
+        mSocket.on("delete-receive", onMessageDeleteReceive);
         mSocket.on("typing", onTyping);
 
         initRecyclerView();
@@ -186,15 +194,16 @@ public class ConversationFragment extends Fragment {
     }
 
     private void initRecyclerView() {
-        MessageAdapter messageAdapter = new MessageAdapter(mMainActivity);
-
+        currentMessageList = new ArrayList<>();
+        messageAdapter = new MessageAdapter(mMainActivity);
         viewModel = new ViewModelProvider(mMainActivity).get(ConversationViewModel.class);
 
         viewModel.getData(conversation.getId()).observe(mMainActivity, new Observer<List<Message>>() {
             @Override
             public void onChanged(List<Message> messages) {
-                messageAdapter.setMessages(messages);
-                mBinding.rvConversation.setAdapter(messageAdapter);
+                currentMessageList.clear();
+                currentMessageList.addAll(messages);
+                messageAdapter.setMessages(currentMessageList);
             }
         });
 
@@ -204,6 +213,11 @@ public class ConversationFragment extends Fragment {
         mBinding.rvConversation.setLayoutManager(
                 linearLayoutManager
         );
+
+        mBinding.rvConversation.setAdapter(messageAdapter);
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+        itemTouchHelper.attachToRecyclerView(mBinding.rvConversation);
     }
 
     private void setConversationInfo(String conversationName, String conversationStatus) {
@@ -310,8 +324,31 @@ public class ConversationFragment extends Fragment {
         emitMsg.addProperty("text", message.getText());
         emitMsg.addProperty("type", message.getType());
         emitMsg.add("media", gson.toJsonTree(message.getMedia()));
+        emitMsg.add("isDelete", gson.toJsonTree(message.isDelete()));
 
         mSocket.emit("send-msg", emitMsg);
+
+        mBinding.edtChat.setText("");
+        mBinding.edtChat.requestFocus();
+    }
+
+    private void delete(Message message) {
+        if (!mSocket.connected()) {
+            mSocket.connect();
+        }
+
+        Gson gson = new Gson();
+        viewModel.insertOrUpdate(message);
+
+        JsonObject emitMsg = new JsonObject();
+        emitMsg.add("conversation", gson.toJsonTree(conversation));
+        emitMsg.add("sender", gson.toJsonTree(LocalDataManager.getCurrentUserInfo()));
+        emitMsg.addProperty("text", message.getText());
+        emitMsg.addProperty("type", message.getType());
+        emitMsg.add("media", gson.toJsonTree(message.getMedia()));
+        emitMsg.add("isDelete", gson.toJsonTree(message.isDelete()));
+
+        mSocket.emit("delete-msg", emitMsg);
 
         mBinding.edtChat.setText("");
         mBinding.edtChat.requestFocus();
@@ -391,7 +428,6 @@ public class ConversationFragment extends Fragment {
                 if (data != null) {
 
                     try {
-
                         Gson gson = new Gson();
 
                         Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
@@ -402,7 +438,7 @@ public class ConversationFragment extends Fragment {
                         }.getType());
 
                         Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
-                                data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media);
+                                data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, false);
 
                         viewModel.insertOrUpdate(message);
 
@@ -413,6 +449,62 @@ public class ConversationFragment extends Fragment {
             });
         }
     };
+
+    private final Emitter.Listener onMessageDeleteReceive = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            mMainActivity.runOnUiThread(() -> {
+                JSONObject data = (JSONObject) args[0];
+                if (data != null) {
+
+                    try {
+                        Gson gson = new Gson();
+
+                        Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
+
+                        User sender = gson.fromJson(data.getString("sender"), User.class);
+
+                        List<Media> media = gson.fromJson(data.get("media").toString(), new TypeToken<List<Media>>() {
+                        }.getType());
+
+                        Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
+                                data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, true);
+
+                        viewModel.unsent(message);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    };
+
+    private void unsentMessage(Message message) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            JsonObject object = new JsonObject();
+            object.addProperty("id", message.getId());
+            RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+            ApiService.apiService.unsentMessage(body).enqueue(new Callback<Object>() {
+                @Override
+                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                    if(response.isSuccessful() && response.code() == 200) {
+                        message.setDelete(true);
+                        delete(message);
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                    Log.e("API_ERR", t.getLocalizedMessage());
+                }
+            });
+        });
+    }
+
+    private void forwardMessage(Message message) {
+        //Todo: forward message
+    }
 
     private final Emitter.Listener onTyping = new Emitter.Listener() {
         @Override
@@ -427,6 +519,45 @@ public class ConversationFragment extends Fragment {
                         mBinding.typing.setVisibility(View.GONE);
                 }
             });
+        }
+    };
+
+    ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public int getSwipeDirs(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+            if(viewHolder instanceof MessageAdapter.MessageReceiveViewHolder) return 0;
+
+            int pos = viewHolder.getBindingAdapterPosition();
+            if(currentMessageList.get(pos).isDelete())  return 0;
+
+            return super.getSwipeDirs(recyclerView, viewHolder);
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            int pos = viewHolder.getBindingAdapterPosition();
+            Message message = currentMessageList.get(pos);
+
+            if (direction == ItemTouchHelper.LEFT) {
+                unsentMessage(message);
+            }
+        }
+
+        @Override
+        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+
+            new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                    .addSwipeLeftBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.danger))
+                    .addSwipeLeftActionIcon(R.drawable.ic_delete_white)
+                    .create()
+                    .decorate();
+
+            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
         }
     };
 }

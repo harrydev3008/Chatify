@@ -38,7 +38,7 @@ public class FriendRequestReceiveFragment extends Fragment {
         User curUser = LocalDataManager.getCurrentUserInfo();
 
         mBinding.rvFriendRequestReceive.setAdapter(
-                new FriendRequestReceiveAdapter(List.of(), mainActivity)
+                new FriendRequestReceiveAdapter(curUser.getFriends(), mainActivity)
         );
 
         mBinding.rvFriendRequestReceive.setLayoutManager(
