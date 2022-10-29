@@ -91,7 +91,7 @@ public class EditProfileFragment extends Fragment {
             e.printStackTrace();
         }
 
-        if (user.isVerifyOTP())
+        if (user.isGender())
             mBinding.rBtnGenderM.setChecked(true);
         else
             mBinding.rBtnGenderF.setChecked(true);

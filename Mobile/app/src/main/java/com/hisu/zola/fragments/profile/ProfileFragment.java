@@ -42,7 +42,7 @@ public class ProfileFragment extends Fragment {
         User user = LocalDataManager.getCurrentUserInfo();
         Glide.with(mMainActivity).load(user.getAvatarURL())
                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(mBinding.cimvUserAvatar);
-        mBinding.tvGender.setText(user.isVerifyOTP() ? getString(R.string.gender_m) : getString(R.string.gender_f));
+        mBinding.tvGender.setText(user.isGender() ? getString(R.string.gender_m) : getString(R.string.gender_f));
         mBinding.tvDob.setText(user.getId());
         mBinding.tvDisplayName.setText(user.getUsername());
         mBinding.tvPhoneNumber.setText(user.getPhoneNumber());

@@ -10,12 +10,12 @@ import java.util.List;
 
 public class ListFriendConverter {
     @TypeConverter
-    public String listToJson(List<String> friends) {
+    public String listToJson(List<User> friends) {
         return new Gson().toJson(friends);
     }
 
     @TypeConverter
-    public List<String> jsonToList(String json) {
-        return new Gson().fromJson(json, new TypeToken<List<String>>() {}.getType());
+    public List<User> jsonToList(String json) {
+        return new Gson().fromJson(json, new TypeToken<List<User>>() {}.getType());
     }
 }

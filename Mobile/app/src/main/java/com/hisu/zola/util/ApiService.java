@@ -67,6 +67,9 @@ public interface ApiService {
     @POST("api/message/sendMessage")
     Call<Object> sendMessage(@Body RequestBody message);
 
+    @POST("api/message/deleteMessage")
+    Call<Object> unsentMessage(@Body RequestBody message);
+
     @Multipart
     @POST("api/message/uploadFile")
     Call<Object> postImage(@Part MultipartBody.Part image);

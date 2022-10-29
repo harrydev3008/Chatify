@@ -28,10 +28,10 @@ public class User implements Serializable {
     private boolean gender;//T -> male, false -> female
 
     @TypeConverters(ListFriendConverter.class)
-    private List<String> friends;
+    private List<User> friends;
 
     @TypeConverters(ListFriendConverter.class)
-    private List<String> friendsQueue;
+    private List<User> friendsQueue;
 
     @Ignore
     public User() {
@@ -114,19 +114,19 @@ public class User implements Serializable {
         isVerifyOTP = verifyOTP;
     }
 
-    public List<String> getFriends() {
+    public List<User> getFriends() {
         return friends;
     }
 
-    public void setFriends(List<String> friends) {
+    public void setFriends(List<User> friends) {
         this.friends = friends;
     }
 
-    public List<String> getFriendsQueue() {
+    public List<User> getFriendsQueue() {
         return friendsQueue;
     }
 
-    public void setFriendsQueue(List<String> friendsQueue) {
+    public void setFriendsQueue(List<User> friendsQueue) {
         this.friendsQueue = friendsQueue;
     }
 

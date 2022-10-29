@@ -40,8 +40,13 @@ public class MessageRepository {
 
     private void update(Message message) {
         Database.dbExecutor.execute(() -> {
-            messageDAO.updateMessage(message.getId(), message.getText());
+            messageDAO.updateMessage(message);
         });
     }
 
+    public void unsent(Message message) {
+        Database.dbExecutor.execute(() -> {
+            messageDAO.unsent(message.getId(), message.isDelete());
+        });
+    }
 }

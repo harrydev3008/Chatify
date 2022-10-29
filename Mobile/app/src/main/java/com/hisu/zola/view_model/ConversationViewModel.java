@@ -27,4 +27,8 @@ public class ConversationViewModel extends AndroidViewModel {
     public void insertOrUpdate(Message message) {
         repository.insertOrUpdate(message);
     }
+
+    public void unsent(Message message) {
+        repository.unsent(message);
+    }
 }

@@ -14,22 +14,27 @@
         android:layout_height="wrap_content"
         android:background="@drawable/message_send"
         android:fontFamily="@font/roboto"
-        android:maxWidth="360dp"
+        android:maxWidth="300dp"
         android:paddingHorizontal="12dp"
         android:paddingVertical="6dp"
         android:text="@string/slogan"
         android:textColor="@color/white"
-        android:textSize="22sp" />
+        android:textSize="20sp" />
 
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/img_msg_send"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
-        android:maxWidth="350dp"
+        android:maxWidth="320dp"
         android:maxHeight="200dp"
         app:riv_corner_radius="10dp"
         android:scaleType="centerCrop"
         android:src="@drawable/bg_profile"
         tools:ignore="ContentDescription" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/group_img"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"/>
 </LinearLayout>
