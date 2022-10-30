@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
@@ -22,20 +23,25 @@ public class ProfileFragment extends Fragment {
     private MainActivity mMainActivity;
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mMainActivity = (MainActivity) getActivity();
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        mMainActivity = (MainActivity) getActivity();
-
         mBinding = FragmentProfileBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         loadUserInfo();
         addActionForBtnEditProfile();
         addActionForBtnSetting();
-
         mMainActivity.setProgressbarVisibility(View.GONE);
-
-        return mBinding.getRoot();
     }
 
     private void loadUserInfo() {

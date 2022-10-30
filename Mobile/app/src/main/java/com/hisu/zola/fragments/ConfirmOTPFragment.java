@@ -16,7 +16,9 @@ import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentConfirmOtpBinding;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.fragments.authenticate.LoginFragment;
 import com.hisu.zola.fragments.authenticate.RegisterUserInfoFragment;
+import com.hisu.zola.fragments.authenticate.ResetPasswordFragment;
 
 public class ConfirmOTPFragment extends Fragment {
 
@@ -24,6 +26,7 @@ public class ConfirmOTPFragment extends Fragment {
     private static final String USER_ARGS = "USER_ARGS";
     public static final String REGISTER_ARGS = "REGISTER_ARGS";
     public static final String CHANGE_PHONE_NO_ARGS = "CHANGE_PHONE_NO_ARGS";
+    public static final String FORGOT_PWD_ARGS = "FORGOT_PWD_ARGS";
     private String argument;
     private User user;
 
@@ -44,6 +47,8 @@ public class ConfirmOTPFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mainActivity = (MainActivity) getActivity();
+
         if (getArguments() != null) {
             argument = getArguments().getString(OTP_ARGS);
             user = (User) getArguments().getSerializable(USER_ARGS);
@@ -53,14 +58,22 @@ public class ConfirmOTPFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        mainActivity = (MainActivity) getActivity();
         mBinding = FragmentConfirmOtpBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        backToPrevPage();
         initOTPInput();
         addActionForBtnVerifyOTP();
+    }
 
-        return mBinding.getRoot();
+    private void backToPrevPage() {
+        mBinding.iBtnBack.setOnClickListener(view -> {
+            mainActivity.getSupportFragmentManager().popBackStackImmediate();
+        });
     }
 
     private void initOTPInput() {
@@ -191,12 +204,24 @@ public class ConfirmOTPFragment extends Fragment {
     }
 
     private void switchToNextPage() {
-        if (argument.equals(REGISTER_ARGS)) {
-            mainActivity.setFragment(RegisterUserInfoFragment.newInstance(user));
-        } else if (argument.equals(CHANGE_PHONE_NO_ARGS)) {
-            mainActivity.getSupportFragmentManager().popBackStackImmediate();
-            mainActivity.getSupportFragmentManager().popBackStackImmediate();
-            mainActivity.getSupportFragmentManager().popBackStackImmediate();
+        switch (argument) {
+            case REGISTER_ARGS:
+                mainActivity.setFragment(RegisterUserInfoFragment.newInstance(user));
+                break;
+            case CHANGE_PHONE_NO_ARGS:
+                new android.app.AlertDialog.Builder(mainActivity)
+                        .setMessage(getString(R.string.change_phone_no_success))
+                        .setPositiveButton(getString(R.string.confirm), (dialogInterface, i) -> {
+                            mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                            mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                            mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                        })
+                        .show();
+                break;
+            case FORGOT_PWD_ARGS:
+                mainActivity.setFragment(ResetPasswordFragment.newInstance(ResetPasswordFragment.FORGOT_PWD_ARGS));
+
+                break;
         }
     }
 }

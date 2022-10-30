@@ -25,6 +25,6 @@ public interface MessageDAO {
     @Update
     void updateMessage(Message message);
 
-    @Query("update messages set isDelete = :isDelete where _id = :id")
+    @Query("update messages set isDeleted = :isDelete where _id = :id")
     void unsent(String id, boolean isDelete);
 }

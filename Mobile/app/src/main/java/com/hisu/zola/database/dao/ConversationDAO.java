@@ -5,6 +5,7 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import com.hisu.zola.database.entity.Conversation;
 
@@ -24,5 +25,6 @@ public interface ConversationDAO {
     @Query("update conversations set label = :label where _id = :id")
     void updateConversationName(String id, String label);
 
-
+    @Update
+    void update(Conversation conversation);
 }

@@ -36,6 +36,9 @@ public class ConversationDetailFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mainActivity = (MainActivity) getActivity();
+
         if (getArguments() != null) {
             user = (User) getArguments().getSerializable(USER_ARGS);
         }
@@ -44,19 +47,19 @@ public class ConversationDetailFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        mainActivity = (MainActivity) getActivity();
-
         mBinding = FragmentConversationDetailBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         loadUserDetail(user);
         addActionForBackBtn();
         addActionForEventChangeNickName();
         addActionForEventViewSentFiles();
         addActionForEventDeleteConversation();
         addActionForEventUnfriend();
-
-        return mBinding.getRoot();
     }
 
     private void loadUserDetail(User user) {

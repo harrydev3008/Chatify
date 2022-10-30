@@ -122,7 +122,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         private void displayMessageContent(Context context, Message message) {
 
-            if (message.isDelete()) {
+            if (message.getDeleted()) {
                 binding.imgMsgSend.setVisibility(View.GONE);
                 binding.tvMsgSend.setVisibility(View.VISIBLE);
                 binding.tvMsgSend.setTextColor(context.getColor(R.color.gray));
@@ -163,7 +163,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         private void displayMessageContent(Context context, Message message) {
 
-            if (message.isDelete()) {
+            if (message.getDeleted()) {
                 binding.imgMsgReceive.setVisibility(View.GONE);
                 binding.tvMsgReceive.setVisibility(View.VISIBLE);
                 binding.tvMsgReceive.setTextColor(context.getColor(R.color.gray));
@@ -172,6 +172,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             } else if (message.getType().equalsIgnoreCase("text")) {
                 binding.imgMsgReceive.setVisibility(View.GONE);
                 binding.tvMsgReceive.setVisibility(View.VISIBLE);
+                binding.tvMsgReceive.setTextColor(context.getColor(R.color.chat_text_color));
+                binding.tvMsgReceive.setBackground(ContextCompat.getDrawable(context, R.drawable.message_receive));
                 binding.tvMsgReceive.setText(message.getText());
             } else {
                 if (message.getMedia().size() == 1) {

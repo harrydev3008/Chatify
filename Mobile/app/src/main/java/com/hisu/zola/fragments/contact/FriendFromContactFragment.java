@@ -3,12 +3,12 @@ package com.hisu.zola.fragments.contact;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -16,13 +16,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.adapters.FriendFromContactAdapter;
-import com.hisu.zola.databinding.FragmentFriendFromContactBinding;
 import com.hisu.zola.database.entity.ContactUser;
+import com.hisu.zola.databinding.FragmentFriendFromContactBinding;
+import com.tomash.androidcontacts.contactgetter.entity.ContactData;
+import com.tomash.androidcontacts.contactgetter.main.contactsGetter.ContactsGetterBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import jagerfield.mobilecontactslibrary.ImportContactsAsync;
 
 public class FriendFromContactFragment extends Fragment {
 
@@ -33,22 +33,30 @@ public class FriendFromContactFragment extends Fragment {
     private List<ContactUser> contactUsers;
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mainActivity = (MainActivity) getActivity();
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        mainActivity = (MainActivity) getActivity();
         mBinding = FragmentFriendFromContactBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         init();
         backToPrevPage();
         addActionForBtnSyncFromContact();
-
-        return mBinding.getRoot();
     }
 
     private void init() {
         contactUsers = new ArrayList<>();
-        adapter = new FriendFromContactAdapter();
+        adapter = new FriendFromContactAdapter(mainActivity);
         mBinding.rvFriendsFromContact.setAdapter(adapter);
         mBinding.rvFriendsFromContact.setLayoutManager(new LinearLayoutManager(mainActivity));
     }
@@ -81,42 +89,18 @@ public class FriendFromContactFragment extends Fragment {
     }
 
     public void getContacts() {
-        new ImportContactsAsync(mainActivity, contacts -> {
-            contactUsers.clear();
+        List<ContactData> contactDataList = new ContactsGetterBuilder(mainActivity)
+                .allFields()
+                .buildList();
 
-//            String res = "";
+        for (ContactData contactData : contactDataList)
+            if (contactData.getPhoneList().size() != 0)
+                contactUsers.add(new ContactUser(contactData.getCompositeName(),
+                        contactData.getPhoneList().get(0).getMainData(),
+                        contactData.getPhotoUri())
+                );
 
-
-//            contacts.forEach(contact -> {
-
-//                if (contact.getNumbers() != null) {
-//                    if (contact.getNumbers().get(0) != null)
-//                        Log.e("test", contact.getDisplaydName() + " - " + contact.getNumbers().get(0));
-//                }
-
-
-//                res += contact.toString();
-
-//
-//
-//
-////                ContactUser contactUser = new ContactUser(
-////                        contact.getDisplaydName(),
-////                        contact.getNumbers().size()+"!", ""
-////                );
-////
-////                if (contact.getPhotoUri() != null)
-////                    contactUser.setAvatar(contact.getPhotoUri());
-////                else
-////                    contactUser.setImageBitmap(
-////                            ImageConvertUtil.createImageFromText(mainActivity,
-////                                    150, 150, contactUser.getName())
-////                    );
-//
-////                contactUsers.add(contactUser);
-//            });
-            Log.e("test", contacts.size() + "!");
-//            adapter.setContactUsers(contactUsers);
-        }).execute();
+        adapter.setContactUsers(contactUsers);
     }
+
 }

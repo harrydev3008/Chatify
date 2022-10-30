@@ -92,6 +92,8 @@ public class ConversationFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mMainActivity = (MainActivity) getActivity();
+
         if (getArguments() != null) {
             conversation = (Conversation) getArguments().getSerializable(CONVERSATION_ARGS);
             conversationName = getArguments().getString(CONVERSATION_NAME_ARGS);
@@ -101,9 +103,13 @@ public class ConversationFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        mMainActivity = (MainActivity) getActivity();
         mBinding = FragmentConversationBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         SocketIOHandler.getInstance().establishSocketConnection();
 
@@ -127,11 +133,9 @@ public class ConversationFragment extends Fragment {
         addActionForSendMessageBtn();
         addToggleShowSendIcon();
 
-        mBinding.btnSendImg.setOnClickListener(view -> openBottomImagePicker());
+        mBinding.btnSendImg.setOnClickListener(imgView -> openBottomImagePicker());
 
         loadConversation(conversation.getId());
-
-        return mBinding.getRoot();
     }
 
     private void initEmojiKeyboard() {
@@ -324,7 +328,7 @@ public class ConversationFragment extends Fragment {
         emitMsg.addProperty("text", message.getText());
         emitMsg.addProperty("type", message.getType());
         emitMsg.add("media", gson.toJsonTree(message.getMedia()));
-        emitMsg.add("isDelete", gson.toJsonTree(message.isDelete()));
+        emitMsg.add("isDelete", gson.toJsonTree(message.getDeleted()));
 
         mSocket.emit("send-msg", emitMsg);
 
@@ -346,7 +350,7 @@ public class ConversationFragment extends Fragment {
         emitMsg.addProperty("text", message.getText());
         emitMsg.addProperty("type", message.getType());
         emitMsg.add("media", gson.toJsonTree(message.getMedia()));
-        emitMsg.add("isDelete", gson.toJsonTree(message.isDelete()));
+        emitMsg.add("isDelete", gson.toJsonTree(message.getDeleted()));
 
         mSocket.emit("delete-msg", emitMsg);
 
@@ -489,7 +493,7 @@ public class ConversationFragment extends Fragment {
                 @Override
                 public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
                     if(response.isSuccessful() && response.code() == 200) {
-                        message.setDelete(true);
+                        message.setDeleted(true);
                         delete(message);
                     }
                 }
@@ -533,7 +537,7 @@ public class ConversationFragment extends Fragment {
             if(viewHolder instanceof MessageAdapter.MessageReceiveViewHolder) return 0;
 
             int pos = viewHolder.getBindingAdapterPosition();
-            if(currentMessageList.get(pos).isDelete())  return 0;
+            if(currentMessageList.get(pos).getDeleted())  return 0;
 
             return super.getSwipeDirs(recyclerView, viewHolder);
         }

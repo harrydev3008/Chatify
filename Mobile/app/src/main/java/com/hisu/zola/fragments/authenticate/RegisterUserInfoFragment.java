@@ -52,6 +52,8 @@ public class RegisterUserInfoFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mainActivity = (MainActivity) getActivity();
+
         if (getArguments() != null)
             user = (User) getArguments().getSerializable(REGISTER_KEY);
         else
@@ -61,15 +63,14 @@ public class RegisterUserInfoFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        mainActivity = (MainActivity) getActivity();
         mBinding = FragmentRegisterUserInfoBinding.inflate(inflater, container, false);
-
-        init();
-
-        Log.e("user data", user.toString());
-
         return mBinding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        init();
     }
 
     private void init() {
@@ -147,5 +148,11 @@ public class RegisterUserInfoFragment extends Fragment {
 
     private void uploadAvatar() {
         //Todo: upload default generated pfp
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mBinding = null;
     }
 }

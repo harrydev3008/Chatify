@@ -21,6 +21,8 @@
     <string name="old_password">Mật khẩu hiện tại</string>
     <string name="change_password">Đổi mật khẩu</string>
     <string name="forgot_password">Quên mật khẩu?</string>
+    <string name="forgot_pwd_new_pwd">Lấy lại mật khẩu</string>
+    <string name="forgot_pwd_new_pwd_desc">Nhập số điện thoại mà bạn đã dùng để đăng ký tài khoản để nhận mã xác thực</string>
     <string name="no_account">Chưa có tài khoản?</string>
     <string name="register_now">Đăng ký ngay!</string>
 
@@ -157,6 +159,13 @@
     <string name="empty_err_displayname">Bạn chưa nhập tên hiển thị!</string>
     <string name="user_not_found">Số điện thoại bạn tìm kiếm chưa đăng ký tài khoản!</string>
     <string name="message_removed">Tin nhắn đã thu hồi</string>
+    <string name="user_message_removed">Bạn: Tin nhắn đã thu hồi</string>
+    <string name="user_message_sent_image">[Hình ảnh]</string>
+    <string name="reset_password_success">Đổi mật khẩu thành công!</string>
+    <string name="change_phone_no_success">Đổi số điện thoại mới thành công!</string>
+    <string name="changes_not_save">Thông tin chưa được lưu, bạn có chắc chắn muốn huỷ?</string>
+    <string name="yes">Có</string>
+    <string name="no">Không</string>
 
     <!--Notification Channels-->
     <string name="system_noty_channel_id">zola notification id</string>

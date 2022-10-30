@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -15,9 +16,9 @@ import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.StarterSliderAdapter;
 import com.hisu.zola.databinding.FragmentStartScreenBinding;
-import com.hisu.zola.model.StarterSliderItem;
 import com.hisu.zola.fragments.authenticate.LoginFragment;
 import com.hisu.zola.fragments.authenticate.RegisterFragment;
+import com.hisu.zola.model.StarterSliderItem;
 
 import java.util.List;
 
@@ -40,17 +41,23 @@ public class StartScreenFragment extends Fragment {
     };
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         mMainActivity = (MainActivity) getActivity();
+    }
 
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mBinding = FragmentStartScreenBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         initViewPager();
         addActionForBtnLogin();
         addActionForBtnRegister();
-
-        return mBinding.getRoot();
     }
 
     private void initViewPager() {
@@ -120,5 +127,11 @@ public class StartScreenFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         mSliderHandler.removeCallbacks(mSliderRunnable);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mBinding = null;
     }
 }

@@ -2,6 +2,8 @@ package com.hisu.zola.fragments.conversation;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -18,12 +20,15 @@ public class SentFilesFragment extends Fragment {
     private MainActivity mainActivity;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         mainActivity = (MainActivity) getActivity();
-        mBinding = FragmentSentFilesBinding.inflate(inflater, container, false);
+    }
 
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        mBinding = FragmentSentFilesBinding.inflate(inflater, container, false);
         return mBinding.getRoot();
     }
 }

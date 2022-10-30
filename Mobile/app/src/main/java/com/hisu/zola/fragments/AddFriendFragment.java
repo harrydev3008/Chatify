@@ -9,6 +9,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -133,6 +134,7 @@ public class AddFriendFragment extends Fragment {
 
                                 if (foundUser != null) {
                                     mainActivity.runOnUiThread(() -> {
+                                        Toast.makeText(mainActivity, "here", Toast.LENGTH_SHORT).show();
                                         AddFriendDialog dialog = new AddFriendDialog(mainActivity, Gravity.CENTER, foundUser);
                                         dialog.showDialog();
                                     });

@@ -30,7 +30,7 @@ public class ConversationRepository {
             if(conversationDAO.getConversationById(conversation.getId()) == null)
                 insert(conversation);
             else
-                update(conversation.getId(), conversation.getLabel());
+                update(conversation);
         });
     }
 
@@ -40,9 +40,9 @@ public class ConversationRepository {
         });
     }
 
-    private void update(String id, String label) {
+    private void update(Conversation conversation) {
         Database.dbExecutor.execute(() -> {
-            conversationDAO.updateConversationName(id, label);
+            conversationDAO.update(conversation);
         });
     }
 }
