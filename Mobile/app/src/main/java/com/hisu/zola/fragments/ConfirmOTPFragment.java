@@ -144,14 +144,53 @@ public class ConfirmOTPFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (charSequence.length() > 0)
+                if (charSequence.length() > 0) {
                     mBinding.edtInputOtp4.setHint(mBinding.edtInputOtp4.getText());
+                    mBinding.edtInputOtp5.requestFocus();
+                }
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() < 1)
                     mBinding.edtInputOtp3.requestFocus();
+            }
+        });
+
+        mBinding.edtInputOtp5.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (charSequence.length() > 0) {
+                    mBinding.edtInputOtp5.setHint(mBinding.edtInputOtp4.getText());
+                    mBinding.edtInputOtp6.requestFocus();
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (editable.length() < 1)
+                    mBinding.edtInputOtp4.requestFocus();
+            }
+        });
+        mBinding.edtInputOtp6.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (charSequence.length() > 0)
+                    mBinding.edtInputOtp6.setHint(mBinding.edtInputOtp4.getText());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (editable.length() < 1)
+                    mBinding.edtInputOtp5.requestFocus();
             }
         });
     }
@@ -167,7 +206,9 @@ public class ConfirmOTPFragment extends Fragment {
         return mBinding.edtInputOtp1.getText().toString() +
                 mBinding.edtInputOtp2.getText().toString() +
                 mBinding.edtInputOtp3.getText().toString() +
-                mBinding.edtInputOtp4.getText().toString();
+                mBinding.edtInputOtp4.getText().toString() +
+                mBinding.edtInputOtp5.getText().toString() +
+                mBinding.edtInputOtp6.getText().toString();
     }
 
     private boolean verifyOTP(String otp) {
@@ -201,6 +242,8 @@ public class ConfirmOTPFragment extends Fragment {
         mBinding.edtInputOtp2.setText("");
         mBinding.edtInputOtp3.setText("");
         mBinding.edtInputOtp4.setText("");
+        mBinding.edtInputOtp5.setText("");
+        mBinding.edtInputOtp6.setText("");
     }
 
     private void switchToNextPage() {

@@ -47,6 +47,7 @@ public class ProfileFragment extends Fragment {
     private void loadUserInfo() {
         User user = LocalDataManager.getCurrentUserInfo();
         Glide.with(mMainActivity).load(user.getAvatarURL())
+                .placeholder(R.drawable.app_logo)
                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(mBinding.cimvUserAvatar);
         mBinding.tvGender.setText(user.isGender() ? getString(R.string.gender_m) : getString(R.string.gender_f));
         mBinding.tvDob.setText(user.getId());

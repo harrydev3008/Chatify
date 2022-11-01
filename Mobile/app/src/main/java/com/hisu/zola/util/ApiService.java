@@ -73,4 +73,13 @@ public interface ApiService {
     @Multipart
     @POST("api/message/uploadFile")
     Call<Object> postImage(@Part MultipartBody.Part image);
+
+    @POST("api/conversation/createConversation")
+    Call<Conversation> createConversation(@Body RequestBody conversation);
+
+//    @POST("api/user/update")
+//    Call<User> updateUser(@Body RequestBody userInfo);
+//
+//    @POST("api/otp")
+//    Call<Object> verifyOTP(@Body RequestBody otp);
 }

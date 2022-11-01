@@ -19,9 +19,16 @@ import com.hisu.zola.databinding.LayoutConversationBinding;
 import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.listeners.IOnConversationItemSelectedListener;
+import com.hisu.zola.util.converter.ImageConvertUtil;
+import com.hisu.zola.util.converter.TimeConverterUtil;
 import com.hisu.zola.util.local.LocalDataManager;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapter.ConversationViewHolder> {
 
@@ -67,27 +74,47 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
             Glide.with(mContext).load(conUser.getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(holder.binding.ivConversationCoverPhoto);
             holder.binding.tvConversationName.setText(conUser.getUsername());
         } else {
+//            holder.binding.ivConversationCoverPhoto.setImageBitmap(ImageConvertUtil.createImageFromText(mContext, 150,150, conversation.getLabel()));
             holder.binding.tvConversationName.setText(conversation.getLabel());
         }
 
         if (conversation.getLastMessage() != null) {
             Message lastMessage = conversation.getLastMessage();
-            if(lastMessage.getSender().getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId())){
-                if(lastMessage.getDeleted())
+            if (lastMessage.getSender().getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId())) {
+                if (lastMessage.getDeleted())
                     holder.binding.tvLastMsg.setText(mContext.getString(R.string.user_message_removed));
                 else {
-                    if(lastMessage.getType().equalsIgnoreCase("text")) {
-                        holder.binding.tvLastMsg.setText("Bạn: " + lastMessage.getText());
-                    }else {
+                    if (lastMessage.getType().equalsIgnoreCase("text")) {
+                        String textPlaceHolder = "Bạn: " + lastMessage.getText();
+                        holder.binding.tvLastMsg.setText(textPlaceHolder);//I wrote like this to avoid warning :)
+                    } else {
                         holder.binding.tvLastMsg.setText(mContext.getString(R.string.user_message_sent_image));
                     }
                 }
+            } else {
+//                if(conversation.getLabel() != null) todo: if group -> display sender name
+                    holder.binding.tvLastMsg.setText(lastMessage.getText());
             }
-            else
-                holder.binding.tvLastMsg.setText(lastMessage.getText());
+
+            Date date = TimeConverterUtil.getDateFromString(lastMessage.getUpdatedAt());
+
+            if(date != null) {
+                Date today = new Date();
+                Duration duration = Duration.between(date.toInstant(), today.toInstant());
+
+                if(duration.toDays() < 1) {
+                    if(duration.toHours() > 0 && duration.toHours() < 24)
+                        holder.binding.tvConversationActiveTime.setText(duration.toHours() + " giờ");
+                    else if(duration.toHours() < 1 && duration.toMinutes() < 60)
+                        holder.binding.tvConversationActiveTime.setText(duration.toMinutes() + " phút");
+                    else if(duration.toMinutes() == 0)
+                        holder.binding.tvConversationActiveTime.setText(mContext.getString(R.string.just_now));
+                } else {
+                    SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM", Locale.ENGLISH);
+                    holder.binding.tvConversationActiveTime.setText(outputFormat.format(date));
+                }
+            }
         }
-        else
-            holder.binding.tvLastMsg.setText("?");
 
         int unreadMsgQuantity = 0;
 

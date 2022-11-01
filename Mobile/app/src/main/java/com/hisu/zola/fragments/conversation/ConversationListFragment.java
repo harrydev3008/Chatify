@@ -29,6 +29,7 @@ import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.view_model.ConversationListViewModel;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Executors;
 
@@ -88,6 +89,9 @@ public class ConversationListFragment extends Fragment {
                             curConversations.add(conversation);
                     });
                 });
+
+                curConversations.sort((c1, c2) -> c2.getLastMessage().getUpdatedAt()
+                        .compareToIgnoreCase(c1.getLastMessage().getUpdatedAt()));
 
                 adapter.setConversations(curConversations);
                 mBinding.rvConversationList.setAdapter(adapter);

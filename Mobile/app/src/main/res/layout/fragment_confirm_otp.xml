@@ -157,6 +157,38 @@
                 android:textSize="24sp"
                 android:textStyle="bold"
                 tools:ignore="LabelFor" />
+
+            <EditText
+                android:id="@+id/edt_input_otp_5"
+                android:layout_width="40dp"
+                android:layout_height="45dp"
+                android:gravity="center"
+                android:imeOptions="actionNext"
+                android:importantForAutofill="no"
+                android:inputType="number"
+                android:maxLength="1"
+                android:textCursorDrawable="@drawable/edt_cursor"
+                android:theme="@style/EditTextTheme"
+                android:textColor="@color/gray"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                tools:ignore="LabelFor" />
+
+            <EditText
+                android:id="@+id/edt_input_otp_6"
+                android:layout_width="40dp"
+                android:layout_height="45dp"
+                android:gravity="center"
+                android:imeOptions="actionNext"
+                android:importantForAutofill="no"
+                android:inputType="number"
+                android:maxLength="1"
+                android:textCursorDrawable="@drawable/edt_cursor"
+                android:theme="@style/EditTextTheme"
+                android:textColor="@color/gray"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                tools:ignore="LabelFor" />
         </LinearLayout>
 
         <LinearLayout

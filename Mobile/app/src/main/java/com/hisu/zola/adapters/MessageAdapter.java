@@ -1,6 +1,7 @@
 package com.hisu.zola.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     private List<Message> messages;
     private final Context mContext;
+    private boolean isGroup;
 
     public MessageAdapter(Context mContext) {
         this.mContext = mContext;
@@ -40,6 +42,10 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.messages = messages;
         this.mContext = context;
         notifyDataSetChanged();
+    }
+
+    public void setGroup(boolean group) {
+        isGroup = group;
     }
 
     public List<Message> getMessages() {
@@ -94,6 +100,11 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             else
                 receiveViewHolder.binding.ivUserPfp.setVisibility(View.INVISIBLE);
 
+            if(isGroup) {
+                receiveViewHolder.binding.tvMemberName.setVisibility(View.VISIBLE);
+                receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
+            }
+
             receiveViewHolder.displayMessageContent(mContext, message);
         }
     }
@@ -121,7 +132,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
 
         private void displayMessageContent(Context context, Message message) {
-
             if (message.getDeleted()) {
                 binding.imgMsgSend.setVisibility(View.GONE);
                 binding.tvMsgSend.setVisibility(View.VISIBLE);
@@ -162,12 +172,11 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
 
         private void displayMessageContent(Context context, Message message) {
-
             if (message.getDeleted()) {
                 binding.imgMsgReceive.setVisibility(View.GONE);
-                binding.tvMsgReceive.setVisibility(View.VISIBLE);
+                binding.msgWrapper.setVisibility(View.VISIBLE);
                 binding.tvMsgReceive.setTextColor(context.getColor(R.color.gray));
-                binding.tvMsgReceive.setBackground(ContextCompat.getDrawable(context, R.drawable.message_removed));
+                binding.msgWrapper.setBackground(ContextCompat.getDrawable(context, R.drawable.message_removed));
                 binding.tvMsgReceive.setText(context.getString(R.string.message_removed));
             } else if (message.getType().equalsIgnoreCase("text")) {
                 binding.imgMsgReceive.setVisibility(View.GONE);
@@ -178,12 +187,12 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             } else {
                 if (message.getMedia().size() == 1) {
                     binding.tvMsgReceive.setVisibility(View.GONE);
-                    binding.imgMsgReceive.setVisibility(View.VISIBLE);
+                    binding.msgWrapper.setVisibility(View.VISIBLE);
                     binding.groupImg.setVisibility(View.GONE);
                     Media media = message.getMedia().get(0);
                     Glide.with(context).load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(binding.imgMsgReceive);
                 } else {
-                    binding.tvMsgReceive.setVisibility(View.GONE);
+                    binding.msgWrapper.setVisibility(View.GONE);
                     binding.imgMsgReceive.setVisibility(View.GONE);
                     binding.groupImg.setVisibility(View.VISIBLE);
                     binding.groupImg.setLayoutManager(new GridLayoutManager(context, 2));
