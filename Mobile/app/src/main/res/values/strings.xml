@@ -21,6 +21,8 @@
     <string name="old_password">Mật khẩu hiện tại</string>
     <string name="change_password">Đổi mật khẩu</string>
     <string name="forgot_password">Quên mật khẩu?</string>
+    <string name="forgot_pwd_new_pwd">Lấy lại mật khẩu</string>
+    <string name="forgot_pwd_new_pwd_desc">Nhập số điện thoại mà bạn đã dùng để đăng ký tài khoản để nhận mã xác thực</string>
     <string name="no_account">Chưa có tài khoản?</string>
     <string name="register_now">Đăng ký ngay!</string>
 
@@ -142,6 +144,20 @@
     <string name="user_birthday">Cảm ơn bạn đã đồng hành cùng Zola trong suốt thời gian qua!</string>
     <string name="user_birthday_greeting">Chúc bạn có một tuổi mới thật bùng nổ! Hạnh phúc bên gia đình và những người yêu thương!</string>
     <string name="change_phone_no_limit">Bạn chỉ có thể đổi số điện thoại 1 lần mỗi tháng.</string>
+    <string name="group_members">Xem thành viên</string>
+    <string name="group_members_desc">Thành viên nhóm</string>
+    <string name="add_group_members">Thêm thành viên</string>
+    <string name="add_member_to_members">Thêm vào nhóm</string>
+    <string name="group_lead_role">Trưởng nhóm</string>
+    <string name="group_lead_role_change">Chuyển quyền trưởng nhóm</string>
+    <string name="out_group">Rời nhóm</string>
+    <string name="kick_from_group">Xoá khỏi nhóm</string>
+    <string name="disband_group">Giải tán nhóm</string>
+    <string name="group_admin">Trưởng nhóm</string>
+    <string name="member_quan">Thành viên</string>
+    <string name="user">Bạn</string>
+    <string name="add_member_to_group_success">Thêm thành viên vào nhóm thành công!</string>
+    <string name="just_now">Vừa xong</string>
 
     <!--Error Messages-->
     <string name="empty_phone_no_err">Bạn chưa điền số điện thoại!</string>
@@ -157,6 +173,13 @@
     <string name="empty_err_displayname">Bạn chưa nhập tên hiển thị!</string>
     <string name="user_not_found">Số điện thoại bạn tìm kiếm chưa đăng ký tài khoản!</string>
     <string name="message_removed">Tin nhắn đã thu hồi</string>
+    <string name="user_message_removed">Bạn: Tin nhắn đã thu hồi</string>
+    <string name="user_message_sent_image">[Hình ảnh]</string>
+    <string name="reset_password_success">Đổi mật khẩu thành công!</string>
+    <string name="change_phone_no_success">Đổi số điện thoại mới thành công!</string>
+    <string name="changes_not_save">Thông tin chưa được lưu, bạn có chắc chắn muốn huỷ?</string>
+    <string name="yes">Có</string>
+    <string name="no">Không</string>
 
     <!--Notification Channels-->
     <string name="system_noty_channel_id">zola notification id</string>

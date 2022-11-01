@@ -3,6 +3,7 @@ package com.hisu.zola.fragments.contact;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
 
@@ -29,11 +30,23 @@ public class ContactsFragment extends Fragment {
     private PopupMenu popupMenu;
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mMainActivity = (MainActivity) getActivity();
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        mMainActivity = (MainActivity) getActivity();
         mBinding = FragmentContactsBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mMainActivity.setProgressbarVisibility(View.GONE);
 
         initPopupMenu();
         tapToCloseApp();
@@ -42,10 +55,6 @@ public class ContactsFragment extends Fragment {
 
         EditTextUtil.toggleShowClearIconOnEditText(mMainActivity, mBinding.edtSearch);
         EditTextUtil.clearTextOnSearchEditText(mBinding.edtSearch);
-
-        mMainActivity.setProgressbarVisibility(View.GONE);
-
-        return mBinding.getRoot();
     }
 
     private void initTabLabLayout() {

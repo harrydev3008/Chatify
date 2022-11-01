@@ -2,15 +2,15 @@ package com.hisu.zola.fragments;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.databinding.FragmentSplashScreenBinding;
@@ -26,29 +26,41 @@ public class SplashScreenFragment extends Fragment {
     public static final long DELAY_TIME = 2 * 1000; //2 secs
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mMainActivity = (MainActivity) getActivity();
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        mMainActivity = (MainActivity) getActivity();
-
         mBinding = FragmentSplashScreenBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
 
             mMainActivity.setBottomNavVisibility(View.GONE);
 
-            if(isUserLoggedIn()) {
+            if (isUserLoggedIn()) {
                 mMainActivity.setBottomNavVisibility(View.VISIBLE);
                 mMainActivity.addFragmentToBackStack(new ConversationListFragment());
-            }else
+            } else
                 mMainActivity.setFragment(new StartScreenFragment());
 
         }, DELAY_TIME);
-
-        return mBinding.getRoot();
     }
 
     private boolean isUserLoggedIn() {
         return LocalDataManager.getUserLoginState();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mBinding = null;
     }
 }

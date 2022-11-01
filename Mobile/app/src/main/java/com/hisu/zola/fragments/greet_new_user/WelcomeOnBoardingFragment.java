@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -19,17 +20,24 @@ public class WelcomeOnBoardingFragment extends Fragment {
     private MainActivity mainActivity;
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mainActivity = (MainActivity) getActivity();
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        mainActivity = (MainActivity) getActivity();
         mBinding = FragmentWelcomeOnBoardingBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         initViewPager();
         addActionForBtnSkip();
         addActionForBtnNext();
-
-        return mBinding.getRoot();
     }
 
     private void initViewPager() {
@@ -60,5 +68,11 @@ public class WelcomeOnBoardingFragment extends Fragment {
             if (currentItem < 3)
                 mBinding.vpOnBoarding.setCurrentItem(currentItem + 1);
         });
+    }
+
+    @Override
+    public void onDestroyView() {
+        mBinding = null;
+        super.onDestroyView();
     }
 }

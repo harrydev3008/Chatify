@@ -3,6 +3,7 @@ package com.hisu.zola.fragments.profile;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -19,16 +20,23 @@ public class ConfirmChangePhoneNumberFragment extends Fragment {
     private MainActivity mainActivity;
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mainActivity = (MainActivity) getActivity();
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        mainActivity = (MainActivity) getActivity();
         mBinding = FragmentConfirmChangePhoneNumberBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         backToPrevPage();
         startChangePhoneNumber();
-
-        return mBinding.getRoot();
     }
 
     private void backToPrevPage() {

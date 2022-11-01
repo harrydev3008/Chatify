@@ -7,8 +7,8 @@ import com.hisu.zola.database.entity.Message;
 
 public class MessageConverter {
     @TypeConverter
-    public String objectToJson(Message mssage) {
-        return new Gson().toJson(mssage);
+    public String objectToJson(Message message) {
+        return new Gson().toJson(message);
     }
 
     @TypeConverter

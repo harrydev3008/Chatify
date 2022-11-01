@@ -1,6 +1,5 @@
-package com.hisu.zola.fragments.profile;
+package com.hisu.zola.fragments.authenticate;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,14 +11,12 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
-import com.hisu.zola.databinding.FragmentChangePhoneNumberBinding;
+import com.hisu.zola.databinding.FragmentForgotPasswordBinding;
 import com.hisu.zola.fragments.ConfirmOTPFragment;
 import com.hisu.zola.util.EditTextUtil;
 import com.hisu.zola.util.dialog.ConfirmSendOTPDialog;
@@ -27,9 +24,9 @@ import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.regex.Pattern;
 
-public class ChangePhoneNumberFragment extends Fragment {
+public class ForgotPasswordFragment extends Fragment {
 
-    private FragmentChangePhoneNumberBinding mBinding;
+    private FragmentForgotPasswordBinding mBinding;
     private MainActivity mainActivity;
     private ConfirmSendOTPDialog dialog;
 
@@ -42,17 +39,18 @@ public class ChangePhoneNumberFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mBinding = FragmentChangePhoneNumberBinding.inflate(inflater, container, false);
+        mBinding = FragmentForgotPasswordBinding.inflate(inflater, container, false);
         return mBinding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mainActivity.setProgressbarVisibility(View.GONE);
         backToPrevPage();
+        EditTextUtil.clearTextOnSearchEditText(mBinding.edtRegisPhoneNumber);
+        EditTextUtil.toggleShowClearIconOnEditText(mainActivity, mBinding.edtRegisPhoneNumber);
         phoneNumberOnChangeEvent();
-        EditTextUtil.toggleShowClearIconOnEditText(mainActivity, mBinding.edtNewPhoneNo);
-        EditTextUtil.clearTextOnSearchEditText(mBinding.edtNewPhoneNo);
         addActionForBtnContinue();
     }
 
@@ -62,8 +60,22 @@ public class ChangePhoneNumberFragment extends Fragment {
         });
     }
 
+    private void initDialog() {
+        dialog = new ConfirmSendOTPDialog(mainActivity, Gravity.CENTER, getString(R.string.otp_change_phone_no));
+
+        dialog.addActionForBtnChange(view_change -> {
+            dialog.dismissDialog();
+            mBinding.edtRegisPhoneNumber.requestFocus();
+        });
+
+        dialog.addActionForBtnConfirm(view_confirm -> {
+            dialog.dismissDialog();
+            mainActivity.addFragmentToBackStack(ConfirmOTPFragment.newInstance(ConfirmOTPFragment.FORGOT_PWD_ARGS, LocalDataManager.getCurrentUserInfo()));
+        });
+    }
+
     private void phoneNumberOnChangeEvent() {
-        mBinding.edtNewPhoneNo.addTextChangedListener(new TextWatcher() {
+        mBinding.edtRegisPhoneNumber.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
             }
@@ -82,29 +94,15 @@ public class ChangePhoneNumberFragment extends Fragment {
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() > 0)
-                    mBinding.edtNewPhoneNo.setCompoundDrawablesWithIntrinsicBounds(
+                    mBinding.edtRegisPhoneNumber.setCompoundDrawablesWithIntrinsicBounds(
                             null, null,
                             ContextCompat.getDrawable(mainActivity, R.drawable.ic_close), null
                     );
                 else
-                    mBinding.edtNewPhoneNo.setCompoundDrawablesWithIntrinsicBounds(
+                    mBinding.edtRegisPhoneNumber.setCompoundDrawablesWithIntrinsicBounds(
                             null, null, null, null
                     );
             }
-        });
-    }
-
-    private void initDialog() {
-        dialog = new ConfirmSendOTPDialog(mainActivity, Gravity.CENTER, getString(R.string.otp_change_phone_no));
-
-        dialog.addActionForBtnChange(view_change -> {
-            dialog.dismissDialog();
-            mBinding.edtNewPhoneNo.requestFocus();
-        });
-
-        dialog.addActionForBtnConfirm(view_confirm -> {
-            dialog.dismissDialog();
-            mainActivity.addFragmentToBackStack(ConfirmOTPFragment.newInstance(ConfirmOTPFragment.CHANGE_PHONE_NO_ARGS, LocalDataManager.getCurrentUserInfo()));
         });
     }
 
@@ -113,8 +111,8 @@ public class ChangePhoneNumberFragment extends Fragment {
             if (dialog == null)
                 initDialog();
 
-            if (verifyPhoneNumber(mBinding.edtNewPhoneNo.getText().toString())) {
-                dialog.setNewPhoneNumber(mBinding.edtNewPhoneNo.getText().toString());
+            if (verifyPhoneNumber(mBinding.edtRegisPhoneNumber.getText().toString())) {
+                dialog.setNewPhoneNumber(mBinding.edtRegisPhoneNumber.getText().toString());
                 dialog.showDialog();
             }
         });
@@ -131,10 +129,16 @@ public class ChangePhoneNumberFragment extends Fragment {
                 "059|099)[0-9]{7}$");
 
         if (!patternPhoneNumber.matcher(phoneNumber).matches()) {
-            mBinding.edtNewPhoneNo.setError(getString(R.string.invalid_phone_format_err));
-            mBinding.edtNewPhoneNo.requestFocus();
+            mBinding.edtRegisPhoneNumber.setError(getString(R.string.invalid_phone_format_err));
+            mBinding.edtRegisPhoneNumber.requestFocus();
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mBinding = null;
     }
 }

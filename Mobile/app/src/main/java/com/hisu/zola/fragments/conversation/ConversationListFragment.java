@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -28,6 +29,7 @@ import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.view_model.ConversationListViewModel;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Executors;
 
@@ -44,11 +46,22 @@ public class ConversationListFragment extends Fragment {
     private PopupMenu popupMenu;
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mMainActivity = (MainActivity) getActivity();
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        mMainActivity = (MainActivity) getActivity();
         mBinding = FragmentConversationListBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mMainActivity.setProgressbarVisibility(View.GONE);
 
         initConversationListRecyclerView();
 
@@ -59,10 +72,7 @@ public class ConversationListFragment extends Fragment {
         EditTextUtil.clearTextOnSearchEditText(mBinding.edtSearch);
         addMoreFriendEvent();
 
-        mMainActivity.setProgressbarVisibility(View.GONE);
         loadConversationList();
-
-        return mBinding.getRoot();
     }
 
     private void initConversationListRecyclerView() {
@@ -79,6 +89,9 @@ public class ConversationListFragment extends Fragment {
                             curConversations.add(conversation);
                     });
                 });
+
+                curConversations.sort((c1, c2) -> c2.getLastMessage().getUpdatedAt()
+                        .compareToIgnoreCase(c1.getLastMessage().getUpdatedAt()));
 
                 adapter.setConversations(curConversations);
                 mBinding.rvConversationList.setAdapter(adapter);
@@ -116,7 +129,8 @@ public class ConversationListFragment extends Fragment {
                         List<Conversation> conversations = response.body();
                         if (conversations != null && conversations.size() != 0) {
                             conversations.forEach(conversation -> {
-                                viewModel.insertOrUpdate(conversation);
+                                if (conversation.getLastMessage() != null)
+                                    viewModel.insertOrUpdate(conversation);
                             });
                         }
                     }

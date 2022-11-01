@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "81858516294",
+    "project_id": "project-zola",
+    "storage_bucket": "project-zola.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:81858516294:android:af40997c88f16bd3e98147",
+        "android_client_info": {
+          "package_name": "com.hisu.zola"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "81858516294-mm6kgoi1fndr2kv0o19g1ujo9imac3pa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hisu.zola",
+            "certificate_hash": "a24947d957c54cf3805cab37929c393624c2830a"
+          }
+        },
+        {
+          "client_id": "81858516294-3eplemmekdcv7bu5tehc5lkaglq53hp2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCICgot9AeBNQb2EON9eb_-GToDoU3HLzM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "81858516294-3eplemmekdcv7bu5tehc5lkaglq53hp2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

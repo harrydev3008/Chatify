@@ -52,6 +52,7 @@
         android:textColor="@color/darkBlue"
         android:textSize="20sp"
         android:textStyle="bold"
+        android:stateListAnimator="@null"
         app:backgroundTint="@color/white"
         app:cornerRadius="50dp"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -19,13 +19,14 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
-import com.hisu.zola.databinding.FragmentEditProfileBinding;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.databinding.FragmentEditProfileBinding;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.text.ParseException;
@@ -42,14 +43,26 @@ public class EditProfileFragment extends Fragment {
     private Calendar mCalendar;
     private Uri newAvatarUri;
     private ActivityResultLauncher<Intent> resultLauncher;
+    private User currentUser;
+    private boolean isGenderChanged;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mainActivity = (MainActivity) getActivity();
+        currentUser = LocalDataManager.getCurrentUserInfo();
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        mainActivity = (MainActivity) getActivity();
         mBinding = FragmentEditProfileBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         init();
         loadUserInfo();
         addActionForBtnBackToPrevPage();
@@ -57,8 +70,7 @@ public class EditProfileFragment extends Fragment {
         addActionForEditTextDateOfBirth();
         addActionForChangeAvatarButton();
         addActionForBtnSave();
-
-        return mBinding.getRoot();
+        genderRadioGroupEvent();
     }
 
     private void init() {
@@ -75,15 +87,14 @@ public class EditProfileFragment extends Fragment {
     }
 
     private void loadUserInfo() {
-        User user = LocalDataManager.getCurrentUserInfo();
-        Glide.with(mainActivity).load(user.getAvatarURL()).into(mBinding.imvAvatar);
+        Glide.with(mainActivity).load(currentUser.getAvatarURL()).into(mBinding.imvAvatar);
 
-        mBinding.edtDisplayName.setText(user.getUsername());
+        mBinding.edtDisplayName.setText(currentUser.getUsername());
         //Todo: change this with user.getDob()
 
         try {
             Date dateObj = parseDate("13/02/2001");
-            if(dateObj != null) {
+            if (dateObj != null) {
                 mCalendar.setTime(dateObj);
                 updateDateOfBirthEditText();
             }
@@ -91,10 +102,12 @@ public class EditProfileFragment extends Fragment {
             e.printStackTrace();
         }
 
-        if (user.isGender())
+        if (currentUser.isGender())
             mBinding.rBtnGenderM.setChecked(true);
         else
             mBinding.rBtnGenderF.setChecked(true);
+
+        isGenderChanged = currentUser.isGender();
     }
 
     private Date parseDate(String date) throws ParseException {
@@ -103,8 +116,45 @@ public class EditProfileFragment extends Fragment {
 
     private void addActionForBtnBackToPrevPage() {
         mBinding.iBtnBack.setOnClickListener(view -> {
-            mainActivity.setBottomNavVisibility(View.VISIBLE);
-            mainActivity.getSupportFragmentManager().popBackStackImmediate();
+            if (!isDataChanged()) {
+                backToPrevPage();
+            } else {
+                new AlertDialog.Builder(mainActivity)
+                        .setMessage(getString(R.string.changes_not_save))
+                        .setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> backToPrevPage())
+                        .setNegativeButton(getString(R.string.no), null).show();
+            }
+        });
+    }
+
+    private void backToPrevPage() {
+        mainActivity.setBottomNavVisibility(View.VISIBLE);
+        mainActivity.getSupportFragmentManager().popBackStackImmediate();
+    }
+
+    private boolean isDataChanged() {
+
+        if (!mBinding.edtDisplayName.getText().toString().equalsIgnoreCase(currentUser.getUsername()))
+            return true;
+
+        //Todo: change later
+//        if(!mBinding.edtDob.getText().toString().equalsIgnoreCase(currentUser.getDob()))
+//            return true;
+
+        if (newAvatarUri != null)
+            return true;
+
+        return isGenderChanged != currentUser.isGender();
+    }
+
+    private void genderRadioGroupEvent() {
+        mBinding.radioGroup.setOnCheckedChangeListener((radioGroup, i) -> {
+            int checkedId = radioGroup.getCheckedRadioButtonId();
+
+            if (checkedId == mBinding.rBtnGenderM.getId())
+                isGenderChanged = true;
+            else if (checkedId == mBinding.rBtnGenderF.getId())
+                isGenderChanged = false;
         });
     }
 
@@ -251,5 +301,4 @@ public class EditProfileFragment extends Fragment {
 
         return age;
     }
-
 }

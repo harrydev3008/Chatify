@@ -92,6 +92,8 @@ public class ConversationFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mMainActivity = (MainActivity) getActivity();
+
         if (getArguments() != null) {
             conversation = (Conversation) getArguments().getSerializable(CONVERSATION_ARGS);
             conversationName = getArguments().getString(CONVERSATION_NAME_ARGS);
@@ -101,9 +103,13 @@ public class ConversationFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        mMainActivity = (MainActivity) getActivity();
         mBinding = FragmentConversationBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         SocketIOHandler.getInstance().establishSocketConnection();
 
@@ -127,11 +133,9 @@ public class ConversationFragment extends Fragment {
         addActionForSendMessageBtn();
         addToggleShowSendIcon();
 
-        mBinding.btnSendImg.setOnClickListener(view -> openBottomImagePicker());
+        mBinding.btnSendImg.setOnClickListener(imgView -> openBottomImagePicker());
 
         loadConversation(conversation.getId());
-
-        return mBinding.getRoot();
     }
 
     private void initEmojiKeyboard() {
@@ -204,6 +208,8 @@ public class ConversationFragment extends Fragment {
                 currentMessageList.clear();
                 currentMessageList.addAll(messages);
                 messageAdapter.setMessages(currentMessageList);
+                if (!currentMessageList.isEmpty())
+                    mBinding.rvConversation.smoothScrollToPosition(currentMessageList.size() - 1);
             }
         });
 
@@ -214,6 +220,10 @@ public class ConversationFragment extends Fragment {
                 linearLayoutManager
         );
 
+        if(conversation.getLabel() != null)
+            messageAdapter.setGroup(true);
+
+//        mBinding.rvConversation.setNestedScrollingEnabled(false);
         mBinding.rvConversation.setAdapter(messageAdapter);
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
@@ -227,7 +237,7 @@ public class ConversationFragment extends Fragment {
 
     private void addActionForBackBtn() {
         mBinding.btnBack.setOnClickListener(view -> {
-            mMainActivity.setProgressbarVisibility(View.VISIBLE);
+//            mMainActivity.setProgressbarVisibility(View.VISIBLE);
             mMainActivity.setBottomNavVisibility(View.VISIBLE);
             mMainActivity.getSupportFragmentManager().popBackStackImmediate();
         });
@@ -247,16 +257,29 @@ public class ConversationFragment extends Fragment {
 
     private void addActionForSideMenu() {
         mBinding.btnConversationMenu.setOnClickListener(view -> {
-            mMainActivity.getSupportFragmentManager().beginTransaction()
-                    .setCustomAnimations(
-                            R.anim.slide_in_left, R.anim.slide_out_left,
-                            R.anim.slide_out_right, R.anim.slide_out_right)
-                    .replace(
-                            mMainActivity.getViewContainerID(),
-                            ConversationDetailFragment.newInstance(getFriendInfo())
-                    )
-                    .addToBackStack(null)
-                    .commit();
+            if (conversation.getLabel() == null) {
+                mMainActivity.getSupportFragmentManager().beginTransaction()
+                        .setCustomAnimations(
+                                R.anim.slide_in_left, R.anim.slide_out_left,
+                                R.anim.slide_out_right, R.anim.slide_out_right)
+                        .replace(
+                                mMainActivity.getViewContainerID(),
+                                ConversationDetailFragment.newInstance(getFriendInfo())
+                        )
+                        .addToBackStack(null)
+                        .commit();
+            } else {
+                mMainActivity.getSupportFragmentManager().beginTransaction()
+                        .setCustomAnimations(
+                                R.anim.slide_in_left, R.anim.slide_out_left,
+                                R.anim.slide_out_right, R.anim.slide_out_right)
+                        .replace(
+                                mMainActivity.getViewContainerID(),
+                                ConversationGroupDetailFragment.newInstance(conversation)
+                        )
+                        .addToBackStack(null)
+                        .commit();
+            }
         });
     }
 
@@ -321,10 +344,14 @@ public class ConversationFragment extends Fragment {
         JsonObject emitMsg = new JsonObject();
         emitMsg.add("conversation", gson.toJsonTree(conversation));
         emitMsg.add("sender", gson.toJsonTree(LocalDataManager.getCurrentUserInfo()));
+
         emitMsg.addProperty("text", message.getText());
         emitMsg.addProperty("type", message.getType());
         emitMsg.add("media", gson.toJsonTree(message.getMedia()));
-        emitMsg.add("isDelete", gson.toJsonTree(message.isDelete()));
+        emitMsg.addProperty("isDelete", message.getDeleted());
+        emitMsg.addProperty("_id", message.getId());
+        emitMsg.addProperty("createdAt", message.getCreatedAt());
+        emitMsg.addProperty("updatedAt", message.getUpdatedAt());
 
         mSocket.emit("send-msg", emitMsg);
 
@@ -346,7 +373,7 @@ public class ConversationFragment extends Fragment {
         emitMsg.addProperty("text", message.getText());
         emitMsg.addProperty("type", message.getType());
         emitMsg.add("media", gson.toJsonTree(message.getMedia()));
-        emitMsg.add("isDelete", gson.toJsonTree(message.isDelete()));
+        emitMsg.add("isDelete", gson.toJsonTree(message.getDeleted()));
 
         mSocket.emit("delete-msg", emitMsg);
 
@@ -456,7 +483,6 @@ public class ConversationFragment extends Fragment {
             mMainActivity.runOnUiThread(() -> {
                 JSONObject data = (JSONObject) args[0];
                 if (data != null) {
-
                     try {
                         Gson gson = new Gson();
 
@@ -488,8 +514,8 @@ public class ConversationFragment extends Fragment {
             ApiService.apiService.unsentMessage(body).enqueue(new Callback<Object>() {
                 @Override
                 public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                    if(response.isSuccessful() && response.code() == 200) {
-                        message.setDelete(true);
+                    if (response.isSuccessful() && response.code() == 200) {
+                        message.setDeleted(true);
                         delete(message);
                     }
                 }
@@ -530,10 +556,10 @@ public class ConversationFragment extends Fragment {
 
         @Override
         public int getSwipeDirs(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-            if(viewHolder instanceof MessageAdapter.MessageReceiveViewHolder) return 0;
+            if (viewHolder instanceof MessageAdapter.MessageReceiveViewHolder) return 0;
 
             int pos = viewHolder.getBindingAdapterPosition();
-            if(currentMessageList.get(pos).isDelete())  return 0;
+            if (currentMessageList.get(pos).getDeleted()) return 0;
 
             return super.getSwipeDirs(recyclerView, viewHolder);
         }

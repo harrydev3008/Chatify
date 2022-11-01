@@ -47,9 +47,9 @@
             android:background="@drawable/edit_text_outline"
             android:hint="@string/username"
             android:inputType="phone"
-            android:textCursorDrawable="@drawable/edt_cursor"
             android:paddingHorizontal="8dp"
             android:paddingVertical="10dp"
+            android:textCursorDrawable="@drawable/edt_cursor"
             android:textSize="20sp"
             app:layout_constraintEnd_toStartOf="@+id/guideline3"
             app:layout_constraintHorizontal_bias="0.0"
@@ -76,10 +76,10 @@
                 android:layout_weight="1"
                 android:background="@color/white"
                 android:hint="@string/password"
-                android:textCursorDrawable="@drawable/edt_cursor"
                 android:inputType="textPassword"
                 android:paddingHorizontal="2dp"
                 android:paddingVertical="6dp"
+                android:textCursorDrawable="@drawable/edt_cursor"
                 android:textSize="20sp"
                 tools:ignore="Autofill" />
 

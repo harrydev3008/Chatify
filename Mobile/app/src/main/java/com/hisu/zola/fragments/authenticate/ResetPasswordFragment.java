@@ -1,13 +1,10 @@
 package com.hisu.zola.fragments.authenticate;
 
-import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.os.Bundle;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.text.method.PasswordTransformationMethod;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -15,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -27,16 +25,42 @@ import java.util.regex.Pattern;
 
 public class ResetPasswordFragment extends Fragment {
 
+    public static final String RESET_PWD_ARGS = "RESET_PWD_ARGS";
+    public static final String FORGOT_PWD_ARGS = "FORGOT_PWD_ARGS";
+    private static final String USER_OPTION_ARGS = "USER_OPTIONS";
+
     private FragmentResetPasswordBinding mBinding;
     private MainActivity mainActivity;
+    private String arguments;
+
+    public static ResetPasswordFragment newInstance(String argsValue) {
+        Bundle args = new Bundle();
+        args.putString(USER_OPTION_ARGS, argsValue);
+        ResetPasswordFragment fragment = new ResetPasswordFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mainActivity = (MainActivity) getActivity();
+
+        if (getArguments() != null) {
+            arguments = getArguments().getString(USER_OPTION_ARGS);
+        }
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        mainActivity = (MainActivity) getActivity();
-
         mBinding = FragmentResetPasswordBinding.inflate(inflater, container, false);
+        return mBinding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         addChangeBackgroundColorOnFocusForPasswordEditText(mBinding.edtNewPwd, mBinding.linearLayout);
 
@@ -60,8 +84,6 @@ public class ResetPasswordFragment extends Fragment {
 
         addActionForBtnBack();
         addActionForBtnSaveChangePwd();
-
-        return mBinding.getRoot();
     }
 
     private void addChangeBackgroundColorOnFocusForPasswordEditText(
@@ -107,9 +129,32 @@ public class ResetPasswordFragment extends Fragment {
     private void addActionForBtnSaveChangePwd() {
         mBinding.btnSave.setOnClickListener(view -> {
             if (validateNewPassword(mBinding.edtNewPwd.getText().toString().trim(),
-                    mBinding.edtConfirmNewPwd.getText().toString().trim()))
-                mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                    mBinding.edtConfirmNewPwd.getText().toString().trim())) {
+                updateUserInfo(mBinding.edtNewPwd.getText().toString().trim());
+            }
         });
+    }
+
+    private void updateUserInfo(String newPwd) {
+        //Todo: call api to update
+
+        new AlertDialog.Builder(mainActivity)
+                .setMessage(getString(R.string.reset_password_success))
+                .setPositiveButton(getString(R.string.confirm), (dialogInterface, i) ->
+                        switchToNextPage()
+                ).show();
+    }
+
+    private void switchToNextPage() {
+        switch (arguments) {
+            case RESET_PWD_ARGS:
+                mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                break;
+
+            case FORGOT_PWD_ARGS:
+                mainActivity.setFragment(new LoginFragment());
+                break;
+        }
     }
 
     /**
@@ -142,5 +187,11 @@ public class ResetPasswordFragment extends Fragment {
         }
 
         return true;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mBinding = null;
     }
 }

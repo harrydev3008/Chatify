@@ -18,7 +18,7 @@ public class FriendRequestReceiveAdapter extends
         RecyclerView.Adapter<FriendRequestReceiveAdapter.RequestReceiveViewHolder> {
 
     private List<User> requestList;
-    private Context context;
+    private final Context context;
 
     public FriendRequestReceiveAdapter(List<User> requestList, Context context) {
         this.requestList = requestList;

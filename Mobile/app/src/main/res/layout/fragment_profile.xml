@@ -95,7 +95,7 @@
         <View
             android:id="@+id/divider"
             android:layout_width="0dp"
-            android:layout_height="1dp"
+            android:layout_height="2dp"
             android:layout_marginTop="4dp"
             android:background="#d2d4d6"
             app:layout_constraintEnd_toStartOf="@+id/guideline7"
@@ -197,7 +197,7 @@
         <View
             android:id="@+id/divider_2"
             android:layout_width="0dp"
-            android:layout_height="1dp"
+            android:layout_height="2dp"
             android:layout_marginTop="8dp"
             android:background="#d2d4d6"
             app:layout_constraintEnd_toStartOf="@+id/guideline7"
@@ -216,7 +216,7 @@
             android:elevation="0dp"
             android:shadowColor="@android:color/transparent"
             android:fontFamily="@font/be_vietnam_medium"
-            android:textStyle="bold"
+            android:stateListAnimator="@null"
             android:paddingLeft="14dp"
             android:text="@string/edit_pf"
             android:textAllCaps="false"

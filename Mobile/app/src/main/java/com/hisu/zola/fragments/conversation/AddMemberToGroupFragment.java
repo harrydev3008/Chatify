@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,37 +15,39 @@ import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.AddGroupMemberAdapter;
 import com.hisu.zola.database.entity.User;
-import com.hisu.zola.databinding.FragmentAddNewGroupBinding;
+import com.hisu.zola.databinding.FragmentAddMemberToGroupBinding;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddNewGroupFragment extends Fragment {
+public class AddMemberToGroupFragment extends Fragment {
 
-    private FragmentAddNewGroupBinding mBinding;
+    private FragmentAddMemberToGroupBinding mBinding;
     private MainActivity mainActivity;
     private List<String> members;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         mainActivity = (MainActivity) getActivity();
+
+        if (getArguments() != null) {
+        }
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mBinding = FragmentAddNewGroupBinding.inflate(inflater, container, false);
+        mBinding = FragmentAddMemberToGroupBinding.inflate(inflater, container, false);
         return mBinding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        mainActivity.setBottomNavVisibility(View.GONE);
-
+        addActionForBtnCancel();
         init();
         addActionForBtnCancel();
         addActionForBtnDone();
@@ -67,14 +68,14 @@ public class AddNewGroupFragment extends Fragment {
             else
                 members.remove(userID);
 
-            if (members.size() > 1)
+            if (members.size() > 0)
                 mBinding.iBtnDone.setVisibility(View.VISIBLE);
             else
                 mBinding.iBtnDone.setVisibility(View.GONE);
         });
 
-        mBinding.rvFriends.setAdapter(adapter);
-        mBinding.rvFriends.setLayoutManager(new LinearLayoutManager(mainActivity));
+        mBinding.rvMembers.setAdapter(adapter);
+        mBinding.rvMembers.setLayoutManager(new LinearLayoutManager(mainActivity));
     }
 
     private void addActionForBtnCancel() {
@@ -90,18 +91,16 @@ public class AddNewGroupFragment extends Fragment {
         });
     }
 
-    private void addActionForBtnDone() {
-        mBinding.iBtnDone.setOnClickListener(view -> {
-            new AlertDialog.Builder(mainActivity)
-                    .setMessage(getString(R.string.add_member_to_group_success))
-                    .setPositiveButton(getString(R.string.confirm), (dialogInterface, i) -> backToPrevPage())
-                    .show();
-        });
-    }
-
     private void backToPrevPage() {
         mainActivity.setBottomNavVisibility(View.GONE);
         mainActivity.getSupportFragmentManager().popBackStackImmediate();
+    }
+
+    private void addActionForBtnDone() {
+        mBinding.iBtnDone.setOnClickListener(view -> {
+            mainActivity.setBottomNavVisibility(View.VISIBLE);
+            mainActivity.getSupportFragmentManager().popBackStackImmediate();
+        });
     }
 
     private boolean isDataChanged() {

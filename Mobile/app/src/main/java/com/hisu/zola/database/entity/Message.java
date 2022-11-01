@@ -6,6 +6,7 @@ import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
+import com.google.gson.annotations.SerializedName;
 import com.hisu.zola.database.type_converter.ListMediaConverter;
 import com.hisu.zola.database.type_converter.UserConverter;
 
@@ -26,13 +27,14 @@ public class Message implements Serializable {
     private String updatedAt;
     @TypeConverters(ListMediaConverter.class)
     private List<Media> media;
-    private boolean isDelete;
+    @SerializedName("isDelete")
+    private Boolean isDeleted;
 
     @Ignore
     public Message() {
     }
 
-    public Message(@NonNull String _id, String conversation, User sender, String text, String type, String createdAt, String updatedAt, List<Media> media, boolean isDelete) {
+    public Message(@NonNull String _id, String conversation, User sender, String text, String type, String createdAt, String updatedAt, List<Media> media, boolean isDeleted) {
         this._id = _id;
         this.conversation = conversation;
         this.sender = sender;
@@ -41,7 +43,7 @@ public class Message implements Serializable {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.media = media;
-        this.isDelete = isDelete;
+        this.isDeleted = isDeleted;
     }
 
     public String getId() {
@@ -108,12 +110,12 @@ public class Message implements Serializable {
         this.media = media;
     }
 
-    public boolean isDelete() {
-        return isDelete;
+    public Boolean getDeleted() {
+        return isDeleted;
     }
 
-    public void setDelete(boolean delete) {
-        isDelete = delete;
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
     }
 
     @Override
@@ -127,7 +129,7 @@ public class Message implements Serializable {
                 ", createdAt='" + createdAt + '\'' +
                 ", updatedAt='" + updatedAt + '\'' +
                 ", media=" + media +
-                ", isDelete=" + isDelete +
+                ", isDelete=" + isDeleted +
                 '}';
     }
 }

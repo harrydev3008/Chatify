@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -42,15 +43,22 @@ public class LoginFragment extends Fragment {
     private LoadingDialog loadingDialog;
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mMainActivity = (MainActivity) getActivity();
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         mBinding = FragmentLoginBinding.inflate(inflater, container, false);
-        mMainActivity = (MainActivity) getActivity();
-
-        init();
-
         return mBinding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        init();
     }
 
     private void init() {
@@ -72,13 +80,14 @@ public class LoginFragment extends Fragment {
 
     private void addActionForBtnLogin() {
         mBinding.btnLogin.setOnClickListener(view -> {
-            addLoginEvent();
+            login();
         });
     }
 
     private void addActionForBtnForgotPassword() {
         mBinding.tvForgotPwd.setOnClickListener(view -> {
-            //Todo: feature in progress
+            mMainActivity.setProgressbarVisibility(View.VISIBLE);
+            mMainActivity.addFragmentToBackStack(new ForgotPasswordFragment());
         });
     }
 
@@ -136,57 +145,61 @@ public class LoginFragment extends Fragment {
         });
     }
 
-    private void addLoginEvent() {
+    private void login() {
         String phoneNumber = mBinding.edtPhoneNo.getText().toString();
         String password = mBinding.edtPassword.getText().toString();
 
         if (validateUserAccount(phoneNumber, password)) {
-            Executors.newSingleThreadExecutor().execute(() -> {
+            addLoginEvent(phoneNumber, password);
+        }
+    }
 
-                mMainActivity.runOnUiThread(() -> {
-                    loadingDialog.showDialog();
-                });
+    private void addLoginEvent(String phoneNumber, String password) {
+        Executors.newSingleThreadExecutor().execute(() -> {
 
-                User user = new User(phoneNumber, password);
+            mMainActivity.runOnUiThread(() -> {
+                loadingDialog.showDialog();
+            });
 
-                ApiService.apiService.signIn(user).enqueue(new Callback<Object>() {
-                    @Override
-                    public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                        if (response.isSuccessful() && response.code() == 200) {
+            User user = new User(phoneNumber, password);
 
-                            LocalDataManager.setUserLoginState(true);
-                            LocalDataManager.setCurrentUserInfo(ObjectConvertUtil.getResponseUser(response));
+            ApiService.apiService.signIn(user).enqueue(new Callback<Object>() {
+                @Override
+                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                    if (response.isSuccessful() && response.code() == 200) {
+
+                        LocalDataManager.setUserLoginState(true);
+                        LocalDataManager.setCurrentUserInfo(ObjectConvertUtil.getResponseUser(response));
+
+                        mMainActivity.runOnUiThread(() -> {
+                            loadingDialog.dismissDialog();
+                            mMainActivity.setBottomNavVisibility(View.VISIBLE);
+                            mMainActivity.setFragment(new ConversationListFragment());
+                        });
+
+                    } else if (response.code() == 400) {
+                        try {
+                            JsonObject obj = new Gson().fromJson(response.errorBody().string(), JsonObject.class);
+
+                            int errorCode = obj.get("errorCode").getAsInt();
+                            String errorMsg = obj.get("message").getAsString();
 
                             mMainActivity.runOnUiThread(() -> {
                                 loadingDialog.dismissDialog();
-                                mMainActivity.setBottomNavVisibility(View.VISIBLE);
-                                mMainActivity.setFragment(new ConversationListFragment());
+                                handleLoginError(errorCode, errorMsg);
                             });
-
-                        } else if (response.code() == 400) {
-                            try {
-                                JsonObject obj = new Gson().fromJson(response.errorBody().string(), JsonObject.class);
-
-                                int errorCode = obj.get("errorCode").getAsInt();
-                                String errorMsg = obj.get("message").getAsString();
-
-                                mMainActivity.runOnUiThread(() -> {
-                                    loadingDialog.dismissDialog();
-                                    handleLoginError(errorCode, errorMsg);
-                                });
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
                     }
+                }
 
-                    @Override
-                    public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                        Log.e("API_ERR", t.getLocalizedMessage());
-                    }
-                });
+                @Override
+                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                    Log.e("API_ERR", t.getLocalizedMessage());
+                }
             });
-        }
+        });
     }
 
     /**
@@ -230,5 +243,11 @@ public class LoginFragment extends Fragment {
 
         mBinding.edtPassword.setError(getString(R.string.wrong_pwd_err));
         mBinding.edtPassword.requestFocus();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mBinding = null;
     }
 }
