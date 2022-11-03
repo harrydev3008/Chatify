@@ -1,7 +1,6 @@
 package com.hisu.zola.adapters;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -100,9 +99,21 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             else
                 receiveViewHolder.binding.ivUserPfp.setVisibility(View.INVISIBLE);
 
-            if(isGroup) {
+            if (isGroup) {
                 receiveViewHolder.binding.tvMemberName.setVisibility(View.VISIBLE);
-                receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
+
+                if (position == 0)
+                    receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
+                else if (position == messages.size() - 1)
+                    receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
+                else if (!messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
+                        && messages.get(position + 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
+                    receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
+                else if (!messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
+                        && !messages.get(position + 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
+                    receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
+                else
+                    receiveViewHolder.binding.tvMemberName.setVisibility(View.GONE);
             }
 
             receiveViewHolder.displayMessageContent(mContext, message);
@@ -182,10 +193,10 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 binding.imgMsgReceive.setVisibility(View.GONE);
                 binding.tvMsgReceive.setVisibility(View.VISIBLE);
                 binding.tvMsgReceive.setTextColor(context.getColor(R.color.chat_text_color));
-                binding.tvMsgReceive.setBackground(ContextCompat.getDrawable(context, R.drawable.message_receive));
+                binding.msgWrapper.setBackground(ContextCompat.getDrawable(context, R.drawable.message_receive));
                 binding.tvMsgReceive.setText(message.getText());
             } else {
-                if (message.getMedia().size() == 1) {
+                if (message.getMedia().size() <= 1) {
                     binding.tvMsgReceive.setVisibility(View.GONE);
                     binding.msgWrapper.setVisibility(View.VISIBLE);
                     binding.groupImg.setVisibility(View.GONE);

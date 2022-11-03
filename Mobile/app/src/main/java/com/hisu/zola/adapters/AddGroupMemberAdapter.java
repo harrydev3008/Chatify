@@ -55,7 +55,7 @@ public class AddGroupMemberAdapter extends RecyclerView.Adapter<AddGroupMemberAd
         Glide.with(context).load(friend.getAvatarURL()).into(holder.binding.cimvFriendAvatar);
         holder.binding.tvFriendName.setText(friend.getUsername());
         holder.binding.cbSelect.setOnCheckedChangeListener((compoundButton, isCheck) -> {
-            onItemCheckedChangListener.itemCheck(friend.getId(), isCheck);
+            onItemCheckedChangListener.itemCheck(friend, isCheck);
         });
     }
 

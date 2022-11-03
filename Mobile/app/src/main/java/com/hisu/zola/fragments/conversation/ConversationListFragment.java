@@ -90,8 +90,8 @@ public class ConversationListFragment extends Fragment {
                     });
                 });
 
-                curConversations.sort((c1, c2) -> c2.getLastMessage().getUpdatedAt()
-                        .compareToIgnoreCase(c1.getLastMessage().getUpdatedAt()));
+//                curConversations.sort((c1, c2) -> c2.getLastMessage().getUpdatedAt()
+//                        .compareToIgnoreCase(c1.getLastMessage().getUpdatedAt()));
 
                 adapter.setConversations(curConversations);
                 mBinding.rvConversationList.setAdapter(adapter);
@@ -129,7 +129,7 @@ public class ConversationListFragment extends Fragment {
                         List<Conversation> conversations = response.body();
                         if (conversations != null && conversations.size() != 0) {
                             conversations.forEach(conversation -> {
-                                if (conversation.getLastMessage() != null)
+//                                if (conversation.getLastMessage() != null)
                                     viewModel.insertOrUpdate(conversation);
                             });
                         }

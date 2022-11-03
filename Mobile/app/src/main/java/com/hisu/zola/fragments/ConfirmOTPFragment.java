@@ -3,22 +3,40 @@ package com.hisu.zola.fragments;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseException;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.PhoneAuthCredential;
+import com.google.firebase.auth.PhoneAuthOptions;
+import com.google.firebase.auth.PhoneAuthProvider;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentConfirmOtpBinding;
 import com.hisu.zola.database.entity.User;
-import com.hisu.zola.fragments.authenticate.LoginFragment;
 import com.hisu.zola.fragments.authenticate.RegisterUserInfoFragment;
 import com.hisu.zola.fragments.authenticate.ResetPasswordFragment;
+import com.hisu.zola.util.dialog.LoadingDialog;
+
+import java.text.DecimalFormat;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ConfirmOTPFragment extends Fragment {
 
@@ -29,6 +47,10 @@ public class ConfirmOTPFragment extends Fragment {
     public static final String FORGOT_PWD_ARGS = "FORGOT_PWD_ARGS";
     private String argument;
     private User user;
+    private FirebaseAuth mAuth;
+    private String verificationID = "";
+    private LoadingDialog loadingDialog;
+    private PhoneAuthProvider.ForceResendingToken token;
 
     private FragmentConfirmOtpBinding mBinding;
     private MainActivity mainActivity;
@@ -48,6 +70,8 @@ public class ConfirmOTPFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         mainActivity = (MainActivity) getActivity();
+        mAuth = FirebaseAuth.getInstance();
+        mAuth.setLanguageCode("vi");
 
         if (getArguments() != null) {
             argument = getArguments().getString(OTP_ARGS);
@@ -65,9 +89,13 @@ public class ConfirmOTPFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        loadingDialog = new LoadingDialog(mainActivity, Gravity.CENTER);
+
         backToPrevPage();
         initOTPInput();
         addActionForBtnVerifyOTP();
+        handleSendOTP();
     }
 
     private void backToPrevPage() {
@@ -165,7 +193,7 @@ public class ConfirmOTPFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if (charSequence.length() > 0) {
-                    mBinding.edtInputOtp5.setHint(mBinding.edtInputOtp4.getText());
+                    mBinding.edtInputOtp5.setHint(mBinding.edtInputOtp5.getText());
                     mBinding.edtInputOtp6.requestFocus();
                 }
             }
@@ -184,7 +212,7 @@ public class ConfirmOTPFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if (charSequence.length() > 0)
-                    mBinding.edtInputOtp6.setHint(mBinding.edtInputOtp4.getText());
+                    mBinding.edtInputOtp6.setHint(mBinding.edtInputOtp6.getText());
             }
 
             @Override
@@ -197,8 +225,11 @@ public class ConfirmOTPFragment extends Fragment {
 
     private void addActionForBtnVerifyOTP() {
         mBinding.btnVerifyOtp.setOnClickListener(view -> {
-            if (verifyOTP(getOtpInput()))
-                switchToNextPage();
+            if (verifyOTP(getOtpInput())) {
+                loadingDialog.showDialog();
+                PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationID, getOtpInput());
+                signInWithPhoneAuthCredential(credential);
+            }
         });
     }
 
@@ -213,12 +244,11 @@ public class ConfirmOTPFragment extends Fragment {
 
     private boolean verifyOTP(String otp) {
 
-        if (otp.length() < 4) {
+        if (otp.length() < 6) {
             showAlertDialog(getString(R.string.empty_otp_err));
             return false;
         }
 
-        //Todo: verify otp via api
         return true;
     }
 
@@ -266,5 +296,129 @@ public class ConfirmOTPFragment extends Fragment {
 
                 break;
         }
+    }
+
+    private void handleSendOTP() {
+        String userPhone = user.getPhoneNumber();
+        String phoneNumber = "+84" + userPhone.substring(userPhone.indexOf("0") + 1);
+        PhoneAuthOptions options =
+                PhoneAuthOptions.newBuilder(mAuth)
+                        .setPhoneNumber(phoneNumber)
+                        .setTimeout(60L, TimeUnit.SECONDS)
+                        .setActivity(mainActivity)
+                        .setCallbacks(new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                            @Override
+                            public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {
+                                signInWithPhoneAuthCredential(phoneAuthCredential);
+                            }
+
+                            @Override
+                            public void onVerificationFailed(@NonNull FirebaseException e) {
+                                showAlertDialog("Đã có lỗi trong quá trình xác thực! " + e.getLocalizedMessage());
+                            }
+
+                            @Override
+                            public void onCodeSent(@NonNull String verificationId, @NonNull PhoneAuthProvider.ForceResendingToken forceResendingToken) {
+                                super.onCodeSent(verificationId, forceResendingToken);
+                                verificationID = verificationId;
+                                startTime();
+                            }
+                        }).build();
+
+        PhoneAuthProvider.verifyPhoneNumber(options);
+    }
+
+    private void startTime() {
+        mBinding.tvResend.setOnClickListener(null);
+        mBinding.tvResend.setTextColor(mainActivity.getColor(R.color.gray));
+        mBinding.tvResendTimeout.setVisibility(View.VISIBLE);
+
+        DecimalFormat decimalFormat = new DecimalFormat("00");
+        Timer timer = new Timer();
+        AtomicInteger counter = new AtomicInteger(30);
+
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                counter.decrementAndGet();
+                String textPlaceholder = "00:" + decimalFormat.format(counter.get());
+                mainActivity.runOnUiThread(() -> {
+                    mBinding.tvResendTimeout.setText(textPlaceholder);
+                });
+
+                if (counter.get() == 0) {
+                    timer.cancel();
+                    mainActivity.runOnUiThread(() -> {
+                        mBinding.tvResendTimeout.setVisibility(View.GONE);
+                        addActionForTvResend();
+                    });
+                }
+            }
+        };
+
+        timer.schedule(timerTask, 0, 1000);
+    }
+
+    private void addActionForTvResend() {
+        mBinding.tvResend.setTextColor(mainActivity.getColor(R.color.darkerBlue));
+        mBinding.tvResend.setOnClickListener(view -> {
+            resendOTP();
+        });
+    }
+
+    private void resendOTP() {
+        String userPhone = user.getPhoneNumber();
+        String phoneNumber = "+84" + userPhone.substring(userPhone.indexOf("0") + 1);
+        PhoneAuthOptions options =
+                PhoneAuthOptions.newBuilder(mAuth)
+                        .setPhoneNumber(phoneNumber)
+                        .setTimeout(60L, TimeUnit.SECONDS)
+                        .setActivity(mainActivity)
+                        .setForceResendingToken(token)
+                        .setCallbacks(new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                            @Override
+                            public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {
+                                showAlertDialog("Đã có lỗi trong quá trình xác thực!");
+                                signInWithPhoneAuthCredential(phoneAuthCredential);
+                            }
+
+                            @Override
+                            public void onVerificationFailed(@NonNull FirebaseException e) {
+                                showAlertDialog("Đã có lỗi trong quá trình xác thực!");
+                            }
+
+                            @Override
+                            public void onCodeSent(@NonNull String verificationId, @NonNull PhoneAuthProvider.ForceResendingToken forceResendingToken) {
+                                super.onCodeSent(verificationId, forceResendingToken);
+                                verificationID = verificationId;
+                                token = forceResendingToken;
+                                startTime();
+                            }
+                        }).build();
+
+        PhoneAuthProvider.verifyPhoneNumber(options);
+    }
+
+    private void signInWithPhoneAuthCredential(PhoneAuthCredential credential) {
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(mainActivity, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        loadingDialog.dismissDialog();
+                        if (task.isSuccessful()) {
+                            switchToNextPage();
+                        } else {
+                            if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
+                                showAlertDialog(getString(R.string.wrong_otp_err));
+                            }
+                        }
+                    }
+                });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mAuth = null;
     }
 }

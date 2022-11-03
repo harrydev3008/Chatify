@@ -20,6 +20,7 @@ import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.databinding.FragmentContactGroupBinding;
 import com.hisu.zola.fragments.conversation.AddNewGroupFragment;
 import com.hisu.zola.fragments.conversation.ConversationFragment;
+import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.view_model.ConversationListViewModel;
 
 import java.util.ArrayList;
@@ -63,8 +64,11 @@ public class ContactGroupFragment extends Fragment {
                 List<Conversation> groupConversations = new ArrayList<>();
 
                 conversations.forEach(conversation -> {
-                    if (conversation.getLabel() != null)
-                        groupConversations.add(conversation);
+                    conversation.getMember().forEach(member -> {
+                        if (member.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId()) &&
+                                conversation.getLabel() != null)
+                            groupConversations.add(conversation);
+                    });
                 });
 
                 adapter.setConversations(groupConversations);

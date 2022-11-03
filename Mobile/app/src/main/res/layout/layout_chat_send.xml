@@ -15,11 +15,11 @@
         android:background="@drawable/message_send"
         android:fontFamily="@font/roboto"
         android:maxWidth="300dp"
-        android:paddingHorizontal="12dp"
+        android:paddingHorizontal="10dp"
         android:paddingVertical="6dp"
         android:text="@string/slogan"
         android:textColor="@color/white"
-        android:textSize="20sp" />
+        android:textSize="18sp" />
 
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/img_msg_send"

@@ -102,7 +102,7 @@
                 android:inputType="number"
                 android:maxLength="1"
                 android:textCursorDrawable="@drawable/edt_cursor"
-                android:textColor="@color/gray"
+                android:textColor="@color/black"
                 android:theme="@style/EditTextTheme"
                 android:textSize="24sp"
                 android:textStyle="bold"
@@ -203,18 +203,22 @@
             app:layout_constraintTop_toBottomOf="@+id/linearLayout4">
 
             <TextView
+                android:id="@+id/tv_resend"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/otp_not_receive"
+                android:text="@string/otp_resend"
+                android:fontFamily="@font/be_vietnam"
                 android:textColor="@color/gray"
-                android:textSize="18sp" />
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tv_resend_timeout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
-                android:text="@string/otp_resend"
-                android:textColor="@color/danger"
+                android:fontFamily="@font/be_vietnam"
+                android:textColor="@color/darkerBlue"
                 android:textSize="18sp"
                 android:textStyle="bold" />
         </LinearLayout>

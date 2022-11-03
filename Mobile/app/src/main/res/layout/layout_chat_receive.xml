@@ -35,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/message_receive"
                 android:orientation="vertical"
-                android:paddingHorizontal="12dp"
+                android:paddingHorizontal="10dp"
                 android:paddingVertical="6dp">
 
                 <TextView
@@ -43,9 +43,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/app_name"
-                    android:textColor="@color/chat_badge_bg"
+                    android:textColor="@color/danger"
                     android:visibility="gone"
-                    android:textSize="16sp"
+                    android:textSize="14sp"
                     />
 
                 <TextView
@@ -56,7 +56,7 @@
                     android:maxWidth="300dp"
                     android:text="@string/slogan"
                     android:textColor="@color/chat_text_color"
-                    android:textSize="20sp" />
+                    android:textSize="18sp" />
             </LinearLayout>
 
             <com.makeramen.roundedimageview.RoundedImageView
@@ -74,6 +74,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/group_img"
                 android:layout_width="320dp"
+                android:visibility="gone"
                 android:layout_height="wrap_content"/>
         </LinearLayout>
     </LinearLayout>

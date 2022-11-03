@@ -61,11 +61,11 @@ public class AddNewGroupFragment extends Fragment {
                 user.getFriends(), mainActivity
         );
 
-        adapter.setOnItemCheckedChangListener((userID, isCheck) -> {
+        adapter.setOnItemCheckedChangListener((friend, isCheck) -> {
             if (isCheck)
-                members.add(userID);
+                members.add(friend.getId());
             else
-                members.remove(userID);
+                members.remove(friend.getId());
 
             if (members.size() > 1)
                 mBinding.iBtnDone.setVisibility(View.VISIBLE);
@@ -100,7 +100,7 @@ public class AddNewGroupFragment extends Fragment {
     }
 
     private void backToPrevPage() {
-        mainActivity.setBottomNavVisibility(View.GONE);
+        mainActivity.setBottomNavVisibility(View.VISIBLE);
         mainActivity.getSupportFragmentManager().popBackStackImmediate();
     }
 

@@ -22,6 +22,7 @@ import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.FragmentContactFriendBinding;
 import com.hisu.zola.fragments.conversation.ConversationFragment;
 import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.view_model.ConversationListViewModel;
 
 import java.util.ArrayList;
@@ -105,8 +106,11 @@ public class ContactFriendFragment extends Fragment {
                 List<Conversation> friendConversations = new ArrayList<>();
 
                 conversations.forEach(conversation -> {
-                    if(conversation.getLabel() == null || conversation.getLabel().isEmpty())
-                        friendConversations.add(conversation);
+                    conversation.getMember().forEach(member -> {
+                        if (member.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId()) &&
+                                (conversation.getLabel() == null || conversation.getLabel().isEmpty()))
+                            friendConversations.add(conversation);
+                    });
                 });
 
                 adapter.setConversations(friendConversations);

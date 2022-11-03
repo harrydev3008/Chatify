@@ -75,8 +75,14 @@ public class ViewFriendAdapter extends RecyclerView.Adapter<ViewFriendAdapter.Vi
 
         if(member.getId().equalsIgnoreCase(admin.getId())) {
             holder.binding.tvRole.setVisibility(View.VISIBLE);
-            holder.binding.tvMemberName.setText(context.getText(R.string.user));
             holder.binding.iBtnRemove.setVisibility(View.GONE);
+
+            if(member.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId()))
+                holder.binding.tvMemberName.setText(context.getText(R.string.user));
+            else
+
+                holder.binding.tvMemberName.setText(member.getUsername());
+
         } else {
             holder.binding.tvRole.setVisibility(View.GONE);
         }

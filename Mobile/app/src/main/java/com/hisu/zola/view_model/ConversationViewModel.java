@@ -31,4 +31,8 @@ public class ConversationViewModel extends AndroidViewModel {
     public void unsent(Message message) {
         repository.unsent(message);
     }
+
+    public LiveData<Conversation> getConversationInfo(String id) {
+        return repository.getConversationInfo(id);
+    }
 }

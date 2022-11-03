@@ -52,17 +52,17 @@ public interface ApiService {
     @POST("api/user/getAllFriends")
     Call<List<User>> getAllFriends();
 
-    @POST("api/conversation/getAllConversations")
-    Call<List<Conversation>> getConversations();
+    @POST("api/user/updateProfile")
+    Call<Object> updateUser(@Body RequestBody userInfo);
 
-    @POST("api/message/getAllMessage")
-    Call<Object> getConversationMessages(@Body RequestBody conversation);
+    @POST("api/user/requestAddFriend")
+    Call<Object> sendFriendRequest(@Body RequestBody friendID);
 
     @POST("api/user/getUserByPhonenumber")
     Call<User> findFriendByPhoneNumber(@Body RequestBody phoneNumber);
 
-    @POST("api/user/requestAddFriend")
-    Call<Object> sendFriendRequest(@Body RequestBody friendID);
+    @POST("api/message/getAllMessage")
+    Call<Object> getConversationMessages(@Body RequestBody conversation);
 
     @POST("api/message/sendMessage")
     Call<Object> sendMessage(@Body RequestBody message);
@@ -77,9 +77,21 @@ public interface ApiService {
     @POST("api/conversation/createConversation")
     Call<Conversation> createConversation(@Body RequestBody conversation);
 
-//    @POST("api/user/update")
-//    Call<User> updateUser(@Body RequestBody userInfo);
-//
-//    @POST("api/otp")
-//    Call<Object> verifyOTP(@Body RequestBody otp);
+    @POST("api/conversation/getAllConversations")
+    Call<List<Conversation>> getConversations();
+
+    @POST("api/conversation/changeLabel")
+    Call<Object> changeGroupName(@Body RequestBody conversation);
+
+    @POST("api/conversation/addMemberGroup")
+    Call<Object> addMemberToGroup(@Body RequestBody conversation);
+
+    @POST("api/conversation/deleteMember")
+    Call<Object> removeMemberFromGroup(@Body RequestBody conversationID);
+
+    @POST("api/conversation/deleteGroup")
+    Call<Object> disbandGroup(@Body RequestBody conversationID);
+
+    @POST("api/conversation/outGroup")
+    Call<Object> outGroup(@Body RequestBody conversationID);
 }

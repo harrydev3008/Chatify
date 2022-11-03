@@ -15,6 +15,7 @@ import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentProfileBinding;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.local.LocalDataManager;
 
 public class ProfileFragment extends Fragment {
@@ -46,11 +47,15 @@ public class ProfileFragment extends Fragment {
 
     private void loadUserInfo() {
         User user = LocalDataManager.getCurrentUserInfo();
-        Glide.with(mMainActivity).load(user.getAvatarURL())
-                .placeholder(R.drawable.app_logo)
-                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(mBinding.cimvUserAvatar);
+
+        if(user.getAvatarURL() == null || user.getAvatarURL().isEmpty())
+            mBinding.cimvUserAvatar.setImageBitmap(ImageConvertUtil.createImageFromText(mMainActivity, 150, 150, user.getUsername()));
+        else
+            Glide.with(mMainActivity).load(user.getAvatarURL())
+                    .placeholder(R.drawable.bg_profile).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(mBinding.cimvUserAvatar);
+
         mBinding.tvGender.setText(user.isGender() ? getString(R.string.gender_m) : getString(R.string.gender_f));
-        mBinding.tvDob.setText(user.getId());
+        mBinding.tvDob.setText(user.getDob());
         mBinding.tvDisplayName.setText(user.getUsername());
         mBinding.tvPhoneNumber.setText(user.getPhoneNumber());
     }

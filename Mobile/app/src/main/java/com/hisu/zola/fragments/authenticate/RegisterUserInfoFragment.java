@@ -18,16 +18,28 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentRegisterUserInfoBinding;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.fragments.greet_new_user.WelcomeOnBoardingFragment;
+import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.RealPathUtil;
 import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
+import java.io.File;
 import java.util.concurrent.Executors;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class RegisterUserInfoFragment extends Fragment {
 
@@ -103,7 +115,7 @@ public class RegisterUserInfoFragment extends Fragment {
                     .setMessage(getString(R.string.confirm_skip))
                     .setPositiveButton(getString(R.string.confirm),
                             (dialogInterface, i) -> {
-                                saveUserInfo();
+                                updateProfile();
                             })
                     .setNegativeButton(getString(R.string.cancel), null)
                     .show();
@@ -120,35 +132,84 @@ public class RegisterUserInfoFragment extends Fragment {
 
     private void addActionForBtnSave() {
         mBinding.btnSave.setOnClickListener(view -> {
-            saveUserInfo();
+            updateProfile();
         });
     }
 
-    private void saveUserInfo() {
+    private void updateProfile() {
 
-        uploadAvatar();
-        user.setGender(mBinding.rBtnGenderMale.isChecked());
+        loadingDialog.showDialog();
 
-        Executors.newSingleThreadExecutor().execute(() -> {
+        if (avatarUri != null) {
+            File file = new File(RealPathUtil.getRealPath(mainActivity, avatarUri));
+            RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+            String fileName = file.getName();
+            MultipartBody.Part part = MultipartBody.Part.createFormData("media", fileName, requestBody);
 
-            mainActivity.runOnUiThread(() -> {
-                loadingDialog.showDialog();
+            ApiService.apiService.postImage(part).enqueue(new Callback<Object>() {
+                @Override
+                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                    if (response.isSuccessful()) {
+
+                        Gson gson = new Gson();
+
+                        String json = gson.toJson(response.body());
+                        JsonObject obj = gson.fromJson(json, JsonObject.class);
+                        String avatarURL = obj.get("data").toString().replaceAll("\"", "");
+
+                        User user = LocalDataManager.getCurrentUserInfo();
+                        user.setGender(mBinding.rBtnGenderMale.isChecked());
+                        user.setAvatarURL(avatarURL);
+
+                        updateUserProfile(user);
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                    Log.e("ERR post img", t.getLocalizedMessage());
+                }
             });
+        } else {
+            User user = LocalDataManager.getCurrentUserInfo();
+            user.setGender(mBinding.rBtnGenderMale.isChecked());
+            user.setAvatarURL("");
+            updateUserProfile(user);
+        }
+    }
 
-            LocalDataManager.setUserLoginState(true);
-            LocalDataManager.setCurrentUserInfo(user);
+    private void updateUserProfile(User user) {
 
-            mainActivity.runOnUiThread(() -> {
-                loadingDialog.dismissDialog();
-                mainActivity.setBottomNavVisibility(View.GONE);
-                mainActivity.addFragmentToBackStack(new WelcomeOnBoardingFragment());
-            });
+        JsonObject userJson = new JsonObject();
+        userJson.addProperty("username", user.getUsername());
+        userJson.addProperty("avatarURL", user.getAvatarURL());
+        userJson.addProperty("gender", user.isGender());
+        userJson.addProperty("dob", user.getDob());
+
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), userJson.toString());
+        ApiService.apiService.updateUser(body).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if (response.isSuccessful() && response.code() == 200) {
+                    loadingDialog.dismissDialog();
+                    LocalDataManager.setCurrentUserInfo(user);
+                    new android.app.AlertDialog.Builder(mainActivity)
+                            .setMessage("Cập nhật thành công!")
+                            .setPositiveButton("Xác nhận", (dialogInterface, i) -> {
+                                loadingDialog.dismissDialog();
+                                mainActivity.setBottomNavVisibility(View.GONE);
+                                mainActivity.addFragmentToBackStack(new WelcomeOnBoardingFragment());
+                            })
+                            .setCancelable(false).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+            }
         });
     }
 
-    private void uploadAvatar() {
-        //Todo: upload default generated pfp
-    }
 
     @Override
     public void onDestroyView() {

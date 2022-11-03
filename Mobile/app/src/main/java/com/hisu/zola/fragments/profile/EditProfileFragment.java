@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,18 +24,33 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.FragmentEditProfileBinding;
+import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.RealPathUtil;
+import com.hisu.zola.util.converter.ImageConvertUtil;
+import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class EditProfileFragment extends Fragment {
 
@@ -45,6 +61,7 @@ public class EditProfileFragment extends Fragment {
     private ActivityResultLauncher<Intent> resultLauncher;
     private User currentUser;
     private boolean isGenderChanged;
+    private LoadingDialog loadingDialog;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -74,6 +91,7 @@ public class EditProfileFragment extends Fragment {
     }
 
     private void init() {
+        loadingDialog = new LoadingDialog(mainActivity, Gravity.CENTER);
         mainActivity.setBottomNavVisibility(View.GONE);
         mCalendar = Calendar.getInstance();
 
@@ -87,13 +105,16 @@ public class EditProfileFragment extends Fragment {
     }
 
     private void loadUserInfo() {
-        Glide.with(mainActivity).load(currentUser.getAvatarURL()).into(mBinding.imvAvatar);
+        if(currentUser.getAvatarURL() == null || currentUser.getAvatarURL().isEmpty())
+            mBinding.imvAvatar.setImageBitmap(ImageConvertUtil.createImageFromText(mainActivity, 150, 150, currentUser.getUsername()));
+        else
+            Glide.with(mainActivity).load(currentUser.getAvatarURL())
+                    .placeholder(R.drawable.bg_profile).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(mBinding.imvAvatar);
 
         mBinding.edtDisplayName.setText(currentUser.getUsername());
-        //Todo: change this with user.getDob()
 
         try {
-            Date dateObj = parseDate("13/02/2001");
+            Date dateObj = parseDate(currentUser.getDob());
             if (dateObj != null) {
                 mCalendar.setTime(dateObj);
                 updateDateOfBirthEditText();
@@ -137,9 +158,8 @@ public class EditProfileFragment extends Fragment {
         if (!mBinding.edtDisplayName.getText().toString().equalsIgnoreCase(currentUser.getUsername()))
             return true;
 
-        //Todo: change later
-//        if(!mBinding.edtDob.getText().toString().equalsIgnoreCase(currentUser.getDob()))
-//            return true;
+        if(!mBinding.edtDob.getText().toString().equalsIgnoreCase(currentUser.getDob()))
+            return true;
 
         if (newAvatarUri != null)
             return true;
@@ -224,24 +244,89 @@ public class EditProfileFragment extends Fragment {
         }
     }
 
-    private void updateProfile() {
-        //Todo: call update api
-        uploadAvatar();
-        User user = LocalDataManager.getCurrentUserInfo();
-        user.setUsername(mBinding.edtDisplayName.getText().toString().trim());
-        user.setDob(getDobFormat());
-
-        Log.e("user update", user.toString());
-        mBinding.iBtnBack.performClick();
-    }
 
     private String getDobFormat() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
         return dateFormat.format(mCalendar.getTime());
     }
 
-    private void uploadAvatar() {
-        //Todo: upload default generated pfp
+    private void updateProfile() {
+
+        loadingDialog.showDialog();
+
+        if(newAvatarUri != null) {
+            File file = new File(RealPathUtil.getRealPath(mainActivity, newAvatarUri));
+            RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+            String fileName = file.getName();
+            MultipartBody.Part part = MultipartBody.Part.createFormData("media", fileName, requestBody);
+
+            ApiService.apiService.postImage(part).enqueue(new Callback<Object>() {
+                @Override
+                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                    if (response.isSuccessful()) {
+
+                        Gson gson = new Gson();
+
+                        String json = gson.toJson(response.body());
+                        JsonObject obj = gson.fromJson(json, JsonObject.class);
+                        String avatarURL = obj.get("data").toString().replaceAll("\"", "");
+
+                        User user = LocalDataManager.getCurrentUserInfo();
+                        user.setUsername(mBinding.edtDisplayName.getText().toString().trim());
+                        user.setDob(getDobFormat());
+                        user.setGender(mBinding.rBtnGenderM.isChecked());
+                        user.setAvatarURL(avatarURL);
+
+                        updateUserProfile(user);
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                    Log.e("ERR post img", t.getLocalizedMessage());
+                }
+            });
+        } else {
+            User user = LocalDataManager.getCurrentUserInfo();
+            user.setUsername(mBinding.edtDisplayName.getText().toString().trim());
+            user.setDob(getDobFormat());
+            user.setGender(mBinding.rBtnGenderM.isChecked());
+            user.setAvatarURL("");
+            updateUserProfile(user);
+        }
+    }
+
+    private void updateUserProfile(User user) {
+
+        JsonObject userJson = new JsonObject();
+        userJson.addProperty("username", user.getUsername());
+        userJson.addProperty("avatarURL", user.getAvatarURL());
+        userJson.addProperty("gender", user.isGender());
+        userJson.addProperty("dob", user.getDob());
+
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), userJson.toString());
+        ApiService.apiService.updateUser(body).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if(response.isSuccessful() && response.code() == 200) {
+                    loadingDialog.dismissDialog();
+                    LocalDataManager.setCurrentUserInfo(user);
+
+                    new AlertDialog.Builder(mainActivity)
+                            .setMessage("Cập nhật thành công!")
+                            .setPositiveButton("Xác nhận", (dialogInterface, i) -> {
+                                currentUser = LocalDataManager.getCurrentUserInfo();
+                                loadUserInfo();
+                                backToPrevPage();
+                            })
+                            .setCancelable(false).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+            }
+        });
     }
 
     /**

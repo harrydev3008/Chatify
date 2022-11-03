@@ -59,7 +59,7 @@
     <string name="confirm_otp_pls">Vui lòng nhập mã OTP của bạn!</string>
     <string name="confirm_skip">Thêm giới tính và ảnh đại diện giúp mọi người tìm ra và hiểu bạn dễ hơn. Bạn vẫn muốn bỏ qua?!</string>
     <string name="otp_not_receive">Không nhận được mã OTP?</string>
-    <string name="otp_resend">Gửi lại!</string>
+    <string name="otp_resend">Gửi lại mã</string>
     <string name="otp_change_phone_no">Mã xác thực sẽ được gửi đến số điện thoại mà bạn vừa nhập. Vui lòng xác nhận số điện thoại trên là đúng.</string>
     <string name="change">Thay đổi</string>
     <string name="edit_pf">Sửa hồ sơ</string>
@@ -153,11 +153,17 @@
     <string name="out_group">Rời nhóm</string>
     <string name="kick_from_group">Xoá khỏi nhóm</string>
     <string name="disband_group">Giải tán nhóm</string>
+    <string name="disband_group_confirm">Bạn có chắc chắn muốn giải tán nhóm này hay không?!</string>
+    <string name="disband_group_success">Bạn đã giải tán nhóm!</string>
     <string name="group_admin">Trưởng nhóm</string>
     <string name="member_quan">Thành viên</string>
     <string name="user">Bạn</string>
     <string name="add_member_to_group_success">Thêm thành viên vào nhóm thành công!</string>
     <string name="just_now">Vừa xong</string>
+    <string name="confirm_out_group">Bạn có thực sự muốn rời khởi nhóm?!</string>
+    <string name="change_group_name">Đổi tên nhóm</string>
+    <string name="change_group_name_success">Đổi tên nhóm</string>
+
 
     <!--Error Messages-->
     <string name="empty_phone_no_err">Bạn chưa điền số điện thoại!</string>

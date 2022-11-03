@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="320dp"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:cardCornerRadius="14dp"
@@ -25,8 +25,9 @@
            tools:ignore="ContentDescription" />
 
        <ImageView
-           android:layout_width="match_parent"
+           android:layout_width="320dp"
            android:layout_height="300dp"
+           android:scaleType="centerCrop"
            android:src="@drawable/bg_happy_birthday"
            tools:ignore="ContentDescription" />
 
@@ -36,7 +37,7 @@
            android:textAlignment="center"
            android:textColor="@color/dark_green"
            android:textStyle="bold"
-           android:textSize="22sp"
+           android:textSize="20sp"
            android:paddingHorizontal="12dp"
            android:paddingVertical="8dp"
            android:text="@string/user_birthday"/>
@@ -46,7 +47,7 @@
            android:layout_height="wrap_content"
            android:textAlignment="center"
            android:textColor="@color/gray"
-           android:textSize="22sp"
+           android:textSize="18sp"
            android:paddingHorizontal="16dp"
            android:paddingVertical="8dp"
            android:text="@string/user_birthday_greeting"/>

@@ -92,7 +92,7 @@ public class ViewGroupMemberFragment extends Fragment {
 
     private void addActionForBtnAddMember() {
         mBinding.iBtnAddMember.setOnClickListener(view -> {
-            mainActivity.addFragmentToBackStack(new AddMemberToGroupFragment());
+            mainActivity.addFragmentToBackStack(AddMemberToGroupFragment.newInstance(conversation));
         });
     }
 }

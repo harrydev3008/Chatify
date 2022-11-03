@@ -124,7 +124,8 @@ public class ConversationFragment extends Fragment {
         initEmojiKeyboard();
         initProgressBar();
 
-        setConversationInfo(conversationName, getString(R.string.user_active));
+        mBinding.tvLastActive.setText(getString(R.string.user_active));
+        loadConversationInfo();
         addActionForBackBtn();
         addActionForAudioCallBtn();
         addActionForVideoCallBtn();
@@ -220,19 +221,27 @@ public class ConversationFragment extends Fragment {
                 linearLayoutManager
         );
 
-        if(conversation.getLabel() != null)
+        if (conversation.getLabel() != null)
             messageAdapter.setGroup(true);
 
-//        mBinding.rvConversation.setNestedScrollingEnabled(false);
         mBinding.rvConversation.setAdapter(messageAdapter);
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(mBinding.rvConversation);
     }
 
-    private void setConversationInfo(String conversationName, String conversationStatus) {
-        mBinding.tvUsername.setText(conversationName);
-        mBinding.tvLastActive.setText(conversationStatus);
+    private void loadConversationInfo() {
+        if (viewModel == null) return;
+        viewModel.getConversationInfo(conversation.getId()).observe(mMainActivity, new Observer<Conversation>() {
+            @Override
+            public void onChanged(Conversation conversation) {
+
+                if (conversation.getLabel() != null)
+                    mBinding.tvUsername.setText(conversation.getLabel());
+                else
+                    mBinding.tvUsername.setText(conversationName);
+            }
+        });
     }
 
     private void addActionForBackBtn() {

@@ -19,6 +19,9 @@ public interface ConversationDAO {
     @Query("select * from conversations where _id = :conversationID")
     Conversation getConversationById(String conversationID);
 
+    @Query("select * from conversations where _id = :id")
+    LiveData<Conversation> getConversationInfoById(String id);
+
     @Query("Select * from conversations")
     LiveData<List<Conversation>> getConversation();
 
@@ -27,4 +30,7 @@ public interface ConversationDAO {
 
     @Update
     void update(Conversation conversation);
+
+    @Query("delete from conversations where _id = :id")
+    void delete(String id);
 }

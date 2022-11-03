@@ -45,4 +45,20 @@ public class ConversationRepository {
             conversationDAO.update(conversation);
         });
     }
+
+    public void delete(String conversationID) {
+        Database.dbExecutor.execute(() -> {
+            conversationDAO.delete(conversationID);
+        });
+    }
+
+    public void changeGroupName(Conversation conversation) {
+        Database.dbExecutor.execute(() -> {
+            conversationDAO.updateConversationName(conversation.getId(), conversation.getLabel());
+        });
+    }
+
+    public LiveData<Conversation> getConversationInfo(String id) {
+        return conversationDAO.getConversationInfoById(id);
+    }
 }
