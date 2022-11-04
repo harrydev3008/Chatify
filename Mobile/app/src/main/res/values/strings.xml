@@ -163,12 +163,14 @@
     <string name="confirm_out_group">Bạn có thực sự muốn rời khởi nhóm?!</string>
     <string name="change_group_name">Đổi tên nhóm</string>
     <string name="change_group_name_success">Đổi tên nhóm</string>
+    <string name="confirm_remove_member">Bạn có chắc muốn xoá thành viên này khỏi nhóm?</string>
 
 
     <!--Error Messages-->
     <string name="empty_phone_no_err">Bạn chưa điền số điện thoại!</string>
     <string name="empty_display_name_err">Bạn chưa điền tên hiển thị!</string>
     <string name="invalid_phone_format_err">Số điện thoại sai định dạng!</string>
+    <string name="registered_phone_err">Số điện thoại này đã được đăng ký!</string>
     <string name="empty_pwd_err">Bạn chưa nhập mật khẩu!</string>
     <string name="invalid_pwd_format_err">Mật khẩu ít nhất 8 ký tự, phải gồm 1 ký tự hoa, 1 ký tự thường, 1 số và một ký tự đặc biệt (@$!%*?)!</string>
     <string name="empty_confirm_pwd_err">Vui lòng xác nhận lại mật khẩu!</string>
@@ -183,7 +185,9 @@
     <string name="user_message_sent_image">[Hình ảnh]</string>
     <string name="reset_password_success">Đổi mật khẩu thành công!</string>
     <string name="change_phone_no_success">Đổi số điện thoại mới thành công!</string>
+    <string name="add_new_group_success">Thêm nhóm mới thành công!</string>
     <string name="changes_not_save">Thông tin chưa được lưu, bạn có chắc chắn muốn huỷ?</string>
+    <string name="empty_group_name_err">Bạn chưa nhập tên nhóm!</string>
     <string name="yes">Có</string>
     <string name="no">Không</string>
 

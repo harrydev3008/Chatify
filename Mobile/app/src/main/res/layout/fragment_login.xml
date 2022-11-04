@@ -85,11 +85,12 @@
 
             <TextView
                 android:id="@+id/tv_toggle_password"
-                android:layout_width="45dp"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:fontFamily="@font/be_vietnam"
                 android:gravity="end|center"
                 android:text="@string/show"
+                android:layout_marginStart="4sp"
                 android:textColor="@color/darkBlue"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -140,7 +141,7 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="16dp"
             android:gravity="center"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/guideline3"

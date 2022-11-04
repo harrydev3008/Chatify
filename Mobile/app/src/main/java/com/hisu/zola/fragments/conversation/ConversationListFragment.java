@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.ConversationAdapter;
@@ -25,14 +26,19 @@ import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.fragments.AddFriendFragment;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.EditTextUtil;
+import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.view_model.ConversationListViewModel;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Executors;
 
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -44,6 +50,7 @@ public class ConversationListFragment extends Fragment {
     private ConversationListViewModel viewModel;
     private ConversationAdapter adapter;
     private PopupMenu popupMenu;
+    private Socket mSocket;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -62,6 +69,14 @@ public class ConversationListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mMainActivity.setProgressbarVisibility(View.GONE);
+
+        SocketIOHandler.getInstance().establishSocketConnection();
+        mSocket = SocketIOHandler.getInstance().getSocketConnection();
+        mSocket.on("addMemberToGroup-receive", onReceive);
+        mSocket.on("deleteMemberGroup-receive", onReceiveRemoveMember);
+        mSocket.on("changeGroupName-receive", onReceiveChangeGroupName);
+        mSocket.on("outGroup-receive", onReceiveOutGroup);
+        mSocket.on("addConversation-receive", onReceiveNewGroup);
 
         initConversationListRecyclerView();
 
@@ -82,6 +97,9 @@ public class ConversationListFragment extends Fragment {
         viewModel.getData().observe(mMainActivity, new Observer<List<Conversation>>() {
             @Override
             public void onChanged(List<Conversation> conversations) {
+
+                if(conversations == null) return;
+
                 List<Conversation> curConversations = new ArrayList<>();
                 conversations.forEach(conversation -> {
                     conversation.getMember().forEach(member -> {
@@ -90,8 +108,8 @@ public class ConversationListFragment extends Fragment {
                     });
                 });
 
-//                curConversations.sort((c1, c2) -> c2.getLastMessage().getUpdatedAt()
-//                        .compareToIgnoreCase(c1.getLastMessage().getUpdatedAt()));
+                curConversations.sort((c1, c2) -> c2.getUpdatedAt()
+                        .compareToIgnoreCase(c1.getUpdatedAt()));
 
                 adapter.setConversations(curConversations);
                 mBinding.rvConversationList.setAdapter(adapter);
@@ -171,4 +189,111 @@ public class ConversationListFragment extends Fragment {
             return true;
         });
     }
+
+    private final Emitter.Listener onReceive = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            mMainActivity.runOnUiThread(() -> {
+                JSONObject data = (JSONObject) args[0];
+                if (data != null) {
+
+                    try {
+                        Gson gson = new Gson();
+
+                        Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+                        viewModel.insertOrUpdate(conversation);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    };
+
+    private final Emitter.Listener onReceiveRemoveMember = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            mMainActivity.runOnUiThread(() -> {
+                JSONObject data = (JSONObject) args[0];
+                if (data != null) {
+
+                    try {
+                        Gson gson = new Gson();
+
+                        Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+                        viewModel.insertOrUpdate(conversation);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    };
+
+    private final Emitter.Listener onReceiveChangeGroupName = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            mMainActivity.runOnUiThread(() -> {
+                JSONObject data = (JSONObject) args[0];
+                if (data != null) {
+
+                    try {
+                        Gson gson = new Gson();
+
+                        Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+                        viewModel.insertOrUpdate(conversation);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    };
+
+    private final Emitter.Listener onReceiveOutGroup = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            mMainActivity.runOnUiThread(() -> {
+                JSONObject data = (JSONObject) args[0];
+                if (data != null) {
+
+                    try {
+                        Gson gson = new Gson();
+
+                        Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+                        viewModel.insertOrUpdate(conversation);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    };
+
+    private final Emitter.Listener onReceiveNewGroup = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            mMainActivity.runOnUiThread(() -> {
+                JSONObject data = (JSONObject) args[0];
+                if (data != null) {
+
+                    try {
+                        Gson gson = new Gson();
+
+                        Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+                        viewModel.insertOrUpdate(conversation);
+
+//                        Log.e("TEST add", conversation.toString());
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    };
 }

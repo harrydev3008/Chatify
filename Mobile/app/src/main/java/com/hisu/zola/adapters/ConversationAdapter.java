@@ -105,9 +105,9 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                 if(duration.toDays() < 1) {
                     if(duration.toHours() > 0 && duration.toHours() < 24)
                         holder.binding.tvConversationActiveTime.setText(duration.toHours() + " giờ");
-                    else if(duration.toHours() < 1 && duration.toMinutes() < 60)
+                    else if(duration.toHours() < 1 && (duration.toMinutes() > 0 && duration.toMinutes() < 60))
                         holder.binding.tvConversationActiveTime.setText(duration.toMinutes() + " phút");
-                    else if(duration.toMinutes() == 0)
+                    else if(duration.toMinutes() == 0 && duration.toMinutes() == 0)
                         holder.binding.tvConversationActiveTime.setText(mContext.getString(R.string.just_now));
                 } else {
                     SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM", Locale.ENGLISH);

@@ -70,7 +70,7 @@
             android:background="@drawable/edit_text_outline"
             android:paddingVertical="10dp"
             android:paddingHorizontal="8dp"
-            android:inputType="number"
+            android:inputType="phone"
             android:textSize="20sp"
             android:textCursorDrawable="@drawable/edt_cursor"
             android:hint="@string/register_num"
@@ -149,11 +149,12 @@
 
             <TextView
                 android:id="@+id/tv_toggle_password"
-                android:layout_width="45dp"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="end|center"
                 android:textSize="18sp"
                 android:textStyle="bold"
+                android:layout_marginStart="4sp"
                 android:text="@string/show"
                 android:fontFamily="@font/be_vietnam"
                 android:textColor="@color/darkBlue" />
@@ -179,6 +180,7 @@
                 android:background="@color/white"
                 android:hint="@string/confirm_password"
                 android:inputType="textPassword"
+                android:imeOptions="actionDone"
                 android:paddingHorizontal="2dp"
                 android:paddingVertical="6dp"
                 android:textSize="20sp"
@@ -187,11 +189,12 @@
 
             <TextView
                 android:id="@+id/tv_toggle_confirm_password"
-                android:layout_width="45dp"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:fontFamily="@font/be_vietnam"
                 android:gravity="end|center"
                 android:text="@string/show"
+                android:layout_marginStart="4sp"
                 android:textColor="@color/darkBlue"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -204,7 +207,7 @@
             android:backgroundTint="@color/primary_color"
             android:fontFamily="@font/be_vietnam"
             android:padding="10dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="16dp"
             android:text="@string/register"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -217,7 +220,7 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="16dp"
             android:gravity="center"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/guideline5"

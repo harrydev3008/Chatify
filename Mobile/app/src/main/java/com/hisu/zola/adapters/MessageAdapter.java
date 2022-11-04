@@ -1,6 +1,7 @@
 package com.hisu.zola.adapters;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -149,6 +150,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 binding.tvMsgSend.setTextColor(context.getColor(R.color.gray));
                 binding.tvMsgSend.setBackground(ContextCompat.getDrawable(context, R.drawable.message_removed));
                 binding.tvMsgSend.setText(context.getString(R.string.message_removed));
+                binding.tvMsgSend.setTypeface(null, Typeface.ITALIC);
             } else if (message.getType().equalsIgnoreCase("text")) {
                 binding.imgMsgSend.setVisibility(View.GONE);
                 binding.tvMsgSend.setVisibility(View.VISIBLE);
@@ -183,12 +185,14 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
 
         private void displayMessageContent(Context context, Message message) {
+            binding.tvMsgReceive.setTypeface(null, Typeface.NORMAL);
             if (message.getDeleted()) {
                 binding.imgMsgReceive.setVisibility(View.GONE);
                 binding.msgWrapper.setVisibility(View.VISIBLE);
                 binding.tvMsgReceive.setTextColor(context.getColor(R.color.gray));
                 binding.msgWrapper.setBackground(ContextCompat.getDrawable(context, R.drawable.message_removed));
                 binding.tvMsgReceive.setText(context.getString(R.string.message_removed));
+                binding.tvMsgReceive.setTypeface(null, Typeface.ITALIC);
             } else if (message.getType().equalsIgnoreCase("text")) {
                 binding.imgMsgReceive.setVisibility(View.GONE);
                 binding.tvMsgReceive.setVisibility(View.VISIBLE);

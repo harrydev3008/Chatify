@@ -105,7 +105,7 @@ public class EditProfileFragment extends Fragment {
     }
 
     private void loadUserInfo() {
-        if(currentUser.getAvatarURL() == null || currentUser.getAvatarURL().isEmpty())
+        if (currentUser.getAvatarURL() == null || currentUser.getAvatarURL().isEmpty())
             mBinding.imvAvatar.setImageBitmap(ImageConvertUtil.createImageFromText(mainActivity, 150, 150, currentUser.getUsername()));
         else
             Glide.with(mainActivity).load(currentUser.getAvatarURL())
@@ -158,7 +158,7 @@ public class EditProfileFragment extends Fragment {
         if (!mBinding.edtDisplayName.getText().toString().equalsIgnoreCase(currentUser.getUsername()))
             return true;
 
-        if(!mBinding.edtDob.getText().toString().equalsIgnoreCase(currentUser.getDob()))
+        if (!mBinding.edtDob.getText().toString().equalsIgnoreCase(currentUser.getDob()))
             return true;
 
         if (newAvatarUri != null)
@@ -254,7 +254,7 @@ public class EditProfileFragment extends Fragment {
 
         loadingDialog.showDialog();
 
-        if(newAvatarUri != null) {
+        if (newAvatarUri != null) {
             File file = new File(RealPathUtil.getRealPath(mainActivity, newAvatarUri));
             RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
             String fileName = file.getName();
@@ -283,7 +283,7 @@ public class EditProfileFragment extends Fragment {
 
                 @Override
                 public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                    Log.e("ERR post img", t.getLocalizedMessage());
+                    Log.e(EditProfileFragment.class.getName(), t.getLocalizedMessage());
                 }
             });
         } else {
@@ -291,7 +291,12 @@ public class EditProfileFragment extends Fragment {
             user.setUsername(mBinding.edtDisplayName.getText().toString().trim());
             user.setDob(getDobFormat());
             user.setGender(mBinding.rBtnGenderM.isChecked());
-            user.setAvatarURL("");
+
+            if (user.getAvatarURL() != null)
+                user.setAvatarURL(user.getAvatarURL());
+            else
+                user.setAvatarURL("");
+
             updateUserProfile(user);
         }
     }
@@ -308,7 +313,7 @@ public class EditProfileFragment extends Fragment {
         ApiService.apiService.updateUser(body).enqueue(new Callback<Object>() {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                if(response.isSuccessful() && response.code() == 200) {
+                if (response.isSuccessful() && response.code() == 200) {
                     loadingDialog.dismissDialog();
                     LocalDataManager.setCurrentUserInfo(user);
 

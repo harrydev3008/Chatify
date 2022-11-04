@@ -21,21 +21,17 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
-import com.hisu.zola.databinding.FragmentRegisterBinding;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.databinding.FragmentRegisterBinding;
 import com.hisu.zola.fragments.ConfirmOTPFragment;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.EditTextUtil;
-import com.hisu.zola.util.converter.ObjectConvertUtil;
 import com.hisu.zola.util.dialog.ConfirmSendOTPDialog;
 import com.hisu.zola.util.dialog.LoadingDialog;
-import com.hisu.zola.util.local.LocalDataManager;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Calendar;
@@ -44,6 +40,8 @@ import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -129,45 +127,45 @@ public class RegisterFragment extends Fragment {
                 loadingDialog.showDialog();
             });
 
-            ApiService.apiService.signUp(user).enqueue(new Callback<>() {
+            mMainActivity.runOnUiThread(() -> {
+                loadingDialog.dismissDialog();
+
+                if (dialog == null)
+                    initDialog();
+
+                dialog.setNewPhoneNumber(user.getPhoneNumber());
+                dialog.showDialog();
+            });
+
+            JsonObject object = new JsonObject();
+            object.addProperty("phoneNumber", mBinding.edtPhoneNumber.getText().toString());
+            RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+
+            ApiService.apiService.findFriendByPhoneNumber(body).enqueue(new Callback<User>() {
                 @Override
-                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-
+                public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
                     if (response.isSuccessful() && response.code() == 200) {
-
-                        LocalDataManager.setUserLoginState(true);
-                        LocalDataManager.setCurrentUserInfo(ObjectConvertUtil.getResponseUser(response));
-
-                        mMainActivity.runOnUiThread(() -> {
-                            loadingDialog.dismissDialog();
-
-                            if (dialog == null)
-                                initDialog();
-
-                            dialog.setNewPhoneNumber(user.getPhoneNumber());
-                            dialog.showDialog();
-                        });
-
-                    } else if (response.code() == 400) {
-                        try {
-                            JsonObject obj = new Gson().fromJson(response.errorBody().string(), JsonObject.class);
-
-                            String errorMsg = obj.get("message").getAsString();
-
+                        User foundUser = response.body();
+                        if (foundUser != null) {
                             mMainActivity.runOnUiThread(() -> {
-                                loadingDialog.dismissDialog();
-                                mBinding.edtPhoneNumber.setError(errorMsg);
+                                mBinding.edtPhoneNumber.setError(getString(R.string.registered_phone_err));
                                 mBinding.edtPhoneNumber.requestFocus();
                             });
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        } else {
+                            mMainActivity.runOnUiThread(() -> {
+                                if (dialog == null)
+                                    initDialog();
+
+                                dialog.setNewPhoneNumber(user.getPhoneNumber());
+                                dialog.showDialog();
+                            });
                         }
                     }
                 }
 
                 @Override
-                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                    Log.e("API_ERR", t.getLocalizedMessage());
+                public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                    Log.e(RegisterFragment.class.getName(), t.getLocalizedMessage());
                 }
             });
         });
@@ -292,7 +290,6 @@ public class RegisterFragment extends Fragment {
         });
 
         dialog.addActionForBtnConfirm(view_confirm -> {
-            Log.e("user", user.toString());
             dialog.dismissDialog();
             mMainActivity.setFragment(ConfirmOTPFragment.newInstance(ConfirmOTPFragment.REGISTER_ARGS, user));
         });

@@ -7,7 +7,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,8 +24,9 @@ import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
-import com.hisu.zola.databinding.FragmentConfirmOtpBinding;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.databinding.FragmentConfirmOtpBinding;
+import com.hisu.zola.fragments.authenticate.RegisterFragment;
 import com.hisu.zola.fragments.authenticate.RegisterUserInfoFragment;
 import com.hisu.zola.fragments.authenticate.ResetPasswordFragment;
 import com.hisu.zola.util.dialog.LoadingDialog;
@@ -34,7 +34,6 @@ import com.hisu.zola.util.dialog.LoadingDialog;
 import java.text.DecimalFormat;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -100,7 +99,10 @@ public class ConfirmOTPFragment extends Fragment {
 
     private void backToPrevPage() {
         mBinding.iBtnBack.setOnClickListener(view -> {
-            mainActivity.getSupportFragmentManager().popBackStackImmediate();
+            if (argument.equalsIgnoreCase(REGISTER_ARGS))
+                mainActivity.setFragment(new RegisterFragment());
+            else
+                mainActivity.getSupportFragmentManager().popBackStackImmediate();
         });
     }
 
@@ -299,6 +301,7 @@ public class ConfirmOTPFragment extends Fragment {
     }
 
     private void handleSendOTP() {
+        loadingDialog.showDialog();
         String userPhone = user.getPhoneNumber();
         String phoneNumber = "+84" + userPhone.substring(userPhone.indexOf("0") + 1);
         PhoneAuthOptions options =
@@ -314,12 +317,13 @@ public class ConfirmOTPFragment extends Fragment {
 
                             @Override
                             public void onVerificationFailed(@NonNull FirebaseException e) {
-                                showAlertDialog("Đã có lỗi trong quá trình xác thực! " + e.getLocalizedMessage());
+                                showAlertDialog("Đã có lỗi trong quá trình xác thực: " + e.getLocalizedMessage());
                             }
 
                             @Override
                             public void onCodeSent(@NonNull String verificationId, @NonNull PhoneAuthProvider.ForceResendingToken forceResendingToken) {
                                 super.onCodeSent(verificationId, forceResendingToken);
+                                loadingDialog.dismissDialog();
                                 verificationID = verificationId;
                                 startTime();
                             }

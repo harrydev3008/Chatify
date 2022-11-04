@@ -13,8 +13,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
-import com.hisu.zola.databinding.FragmentProfileBinding;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.databinding.FragmentProfileBinding;
 import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.local.LocalDataManager;
 

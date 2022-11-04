@@ -10,25 +10,35 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.AddGroupMemberAdapter;
 import com.hisu.zola.database.entity.Conversation;
+import com.hisu.zola.database.entity.Media;
+import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentAddMemberToGroupBinding;
 import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -44,6 +54,7 @@ public class AddMemberToGroupFragment extends Fragment {
     private List<User> newMembers;
     private Conversation conversation;
     private ConversationRepository repository;
+    private Socket mSocket;
 
     public static AddMemberToGroupFragment newInstance(Conversation conversation) {
         Bundle args = new Bundle();
@@ -74,6 +85,8 @@ public class AddMemberToGroupFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mSocket = SocketIOHandler.getInstance().getSocketConnection();
         repository = new ConversationRepository(mainActivity.getApplication());
         addActionForBtnCancel();
         init();
@@ -85,6 +98,15 @@ public class AddMemberToGroupFragment extends Fragment {
 
         members = new ArrayList<>();
         newMembers = new ArrayList<>();
+
+        repository.getConversationInfo(conversation.getId()).observe(mainActivity, new Observer<Conversation>() {
+            @Override
+            public void onChanged(Conversation dbConversation) {
+                if(dbConversation == null) return;
+
+                conversation = dbConversation;
+            }
+        });
 
         AddGroupMemberAdapter adapter = new AddGroupMemberAdapter(
                 getFriendNotInGroup(), mainActivity
@@ -162,7 +184,7 @@ public class AddMemberToGroupFragment extends Fragment {
 
                     conversation.setMember(newGroupMembers);
                     repository.insertOrUpdate(conversation);
-                    mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                    emitAddMember();
                     mainActivity.getSupportFragmentManager().popBackStackImmediate();
                 }
             }
@@ -172,6 +194,20 @@ public class AddMemberToGroupFragment extends Fragment {
                 Log.e(AddMemberToGroupFragment.class.getName(), t.getLocalizedMessage());
             }
         });
+    }
+
+    private void emitAddMember() {
+        if (!mSocket.connected()) {
+            mSocket.connect();
+        }
+
+        Gson gson = new Gson();
+
+        JsonObject emitMsg = new JsonObject();
+        emitMsg.add("conversation", gson.toJsonTree(conversation));
+        emitMsg.addProperty("userChange", LocalDataManager.getCurrentUserInfo().getId());
+
+        mSocket.emit("addMemberToGroup", emitMsg);
     }
 
     private boolean isDataChanged() {
