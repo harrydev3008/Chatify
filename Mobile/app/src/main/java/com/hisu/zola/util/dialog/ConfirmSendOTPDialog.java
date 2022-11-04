@@ -4,21 +4,22 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.hisu.zola.R;
+import com.hisu.zola.databinding.LayoutSendOtpDialogBinding;
 
 public class ConfirmSendOTPDialog {
 
     private Dialog dialog;
     private final Context context;
     private final int gravity;
-    private String dialogDesc;
-
-    private TextView tvPhoneNumber, tvChange, tvConfirm, tvDialogDesc;
+    private final String dialogDesc;
+    private LayoutSendOtpDialogBinding binding;
 
     public ConfirmSendOTPDialog(Context context, int gravity, String dialogDesc) {
         this.context = context;
@@ -28,11 +29,11 @@ public class ConfirmSendOTPDialog {
     }
 
     public void setNewPhoneNumber(String newPhoneNumber) {
-        this.tvPhoneNumber.setText(newPhoneNumber);
+        binding.tvNewPhoneNo.setText(newPhoneNumber);
     }
 
     public String getNewPhoneNumber() {
-        return tvPhoneNumber.getText().toString();
+        return binding.tvNewPhoneNo.getText().toString();
     }
 
     public Dialog getDialog() {
@@ -42,7 +43,8 @@ public class ConfirmSendOTPDialog {
     private void initDialog() {
         dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.layout_send_otp_dialog);
+        binding = LayoutSendOtpDialogBinding.inflate(LayoutInflater.from(context), null, false);
+        dialog.setContentView(binding.getRoot());
         dialog.setCancelable(false);
 
         Window window = dialog.getWindow();
@@ -61,11 +63,7 @@ public class ConfirmSendOTPDialog {
     }
 
     private void initUIComponent() {
-        tvPhoneNumber = dialog.findViewById(R.id.tv_new_phone_no);
-        tvChange = dialog.findViewById(R.id.tv_change);
-        tvConfirm = dialog.findViewById(R.id.tv_confirm);
-        tvDialogDesc = dialog.findViewById(R.id.tv_dialog_desc);
-        tvDialogDesc.setText(dialogDesc);
+        binding.tvDialogDesc.setText(dialogDesc);
     }
 
     public void showDialog() {
@@ -77,10 +75,10 @@ public class ConfirmSendOTPDialog {
     }
 
     public void addActionForBtnChange(View.OnClickListener onClickListener) {
-        tvChange.setOnClickListener(onClickListener);
+        binding.tvChange.setOnClickListener(onClickListener);
     }
 
     public void addActionForBtnConfirm(View.OnClickListener onClickListener) {
-        tvConfirm.setOnClickListener(onClickListener);
+        binding.tvConfirm.setOnClickListener(onClickListener);
     }
 }

@@ -10,6 +10,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -22,17 +23,17 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
-import com.hisu.zola.databinding.FragmentRegisterUserInfoBinding;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.databinding.FragmentRegisterUserInfoBinding;
 import com.hisu.zola.fragments.greet_new_user.WelcomeOnBoardingFragment;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.RealPathUtil;
 import com.hisu.zola.util.converter.ImageConvertUtil;
+import com.hisu.zola.util.converter.ObjectConvertUtil;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.io.File;
-import java.util.concurrent.Executors;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -82,6 +83,7 @@ public class RegisterUserInfoFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Log.e("USer data", user.toString());
         init();
     }
 
@@ -137,10 +139,10 @@ public class RegisterUserInfoFragment extends Fragment {
     }
 
     private void updateProfile() {
-
         loadingDialog.showDialog();
 
         if (avatarUri != null) {
+            Toast.makeText(mainActivity, "here", Toast.LENGTH_SHORT).show();
             File file = new File(RealPathUtil.getRealPath(mainActivity, avatarUri));
             RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
             String fileName = file.getName();
@@ -171,7 +173,6 @@ public class RegisterUserInfoFragment extends Fragment {
                 }
             });
         } else {
-            User user = LocalDataManager.getCurrentUserInfo();
             user.setGender(mBinding.rBtnGenderMale.isChecked());
             user.setAvatarURL("");
             updateUserProfile(user);
@@ -179,37 +180,29 @@ public class RegisterUserInfoFragment extends Fragment {
     }
 
     private void updateUserProfile(User user) {
-
-        JsonObject userJson = new JsonObject();
-        userJson.addProperty("username", user.getUsername());
-        userJson.addProperty("avatarURL", user.getAvatarURL());
-        userJson.addProperty("gender", user.isGender());
-        userJson.addProperty("dob", user.getDob());
-
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), userJson.toString());
-        ApiService.apiService.updateUser(body).enqueue(new Callback<Object>() {
+        ApiService.apiService.signUp(user).enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+
                 if (response.isSuccessful() && response.code() == 200) {
-                    loadingDialog.dismissDialog();
-                    LocalDataManager.setCurrentUserInfo(user);
-                    new android.app.AlertDialog.Builder(mainActivity)
-                            .setMessage("Cập nhật thành công!")
-                            .setPositiveButton("Xác nhận", (dialogInterface, i) -> {
-                                loadingDialog.dismissDialog();
-                                mainActivity.setBottomNavVisibility(View.GONE);
-                                mainActivity.addFragmentToBackStack(new WelcomeOnBoardingFragment());
-                            })
-                            .setCancelable(false).show();
+
+                    LocalDataManager.setUserLoginState(true);
+                    LocalDataManager.setCurrentUserInfo(ObjectConvertUtil.getResponseUser(response));
+
+                    mainActivity.runOnUiThread(() -> {
+                        loadingDialog.dismissDialog();
+                        mainActivity.setBottomNavVisibility(View.GONE);
+                        mainActivity.addFragmentToBackStack(new WelcomeOnBoardingFragment());
+                    });
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                Log.e(RegisterUserInfoFragment.class.getName(), t.getLocalizedMessage());
             }
         });
     }
-
 
     @Override
     public void onDestroyView() {

@@ -111,8 +111,6 @@ public class ConversationFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        SocketIOHandler.getInstance().establishSocketConnection();
-
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
 
         mSocket.on("msg-receive", onMessageReceive);
@@ -235,7 +233,7 @@ public class ConversationFragment extends Fragment {
         viewModel.getConversationInfo(conversation.getId()).observe(mMainActivity, new Observer<Conversation>() {
             @Override
             public void onChanged(Conversation conversation) {
-
+                if(conversation == null) return;
                 if (conversation.getLabel() != null)
                     mBinding.tvUsername.setText(conversation.getLabel());
                 else
@@ -587,8 +585,8 @@ public class ConversationFragment extends Fragment {
         public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
 
             new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-                    .addSwipeLeftBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.danger))
-                    .addSwipeLeftActionIcon(R.drawable.ic_delete_white)
+                    .addSwipeLeftBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.white))
+                    .addSwipeLeftActionIcon(R.drawable.ic_remove_msg_outline_rounded)
                     .create()
                     .decorate();
 

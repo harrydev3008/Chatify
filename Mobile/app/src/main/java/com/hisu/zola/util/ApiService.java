@@ -83,6 +83,9 @@ public interface ApiService {
     @POST("api/conversation/changeLabel")
     Call<Object> changeGroupName(@Body RequestBody conversation);
 
+    @POST("api/conversation/updateCreator")
+    Call<Object> changeGroupAdmin(@Body RequestBody conversation);
+
     @POST("api/conversation/addMemberGroup")
     Call<Object> addMemberToGroup(@Body RequestBody conversation);
 

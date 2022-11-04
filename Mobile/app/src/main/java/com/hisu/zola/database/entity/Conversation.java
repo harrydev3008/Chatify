@@ -27,15 +27,18 @@ public class Conversation implements Serializable {
     @TypeConverters(MessageConverter.class)
     private Message lastMessage;
 
+    private String updatedAt;
+
     @Ignore
     public Conversation() {
     }
 
-    public Conversation(@NonNull String _id, List<User> member, User createdBy, String label) {
+    public Conversation(@NonNull String _id, List<User> member, User createdBy, String label, String updatedAt) {
         this._id = _id;
         this.member = member;
         this.createdBy = createdBy;
         this.label = label;
+        this.updatedAt = updatedAt;
     }
 
     public String getId() {
@@ -78,6 +81,14 @@ public class Conversation implements Serializable {
         this.lastMessage = lastMessage;
     }
 
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     @Override
     public String toString() {
         return "Conversation{" +
@@ -85,6 +96,8 @@ public class Conversation implements Serializable {
                 ", member=" + member +
                 ", createdBy=" + createdBy +
                 ", label='" + label + '\'' +
+                ", lastMessage=" + lastMessage +
+                ", updatedAt='" + updatedAt + '\'' +
                 '}';
     }
 }

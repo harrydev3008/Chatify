@@ -134,7 +134,6 @@ public class AddFriendFragment extends Fragment {
 
                                 if (foundUser != null) {
                                     mainActivity.runOnUiThread(() -> {
-                                        Toast.makeText(mainActivity, "here", Toast.LENGTH_SHORT).show();
                                         AddFriendDialog dialog = new AddFriendDialog(mainActivity, Gravity.CENTER, foundUser);
                                         dialog.showDialog();
                                     });

@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
@@ -21,12 +22,14 @@ import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentConversationGroupDetailBinding;
 import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.dialog.ChangeGroupNameDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.List;
 
+import io.socket.client.Socket;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -42,6 +45,7 @@ public class ConversationGroupDetailFragment extends Fragment {
     private User currentUser;
     private ConversationRepository repository;
     private ChangeGroupNameDialog groupNameDialog;
+    private Socket mSocket;
 
     public static ConversationGroupDetailFragment newInstance(Conversation conversation) {
         Bundle args = new Bundle();
@@ -74,6 +78,7 @@ public class ConversationGroupDetailFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         repository = new ConversationRepository(mainActivity.getApplication());
+        mSocket = SocketIOHandler.getInstance().getSocketConnection();
         loadConversationInfo();
         backToPrevPage();
         addActionForBtnViewMember();
@@ -85,10 +90,11 @@ public class ConversationGroupDetailFragment extends Fragment {
         repository.getConversationInfo(conversation.getId()).observe(mainActivity, new Observer<Conversation>() {
             @Override
             public void onChanged(Conversation conversation) {
+
+                if (conversation == null) return;
+
                 mBinding.imvGroupPfp.setImageBitmap(ImageConvertUtil.createImageFromText(mainActivity, 150, 150, conversation.getLabel()));
                 mBinding.tvGroupName.setText(conversation.getLabel());
-                String memberAmount = getString(R.string.group_members) + " (" + conversation.getMember().size() + ")";
-                mBinding.tvMembers.setText(memberAmount);
 
                 if (conversation.getCreatedBy().getId().equalsIgnoreCase(currentUser.getId())) {
                     mBinding.tvAddMembers.setVisibility(View.VISIBLE);
@@ -144,6 +150,7 @@ public class ConversationGroupDetailFragment extends Fragment {
                     conversation.setLabel(label);
                     repository.changeGroupName(conversation);
                     groupNameDialog.dismissDialog();
+                    emitChangeLabel();
                 }
             }
 
@@ -223,6 +230,7 @@ public class ConversationGroupDetailFragment extends Fragment {
 
                     conversation.setMember(members);
                     repository.insertOrUpdate(conversation);
+                    emitOutGroup();
 
                     mainActivity.setBottomNavVisibility(View.VISIBLE);
                     mainActivity.getSupportFragmentManager().popBackStackImmediate();
@@ -235,5 +243,33 @@ public class ConversationGroupDetailFragment extends Fragment {
                 Log.e(ConversationGroupDetailFragment.class.getName(), t.getLocalizedMessage());
             }
         });
+    }
+
+    private void emitChangeLabel() {
+        if (!mSocket.connected()) {
+            mSocket.connect();
+        }
+
+        Gson gson = new Gson();
+
+        JsonObject emitMsg = new JsonObject();
+        emitMsg.add("conversation", gson.toJsonTree(conversation));
+        emitMsg.addProperty("userChange", LocalDataManager.getCurrentUserInfo().getId());
+
+        mSocket.emit("changeGroupName", emitMsg);
+    }
+
+    private void emitOutGroup() {
+        if (!mSocket.connected()) {
+            mSocket.connect();
+        }
+
+        Gson gson = new Gson();
+
+        JsonObject emitMsg = new JsonObject();
+        emitMsg.add("conversation", gson.toJsonTree(conversation));
+//        emitMsg.addProperty("userChange", LocalDataManager.getCurrentUserInfo().getId());
+
+        mSocket.emit("outGroup", emitMsg);
     }
 }
