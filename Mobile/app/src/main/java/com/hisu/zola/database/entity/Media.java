@@ -1,6 +1,8 @@
 package com.hisu.zola.database.entity;
 
-public class Media {
+import java.io.Serializable;
+
+public class Media implements Serializable {
     private String url;
     private String type;
 

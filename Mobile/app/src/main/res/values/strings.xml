@@ -161,9 +161,15 @@
     <string name="add_member_to_group_success">Thêm thành viên vào nhóm thành công!</string>
     <string name="just_now">Vừa xong</string>
     <string name="confirm_out_group">Bạn có thực sự muốn rời khởi nhóm?!</string>
+    <string name="confirm_out_group_admin">Bạn có thể chọn một trưởng nhóm mới trước khi rời nhóm. Nếu không, quyền trưởng nhóm sẽ được trao ngẫu nhiên cho một thành viên.</string>
     <string name="change_group_name">Đổi tên nhóm</string>
     <string name="change_group_name_success">Đổi tên nhóm</string>
     <string name="confirm_remove_member">Bạn có chắc muốn xoá thành viên này khỏi nhóm?</string>
+    <string name="use_removed">Bạn đã bị nhóm trưởng xoá khỏi nhóm!</string>
+    <string name="group_disbanded">Nhóm đã bị giải tán!</string>
+    <string name="change_admin_success">Chuyển trưởng nhóm thành công!</string>
+    <string name="change_admin_confirm">Chọn người này làm trưởng nhóm mới?</string>
+    <string name="pick_new_admin">Chọn trưởng nhóm mới</string>
 
 
     <!--Error Messages-->

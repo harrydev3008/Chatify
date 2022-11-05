@@ -1,18 +1,22 @@
 package com.hisu.zola.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.Media;
 import com.hisu.zola.database.entity.Message;
@@ -105,7 +109,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                 if (position == 0)
                     receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
-                else if (position == messages.size() - 1)
+                else if (position == messages.size() - 1 && !messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
                     receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
                 else if (!messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
                         && messages.get(position + 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
@@ -144,6 +148,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
 
         private void displayMessageContent(Context context, Message message) {
+            binding.tvMsgSend.setTypeface(null, Typeface.NORMAL);
             if (message.getDeleted()) {
                 binding.imgMsgSend.setVisibility(View.GONE);
                 binding.tvMsgSend.setVisibility(View.VISIBLE);
@@ -163,7 +168,13 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     binding.imgMsgSend.setVisibility(View.VISIBLE);
                     binding.groupImg.setVisibility(View.GONE);
                     Media media = message.getMedia().get(0);
-                    Glide.with(context).load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(binding.imgMsgSend);
+                    Glide.with(context)
+                            .asBitmap().load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(new SimpleTarget<Bitmap>() {
+                                @Override
+                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                    binding.imgMsgSend.setImageBitmap(resource);
+                                }
+                            });
                 } else {
                     binding.tvMsgSend.setVisibility(View.GONE);
                     binding.imgMsgSend.setVisibility(View.GONE);
@@ -205,7 +216,13 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     binding.msgWrapper.setVisibility(View.VISIBLE);
                     binding.groupImg.setVisibility(View.GONE);
                     Media media = message.getMedia().get(0);
-                    Glide.with(context).load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(binding.imgMsgReceive);
+                    Glide.with(context)
+                            .asBitmap().load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(new SimpleTarget<Bitmap>() {
+                                @Override
+                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                    binding.imgMsgReceive.setImageBitmap(resource);
+                                }
+                            });
                 } else {
                     binding.msgWrapper.setVisibility(View.GONE);
                     binding.imgMsgReceive.setVisibility(View.GONE);

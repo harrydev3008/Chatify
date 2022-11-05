@@ -10,6 +10,7 @@ import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ import com.hisu.zola.databinding.FragmentViewGroupMemberBinding;
 import com.hisu.zola.listeners.IOnRemoveUserListener;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.SocketIOHandler;
+import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.io.Serializable;
@@ -49,6 +51,7 @@ public class ViewGroupMemberFragment extends Fragment {
     private ConversationRepository repository;
     private ViewFriendAdapter adapter;
     private Socket mSocket;
+    private LoadingDialog loadingDialog;
 
     public static ViewGroupMemberFragment newInstance(Conversation conversation) {
         Bundle args = new Bundle();
@@ -79,6 +82,7 @@ public class ViewGroupMemberFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        loadingDialog = new LoadingDialog(mainActivity, Gravity.CENTER);
         repository = new ConversationRepository(mainActivity.getApplication());
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
         backToPrevPage();
@@ -119,6 +123,9 @@ public class ViewGroupMemberFragment extends Fragment {
     }
 
     private void removeMember(String memberID) {
+
+        loadingDialog.showDialog();
+
         JsonObject object = new JsonObject();
         object.addProperty("conversationId", conversation.getId());
         object.addProperty("deleteMemberId", memberID);
@@ -155,6 +162,8 @@ public class ViewGroupMemberFragment extends Fragment {
         if (!mSocket.connected()) {
             mSocket.connect();
         }
+
+        loadingDialog.dismissDialog();
 
         Gson gson = new Gson();
 

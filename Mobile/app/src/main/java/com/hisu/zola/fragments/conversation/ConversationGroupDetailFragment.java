@@ -25,6 +25,7 @@ import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.dialog.ChangeGroupNameDialog;
+import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.List;
@@ -46,6 +47,7 @@ public class ConversationGroupDetailFragment extends Fragment {
     private ConversationRepository repository;
     private ChangeGroupNameDialog groupNameDialog;
     private Socket mSocket;
+    private LoadingDialog loadingDialog;
 
     public static ConversationGroupDetailFragment newInstance(Conversation conversation) {
         Bundle args = new Bundle();
@@ -77,6 +79,7 @@ public class ConversationGroupDetailFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        loadingDialog = new LoadingDialog(mainActivity, Gravity.CENTER);
         repository = new ConversationRepository(mainActivity.getApplication());
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
         loadConversationInfo();
@@ -89,19 +92,22 @@ public class ConversationGroupDetailFragment extends Fragment {
     private void loadConversationInfo() {
         repository.getConversationInfo(conversation.getId()).observe(mainActivity, new Observer<Conversation>() {
             @Override
-            public void onChanged(Conversation conversation) {
+            public void onChanged(Conversation conversationDB) {
 
-                if (conversation == null) return;
+                if (conversationDB == null) return;
 
-                mBinding.imvGroupPfp.setImageBitmap(ImageConvertUtil.createImageFromText(mainActivity, 150, 150, conversation.getLabel()));
-                mBinding.tvGroupName.setText(conversation.getLabel());
+                conversation = conversationDB;
 
-                if (conversation.getCreatedBy().getId().equalsIgnoreCase(currentUser.getId())) {
+                mBinding.imvGroupPfp.setImageBitmap(ImageConvertUtil.createImageFromText(mainActivity, 150, 150, conversationDB.getLabel()));
+                mBinding.tvGroupName.setText(conversationDB.getLabel());
+
+                if (conversationDB.getCreatedBy().getId().equalsIgnoreCase(currentUser.getId())) {
                     mBinding.tvAddMembers.setVisibility(View.VISIBLE);
                     mBinding.tvDisbandGroup.setVisibility(View.VISIBLE);
                     mBinding.tvChangeAdmin.setVisibility(View.VISIBLE);
                     addActionForBtnAddMember();
                     addActionForBtnDisbandGroup();
+                    addActionForBtnChangeAdmin();
                 }
             }
         });
@@ -139,6 +145,9 @@ public class ConversationGroupDetailFragment extends Fragment {
     }
 
     private void changeGroupLabel(String label) {
+
+        loadingDialog.showDialog();
+
         JsonObject object = new JsonObject();
         object.addProperty("newLabel", label);
         object.addProperty("conversationId", conversation.getId());
@@ -184,10 +193,7 @@ public class ConversationGroupDetailFragment extends Fragment {
                             .setMessage(getString(R.string.disband_group_success))
                             .setCancelable(false)
                             .setPositiveButton("ok", (dialogInterface, i) -> {
-                                repository.delete(conversation.getId());
-                                mainActivity.setBottomNavVisibility(View.GONE);
-                                mainActivity.getSupportFragmentManager().popBackStackImmediate();
-                                mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                                emitDisbandGroup(conversation);
                             }).show();
                 }
             }
@@ -199,38 +205,63 @@ public class ConversationGroupDetailFragment extends Fragment {
         });
     }
 
-    private void addActionForBtnOutGroup() {
-        mBinding.tvOutGroup.setOnClickListener(view -> {
-            new AlertDialog.Builder(mainActivity)
-                    .setMessage(getString(R.string.confirm_out_group))
-                    .setNegativeButton(getString(R.string.no), null)
-                    .setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> {
-                        outGroup();
-                    }).show();
+    private void addActionForBtnChangeAdmin() {
+        mBinding.tvChangeAdmin.setOnClickListener(view -> {
+            mainActivity.addFragmentToBackStack(ChangeAdminFragment.newInstance(conversation, ChangeAdminFragment.CHANGE_ADMIN_OPTION_CHANGE_ARGS));
         });
     }
 
-    //todo: if admin then switch admin role to someone else
-    private void outGroup() {
+    private void addActionForBtnOutGroup() {
+        mBinding.tvOutGroup.setOnClickListener(view -> {
+            if (conversation.getCreatedBy().getId().equalsIgnoreCase(currentUser.getId())) {
+                new AlertDialog.Builder(mainActivity)
+                        .setMessage(getString(R.string.confirm_out_group_admin))
+                        .setNegativeButton(getString(R.string.out_group), (dialogInterface, i) -> {
+                            for (User user : conversation.getMember()) {
+                                if (!user.getId().equalsIgnoreCase(currentUser.getId())) {
+                                    changeAdmin(user);
+                                    break;
+                                }
+                            }
+                            outGroup(conversation);
+                        })
+                        .setPositiveButton(getString(R.string.pick_new_admin), (dialogInterface, i) -> {
+                            mainActivity.addFragmentToBackStack(ChangeAdminFragment.newInstance(
+                                    conversation, ChangeAdminFragment.CHANGE_ADMIN_OPTION_DELETE_ARGS)
+                            );
+                        }).show();
+            } else {
+                new AlertDialog.Builder(mainActivity)
+                        .setMessage(getString(R.string.confirm_out_group))
+                        .setNegativeButton(getString(R.string.no), null)
+                        .setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> {
+                            List<User> members = conversation.getMember();
+                            for (User user : members) {
+                                if(user.getId().equalsIgnoreCase(currentUser.getId())) {
+                                    members.remove(user);
+                                    break;
+                                }
+                            }
+                            conversation.setMember(members);
+                            outGroup(conversation);
+                        }).show();
+            }
+        });
+    }
+
+    private void outGroup(Conversation conversationEmit) {
+
+        loadingDialog.showDialog();
+
         JsonObject object = new JsonObject();
-        object.addProperty("conversationId", conversation.getId());
+        object.addProperty("conversationId", conversationEmit.getId());
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
         ApiService.apiService.outGroup(body).enqueue(new Callback<Object>() {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
                 if (response.isSuccessful() && response.code() == 200) {
 
-                    List<User> members = conversation.getMember();
-                    for (User member : members) {
-                        if (member.getId().equalsIgnoreCase(currentUser.getId())) {
-                            members.remove(member);
-                            break;
-                        }
-                    }
-
-                    conversation.setMember(members);
-                    repository.insertOrUpdate(conversation);
-                    emitOutGroup();
+                    emitOutGroup(conversationEmit);
 
                     mainActivity.setBottomNavVisibility(View.VISIBLE);
                     mainActivity.getSupportFragmentManager().popBackStackImmediate();
@@ -250,6 +281,8 @@ public class ConversationGroupDetailFragment extends Fragment {
             mSocket.connect();
         }
 
+        loadingDialog.dismissDialog();
+
         Gson gson = new Gson();
 
         JsonObject emitMsg = new JsonObject();
@@ -259,17 +292,94 @@ public class ConversationGroupDetailFragment extends Fragment {
         mSocket.emit("changeGroupName", emitMsg);
     }
 
-    private void emitOutGroup() {
+    private void emitOutGroup(Conversation conversation) {
         if (!mSocket.connected()) {
             mSocket.connect();
         }
+
+        loadingDialog.dismissDialog();
 
         Gson gson = new Gson();
 
         JsonObject emitMsg = new JsonObject();
         emitMsg.add("conversation", gson.toJsonTree(conversation));
-//        emitMsg.addProperty("userChange", LocalDataManager.getCurrentUserInfo().getId());
 
         mSocket.emit("outGroup", emitMsg);
+        repository.delete(conversation.getId());
+    }
+
+    private void changeAdmin(User newAdmin) {
+
+        loadingDialog.showDialog();
+
+        Gson gson = new Gson();
+
+        JsonObject object = new JsonObject();
+        object.addProperty("conversationId", conversation.getId());
+        object.add("newCreator", gson.toJsonTree(newAdmin));
+
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+
+        ApiService.apiService.changeGroupAdmin(body).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if (response.isSuccessful() && response.code() == 200) {
+
+                    conversation.setCreatedBy(newAdmin);
+
+                    List<User> members = conversation.getMember();
+                    for (User member : members) {
+                        if (member.getId().equalsIgnoreCase(currentUser.getId())) {
+                            members.remove(member);
+                            break;
+                        }
+                    }
+
+                    conversation.setMember(members);
+                    repository.insertOrUpdate(conversation);
+                    emitChangeAdmin(conversation);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                Log.e(ChangeAdminFragment.class.getName(), t.getLocalizedMessage());
+            }
+        });
+    }
+
+    private void emitChangeAdmin(Conversation conversation) {
+        if (!mSocket.connected()) {
+            mSocket.connect();
+        }
+
+        loadingDialog.dismissDialog();
+
+        Gson gson = new Gson();
+
+        JsonObject emitMsg = new JsonObject();
+        emitMsg.add("conversation", gson.toJsonTree(conversation));
+
+        mSocket.emit("changeCreatorGroup", emitMsg);
+    }
+
+    private void emitDisbandGroup(Conversation conversation) {
+        if (!mSocket.connected()) {
+            mSocket.connect();
+        }
+
+        loadingDialog.dismissDialog();
+
+        Gson gson = new Gson();
+
+        JsonObject emitMsg = new JsonObject();
+        emitMsg.add("conversation", gson.toJsonTree(conversation));
+
+        mSocket.emit("deleteGroup", emitMsg);
+
+        repository.delete(conversation.getId());
+        mainActivity.setBottomNavVisibility(View.GONE);
+        mainActivity.getSupportFragmentManager().popBackStackImmediate();
+        mainActivity.getSupportFragmentManager().popBackStackImmediate();
     }
 }

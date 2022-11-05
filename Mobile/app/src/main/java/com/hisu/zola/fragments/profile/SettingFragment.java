@@ -9,9 +9,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
+import com.hisu.zola.database.entity.User;
+import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentSettingBinding;
 import com.hisu.zola.fragments.authenticate.ResetPasswordFragment;
 import com.hisu.zola.util.local.LocalDataManager;
@@ -20,6 +23,7 @@ public class SettingFragment extends Fragment {
 
     private FragmentSettingBinding mBinding;
     private MainActivity mainActivity;
+    private UserRepository repository;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,6 +43,7 @@ public class SettingFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         mainActivity.setBottomNavVisibility(View.GONE);
+        repository = new UserRepository(mainActivity.getApplication());
 
         loadUserInfo();
         addActionForBtnBackToPrevPage();
@@ -48,7 +53,15 @@ public class SettingFragment extends Fragment {
     }
 
     private void loadUserInfo() {
-        mBinding.tvPhoneNo.setText(LocalDataManager.getCurrentUserInfo().getPhoneNumber());
+        User localUser = LocalDataManager.getCurrentUserInfo();
+        repository.getUser(localUser.getId()).observe(mainActivity, new Observer<User>() {
+            @Override
+            public void onChanged(User user) {
+                if (user == null) return;
+                mBinding.tvPhoneNo.setText(user.getPhoneNumber());
+            }
+        });
+
     }
 
     private void addActionForBtnLogout() {

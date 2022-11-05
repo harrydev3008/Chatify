@@ -27,4 +27,8 @@ public class ConversationListViewModel extends AndroidViewModel {
     public void insertOrUpdate(Conversation conversation) {
         repository.insertOrUpdate(conversation);
     }
+
+    public void delete(Conversation conversation) {
+        repository.delete(conversation.getId());
+    }
 }

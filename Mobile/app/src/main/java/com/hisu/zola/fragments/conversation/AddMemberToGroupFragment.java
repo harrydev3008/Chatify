@@ -3,6 +3,7 @@ package com.hisu.zola.fragments.conversation;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentAddMemberToGroupBinding;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.SocketIOHandler;
+import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import org.json.JSONException;
@@ -55,6 +57,7 @@ public class AddMemberToGroupFragment extends Fragment {
     private Conversation conversation;
     private ConversationRepository repository;
     private Socket mSocket;
+    private LoadingDialog loadingDialog;
 
     public static AddMemberToGroupFragment newInstance(Conversation conversation) {
         Bundle args = new Bundle();
@@ -85,7 +88,7 @@ public class AddMemberToGroupFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        loadingDialog = new LoadingDialog(mainActivity, Gravity.CENTER);
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
         repository = new ConversationRepository(mainActivity.getApplication());
         addActionForBtnCancel();
@@ -169,6 +172,9 @@ public class AddMemberToGroupFragment extends Fragment {
     }
 
     private void addMember() {
+
+        loadingDialog.showDialog();
+
         Gson gson = new Gson();
         JsonObject object = new JsonObject();
         object.addProperty("conversationId", conversation.getId());
@@ -200,6 +206,8 @@ public class AddMemberToGroupFragment extends Fragment {
         if (!mSocket.connected()) {
             mSocket.connect();
         }
+
+        loadingDialog.dismissDialog();
 
         Gson gson = new Gson();
 

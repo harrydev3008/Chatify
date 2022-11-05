@@ -3,6 +3,7 @@ package com.hisu.zola.fragments.conversation;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.FragmentAddNewGroupBinding;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.SocketIOHandler;
+import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.ArrayList;
@@ -40,6 +42,7 @@ public class AddNewGroupFragment extends Fragment {
     private MainActivity mainActivity;
     private List<String> members;
     private Socket mSocket;
+    private LoadingDialog loadingDialog;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,6 +61,7 @@ public class AddNewGroupFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        loadingDialog = new LoadingDialog(mainActivity, Gravity.CENTER);
         mainActivity.setBottomNavVisibility(View.GONE);
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
         init();
@@ -131,6 +135,9 @@ public class AddNewGroupFragment extends Fragment {
     }
 
     private void addNewGroup() {
+
+        loadingDialog.showDialog();
+
         User currentUser = LocalDataManager.getCurrentUserInfo();
         Gson gson = new Gson();
         JsonObject object = new JsonObject();
@@ -145,6 +152,8 @@ public class AddNewGroupFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<Conversation> call, @NonNull Response<Conversation> response) {
                 if (response.isSuccessful() && response.code() == 200) {
+
+                    loadingDialog.dismissDialog();
 
                     Conversation conversation = response.body();
 

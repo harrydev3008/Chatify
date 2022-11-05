@@ -18,6 +18,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
+import com.hisu.zola.database.Database;
+import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentLoginBinding;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.fragments.conversation.ConversationListFragment;
@@ -41,6 +43,7 @@ public class LoginFragment extends Fragment {
     private FragmentLoginBinding mBinding;
     private MainActivity mMainActivity;
     private LoadingDialog loadingDialog;
+    private UserRepository repository;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,6 +61,8 @@ public class LoginFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mMainActivity.clearDB();
+        repository = new UserRepository(mMainActivity.getApplication());
         init();
     }
 
@@ -168,8 +173,12 @@ public class LoginFragment extends Fragment {
                 public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
                     if (response.isSuccessful() && response.code() == 200) {
 
+                        User newUser = ObjectConvertUtil.getResponseUser(response);
+
                         LocalDataManager.setUserLoginState(true);
-                        LocalDataManager.setCurrentUserInfo(ObjectConvertUtil.getResponseUser(response));
+                        LocalDataManager.setCurrentUserInfo(newUser);
+
+                        repository.insert(newUser);
 
                         mMainActivity.runOnUiThread(() -> {
                             loadingDialog.dismissDialog();

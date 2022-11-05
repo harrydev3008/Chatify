@@ -30,6 +30,7 @@ import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentEditProfileBinding;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.RealPathUtil;
@@ -62,6 +63,7 @@ public class EditProfileFragment extends Fragment {
     private User currentUser;
     private boolean isGenderChanged;
     private LoadingDialog loadingDialog;
+    private UserRepository repository;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,6 +82,9 @@ public class EditProfileFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        repository = new UserRepository(mainActivity.getApplication());
+
         init();
         loadUserInfo();
         addActionForBtnBackToPrevPage();
@@ -316,6 +321,7 @@ public class EditProfileFragment extends Fragment {
                 if (response.isSuccessful() && response.code() == 200) {
                     loadingDialog.dismissDialog();
                     LocalDataManager.setCurrentUserInfo(user);
+                    repository.update(user);
 
                     new AlertDialog.Builder(mainActivity)
                             .setMessage("Cập nhật thành công!")

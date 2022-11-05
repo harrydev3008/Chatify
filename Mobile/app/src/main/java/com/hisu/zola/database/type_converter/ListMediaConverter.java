@@ -11,7 +11,7 @@ import java.util.List;
 public class ListMediaConverter {
     @TypeConverter
     public String listToJson(List<Media> media) {
-        return new Gson().toJson(media);
+        return new Gson().toJsonTree(media).toString();
     }
 
     @TypeConverter
