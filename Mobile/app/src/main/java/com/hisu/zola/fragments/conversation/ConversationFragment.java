@@ -1,6 +1,5 @@
 package com.hisu.zola.fragments.conversation;
 
-import android.app.AlertDialog;
 import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,6 +21,8 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.gdacciaro.iOSDialog.iOSDialog;
+import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.ThreeBounce;
 import com.google.gson.Gson;
@@ -37,6 +38,7 @@ import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentConversationBinding;
 import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.NetworkUtil;
 import com.hisu.zola.util.RealPathUtil;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
@@ -161,7 +163,13 @@ public class ConversationFragment extends Fragment {
                 .title(getString(R.string.pick_img))
                 .buttonText(getString(R.string.send))
                 .startMultiImage(uris -> {
-                    uris.forEach(this::uploadFileToServer);
+                    if (NetworkUtil.isConnectionAvailable(mMainActivity))
+                        uris.forEach(this::uploadFileToServer);
+                    else
+                        new iOSDialogBuilder(mMainActivity)
+                                .setTitle(getString(R.string.no_network_connection))
+                                .setSubtitle(getString(R.string.no_network_connection_desc))
+                                .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
                 });
     }
 
@@ -187,7 +195,7 @@ public class ConversationFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                Log.e("ERR post img", t.getLocalizedMessage());
+                Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
             }
         });
     }
@@ -301,7 +309,13 @@ public class ConversationFragment extends Fragment {
 
     private void addActionForSendMessageBtn() {
         mBinding.btnSend.setOnClickListener(view -> {
-            sendMessageViaApi(mBinding.edtChat.getText().toString().trim(), "", "", "text");
+            if (NetworkUtil.isConnectionAvailable(mMainActivity))
+                sendMessageViaApi(mBinding.edtChat.getText().toString().trim(), "", "", "text");
+            else
+                new iOSDialogBuilder(mMainActivity)
+                        .setTitle(getString(R.string.no_network_connection))
+                        .setSubtitle(getString(R.string.no_network_connection_desc))
+                        .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
         });
     }
 
@@ -337,7 +351,7 @@ public class ConversationFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                Log.e("API_ERR", t.getLocalizedMessage());
+                Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
             }
         });
     }
@@ -492,7 +506,7 @@ public class ConversationFragment extends Fragment {
 
                 @Override
                 public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                    Log.e("API_ERR", t.getLocalizedMessage());
+                    Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
                 }
             });
         });
@@ -546,14 +560,12 @@ public class ConversationFragment extends Fragment {
 
         @Override
         public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-
             new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
                     .addSwipeLeftBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.white))
                     .addSwipeLeftActionIcon(R.drawable.ic_remove_msg_outline_rounded)
                     .create()
                     .decorate();
-
-            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+            super.onChildDraw(c, recyclerView, viewHolder, -150f, dY, actionState, isCurrentlyActive);
         }
     };
 
@@ -568,16 +580,17 @@ public class ConversationFragment extends Fragment {
                         String deleteUserId = data.getString("id");
 
                         if (LocalDataManager.getCurrentUserInfo().getId().equalsIgnoreCase(deleteUserId)) {
-                            new AlertDialog.Builder(mMainActivity)
-                                    .setMessage(getString(R.string.use_removed))
+                            new iOSDialogBuilder(mMainActivity)
+                                    .setTitle(getString(R.string.notification_warning))
+                                    .setSubtitle(getString(R.string.use_removed))
                                     .setCancelable(false)
-                                    .setPositiveButton(getString(R.string.confirm), (dialogInterface, i) -> {
+                                    .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                        dialog.dismiss();
                                         repository.delete(conversation.getId());
                                         mMainActivity.setBottomNavVisibility(View.VISIBLE);
                                         mMainActivity.getSupportFragmentManager().popBackStackImmediate();
-                                    }).show();
+                                    }).build().show();
                         }
-
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -598,14 +611,16 @@ public class ConversationFragment extends Fragment {
 
                         Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
 
-                        new AlertDialog.Builder(mMainActivity)
-                                .setMessage(getString(R.string.group_disbanded))
+                        new iOSDialogBuilder(mMainActivity)
+                                .setTitle(getString(R.string.notification_warning))
+                                .setSubtitle(getString(R.string.group_disbanded))
                                 .setCancelable(false)
-                                .setPositiveButton(getString(R.string.confirm), (dialogInterface, i) -> {
+                                .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                    dialog.dismiss();
                                     repository.delete(conversation.getId());
                                     mMainActivity.setBottomNavVisibility(View.VISIBLE);
                                     mMainActivity.getSupportFragmentManager().popBackStackImmediate();
-                                }).show();
+                                }).build().show();
 
                     } catch (Exception e) {
                         e.printStackTrace();

@@ -14,6 +14,9 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.gdacciaro.iOSDialog.iOSDialog;
+import com.gdacciaro.iOSDialog.iOSDialogBuilder;
+import com.gdacciaro.iOSDialog.iOSDialogClickListener;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
@@ -25,6 +28,7 @@ import com.hisu.zola.database.entity.User;
 import com.hisu.zola.fragments.conversation.ConversationListFragment;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.EditTextUtil;
+import com.hisu.zola.util.NetworkUtil;
 import com.hisu.zola.util.converter.ObjectConvertUtil;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
@@ -155,7 +159,14 @@ public class LoginFragment extends Fragment {
         String password = mBinding.edtPassword.getText().toString();
 
         if (validateUserAccount(phoneNumber, password)) {
-            addLoginEvent(phoneNumber, password);
+            if (NetworkUtil.isConnectionAvailable(mMainActivity))
+                addLoginEvent(phoneNumber, password);
+            else {
+                new iOSDialogBuilder(mMainActivity)
+                        .setTitle(getString(R.string.no_network_connection))
+                        .setSubtitle(getString(R.string.no_network_connection))
+                        .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+            }
         }
     }
 
@@ -205,7 +216,7 @@ public class LoginFragment extends Fragment {
 
                 @Override
                 public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                    Log.e("API_ERR", t.getLocalizedMessage());
+                    Log.e(LoginFragment.class.getName(), t.getLocalizedMessage());
                 }
             });
         });

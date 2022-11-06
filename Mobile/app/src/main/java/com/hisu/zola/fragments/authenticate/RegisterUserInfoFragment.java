@@ -16,9 +16,10 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import com.gdacciaro.iOSDialog.iOSDialog;
+import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
@@ -27,6 +28,7 @@ import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.FragmentRegisterUserInfoBinding;
 import com.hisu.zola.fragments.greet_new_user.WelcomeOnBoardingFragment;
 import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.NetworkUtil;
 import com.hisu.zola.util.RealPathUtil;
 import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.converter.ObjectConvertUtil;
@@ -83,7 +85,6 @@ public class RegisterUserInfoFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Log.e("USer data", user.toString());
         init();
     }
 
@@ -111,16 +112,14 @@ public class RegisterUserInfoFragment extends Fragment {
 
     private void addActionForBtnSkip() {
         mBinding.btnSkip.setOnClickListener(view -> {
-            new AlertDialog.Builder(mainActivity)
-                    .setIcon(R.drawable.ic_alert)
-                    .setTitle(getString(R.string.confirm))
-                    .setMessage(getString(R.string.confirm_skip))
-                    .setPositiveButton(getString(R.string.confirm),
-                            (dialogInterface, i) -> {
-                                updateProfile();
-                            })
-                    .setNegativeButton(getString(R.string.cancel), null)
-                    .show();
+            new iOSDialogBuilder(mainActivity)
+                    .setTitle(getString(R.string.notification_warning))
+                    .setSubtitle(getString(R.string.confirm_skip))
+                    .setNegativeListener(getString(R.string.cancel), iOSDialog::dismiss)
+                    .setPositiveListener(getString(R.string.confirm), dialog -> {
+                        dialog.dismiss();
+                        updateProfile();
+                    }).build().show();
         });
     }
 
@@ -141,41 +140,48 @@ public class RegisterUserInfoFragment extends Fragment {
     private void updateProfile() {
         loadingDialog.showDialog();
 
-        if (avatarUri != null) {
-            Toast.makeText(mainActivity, "here", Toast.LENGTH_SHORT).show();
-            File file = new File(RealPathUtil.getRealPath(mainActivity, avatarUri));
-            RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-            String fileName = file.getName();
-            MultipartBody.Part part = MultipartBody.Part.createFormData("media", fileName, requestBody);
+        if (NetworkUtil.isConnectionAvailable(mainActivity)) {
+            if (avatarUri != null) {
+                Toast.makeText(mainActivity, "here", Toast.LENGTH_SHORT).show();
+                File file = new File(RealPathUtil.getRealPath(mainActivity, avatarUri));
+                RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+                String fileName = file.getName();
+                MultipartBody.Part part = MultipartBody.Part.createFormData("media", fileName, requestBody);
 
-            ApiService.apiService.postImage(part).enqueue(new Callback<Object>() {
-                @Override
-                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                    if (response.isSuccessful()) {
+                ApiService.apiService.postImage(part).enqueue(new Callback<Object>() {
+                    @Override
+                    public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                        if (response.isSuccessful()) {
 
-                        Gson gson = new Gson();
+                            Gson gson = new Gson();
 
-                        String json = gson.toJson(response.body());
-                        JsonObject obj = gson.fromJson(json, JsonObject.class);
-                        String avatarURL = obj.get("data").toString().replaceAll("\"", "");
+                            String json = gson.toJson(response.body());
+                            JsonObject obj = gson.fromJson(json, JsonObject.class);
+                            String avatarURL = obj.get("data").toString().replaceAll("\"", "");
 
-                        User user = LocalDataManager.getCurrentUserInfo();
-                        user.setGender(mBinding.rBtnGenderMale.isChecked());
-                        user.setAvatarURL(avatarURL);
+                            User user = LocalDataManager.getCurrentUserInfo();
+                            user.setGender(mBinding.rBtnGenderMale.isChecked());
+                            user.setAvatarURL(avatarURL);
 
-                        updateUserProfile(user);
+                            updateUserProfile(user);
+                        }
                     }
-                }
 
-                @Override
-                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                    Log.e("ERR post img", t.getLocalizedMessage());
-                }
-            });
+                    @Override
+                    public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                        Log.e(RegisterUserInfoFragment.class.getName(), t.getLocalizedMessage());
+                    }
+                });
+            } else {
+                user.setGender(mBinding.rBtnGenderMale.isChecked());
+                user.setAvatarURL("");
+                updateUserProfile(user);
+            }
         } else {
-            user.setGender(mBinding.rBtnGenderMale.isChecked());
-            user.setAvatarURL("");
-            updateUserProfile(user);
+            new iOSDialogBuilder(mainActivity)
+                    .setTitle(getString(R.string.no_network_connection))
+                    .setSubtitle(getString(R.string.no_network_connection_desc))
+                    .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
         }
     }
 

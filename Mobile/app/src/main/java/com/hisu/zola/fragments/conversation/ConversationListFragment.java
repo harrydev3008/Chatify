@@ -16,6 +16,9 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.gdacciaro.iOSDialog.iOSDialog;
+import com.gdacciaro.iOSDialog.iOSDialogBuilder;
+import com.gdacciaro.iOSDialog.iOSDialogClickListener;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -32,6 +35,7 @@ import com.hisu.zola.databinding.FragmentConversationListBinding;
 import com.hisu.zola.fragments.AddFriendFragment;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.EditTextUtil;
+import com.hisu.zola.util.NetworkUtil;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.view_model.ConversationListViewModel;
@@ -104,7 +108,8 @@ public class ConversationListFragment extends Fragment {
         EditTextUtil.clearTextOnSearchEditText(mBinding.edtSearch);
         addMoreFriendEvent();
 
-        loadConversationList();
+        if (NetworkUtil.isConnectionAvailable(mMainActivity))
+            loadConversationList();
     }
 
     private void initConversationListRecyclerView() {

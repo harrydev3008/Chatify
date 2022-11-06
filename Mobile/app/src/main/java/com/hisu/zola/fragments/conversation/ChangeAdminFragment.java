@@ -1,6 +1,5 @@
 package com.hisu.zola.fragments.conversation;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +12,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.gdacciaro.iOSDialog.iOSDialog;
+import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
@@ -105,16 +106,18 @@ public class ChangeAdminFragment extends Fragment {
 
                 if (LocalDataManager.getCurrentUserInfo().getId().equalsIgnoreCase(conversationDB.getCreatedBy().getId())) {
                     adapter.setOnRemoveUserListener(user -> {
-                        new AlertDialog.Builder(mainActivity)
-                                .setMessage(getString(R.string.change_admin_confirm))
-                                .setNegativeButton(getString(R.string.no), null)
-                                .setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> {
+                        new iOSDialogBuilder(mainActivity)
+                                .setTitle(getString(R.string.confirm))
+                                .setSubtitle(getString(R.string.change_admin_confirm))
+                                .setPositiveListener(getString(R.string.yes), dialog -> {
+                                    dialog.dismiss();
                                     if (option.equalsIgnoreCase(CHANGE_ADMIN_OPTION_CHANGE_ARGS))
                                         changeAdmin(user);
                                     else if (option.equalsIgnoreCase(CHANGE_ADMIN_OPTION_DELETE_ARGS)) {
                                         changeAdmin(user);
                                     }
-                                }).show();
+                                })
+                                .setNegativeListener(getString(R.string.no), iOSDialog::dismiss).build().show();
                     });
                 }
 
@@ -145,17 +148,20 @@ public class ChangeAdminFragment extends Fragment {
                     conversation.setCreatedBy(newAdmin);
                     repository.insertOrUpdate(conversation);
 
-                    new AlertDialog.Builder(mainActivity)
-                            .setMessage(getString(R.string.change_admin_success))
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.change_admin_success))
                             .setCancelable(false)
-                            .setPositiveButton(getString(R.string.confirm), (dialogInterface, i) -> {
+                            .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                dialog.dismiss();
                                 if (option.equalsIgnoreCase(CHANGE_ADMIN_OPTION_CHANGE_ARGS)) {
                                     emitChangeAdmin(conversation);
                                     mainActivity.getSupportFragmentManager().popBackStackImmediate();
                                 } else if (option.equalsIgnoreCase(CHANGE_ADMIN_OPTION_DELETE_ARGS)) {
                                     outGroup();
                                 }
-                            }).show();
+                            })
+                            .build().show();
                 }
             }
 
@@ -174,7 +180,6 @@ public class ChangeAdminFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
                 if (response.isSuccessful() && response.code() == 200) {
-
                     emitOutGroup(conversation);
                 }
             }

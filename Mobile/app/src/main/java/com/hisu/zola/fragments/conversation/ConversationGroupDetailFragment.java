@@ -1,6 +1,5 @@
 package com.hisu.zola.fragments.conversation;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -13,6 +12,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 
+import com.gdacciaro.iOSDialog.iOSDialog;
+import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
@@ -172,12 +173,14 @@ public class ConversationGroupDetailFragment extends Fragment {
 
     private void addActionForBtnDisbandGroup() {
         mBinding.tvDisbandGroup.setOnClickListener(view -> {
-            new AlertDialog.Builder(mainActivity)
-                    .setMessage(getString(R.string.disband_group_confirm))
-                    .setNegativeButton(getString(R.string.no), null)
-                    .setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> {
+            new iOSDialogBuilder(mainActivity)
+                    .setTitle(getString(R.string.confirm))
+                    .setSubtitle(getString(R.string.disband_group_confirm))
+                    .setPositiveListener(getString(R.string.yes), dialog -> {
+                        dialog.dismiss();
                         disbandGroup();
-                    }).show();
+                    })
+                    .setNegativeListener(getString(R.string.no), iOSDialog::dismiss).build().show();
         });
     }
 
@@ -189,12 +192,14 @@ public class ConversationGroupDetailFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
                 if (response.isSuccessful() && response.code() == 200) {
-                    new AlertDialog.Builder(mainActivity)
-                            .setMessage(getString(R.string.disband_group_success))
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.disband_group_success))
                             .setCancelable(false)
-                            .setPositiveButton("ok", (dialogInterface, i) -> {
+                            .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                dialog.dismiss();
                                 emitDisbandGroup(conversation);
-                            }).show();
+                            }).build().show();
                 }
             }
 
@@ -214,9 +219,18 @@ public class ConversationGroupDetailFragment extends Fragment {
     private void addActionForBtnOutGroup() {
         mBinding.tvOutGroup.setOnClickListener(view -> {
             if (conversation.getCreatedBy().getId().equalsIgnoreCase(currentUser.getId())) {
-                new AlertDialog.Builder(mainActivity)
-                        .setMessage(getString(R.string.confirm_out_group_admin))
-                        .setNegativeButton(getString(R.string.out_group), (dialogInterface, i) -> {
+                new iOSDialogBuilder(mainActivity)
+                        .setTitle(getString(R.string.confirm_out_group_admin_ask))
+                        .setSubtitle(getString(R.string.confirm_out_group_admin))
+                        .setCancelable(true)
+                        .setPositiveListener(getString(R.string.pick_new_admin), dialog -> {
+                            dialog.dismiss();
+                            mainActivity.addFragmentToBackStack(ChangeAdminFragment.newInstance(
+                                    conversation, ChangeAdminFragment.CHANGE_ADMIN_OPTION_DELETE_ARGS)
+                            );
+                        })
+                        .setNegativeListener(getString(R.string.out_group), dialog -> {
+                            dialog.dismiss();
                             for (User user : conversation.getMember()) {
                                 if (!user.getId().equalsIgnoreCase(currentUser.getId())) {
                                     changeAdmin(user);
@@ -224,27 +238,24 @@ public class ConversationGroupDetailFragment extends Fragment {
                                 }
                             }
                             outGroup(conversation);
-                        })
-                        .setPositiveButton(getString(R.string.pick_new_admin), (dialogInterface, i) -> {
-                            mainActivity.addFragmentToBackStack(ChangeAdminFragment.newInstance(
-                                    conversation, ChangeAdminFragment.CHANGE_ADMIN_OPTION_DELETE_ARGS)
-                            );
-                        }).show();
+                        }).build().show();
             } else {
-                new AlertDialog.Builder(mainActivity)
-                        .setMessage(getString(R.string.confirm_out_group))
-                        .setNegativeButton(getString(R.string.no), null)
-                        .setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> {
+                new iOSDialogBuilder(mainActivity)
+                        .setTitle(getString(R.string.confirm))
+                        .setSubtitle(getString(R.string.confirm_out_group))
+                        .setPositiveListener(getString(R.string.yes), dialog -> {
+                            dialog.dismiss();
                             List<User> members = conversation.getMember();
                             for (User user : members) {
-                                if(user.getId().equalsIgnoreCase(currentUser.getId())) {
+                                if (user.getId().equalsIgnoreCase(currentUser.getId())) {
                                     members.remove(user);
                                     break;
                                 }
                             }
                             conversation.setMember(members);
                             outGroup(conversation);
-                        }).show();
+                        })
+                        .setNegativeListener(getString(R.string.no), iOSDialog::dismiss).build().show();
             }
         });
     }
@@ -378,7 +389,7 @@ public class ConversationGroupDetailFragment extends Fragment {
         mSocket.emit("deleteGroup", emitMsg);
 
         repository.delete(conversation.getId());
-        mainActivity.setBottomNavVisibility(View.GONE);
+        mainActivity.setBottomNavVisibility(View.VISIBLE);
         mainActivity.getSupportFragmentManager().popBackStackImmediate();
         mainActivity.getSupportFragmentManager().popBackStackImmediate();
     }

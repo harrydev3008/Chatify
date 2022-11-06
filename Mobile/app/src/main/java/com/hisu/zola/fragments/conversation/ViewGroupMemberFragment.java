@@ -1,7 +1,11 @@
 package com.hisu.zola.fragments.conversation;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -9,16 +13,10 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
-
+import com.gdacciaro.iOSDialog.iOSDialog;
+import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.ViewFriendAdapter;
@@ -26,13 +24,11 @@ import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentViewGroupMemberBinding;
-import com.hisu.zola.listeners.IOnRemoveUserListener;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
-import java.io.Serializable;
 import java.util.List;
 
 import io.socket.client.Socket;
@@ -97,19 +93,21 @@ public class ViewGroupMemberFragment extends Fragment {
         repository.getConversationInfo(conversation.getId()).observe(mainActivity, new Observer<Conversation>() {
             @Override
             public void onChanged(Conversation conversation) {
-                if(conversation == null) return;
+                if (conversation == null) return;
 
                 adapter.setAdmin(conversation.getCreatedBy());
                 adapter.setMembers(conversation.getMember());
 
-                if(LocalDataManager.getCurrentUserInfo().getId().equalsIgnoreCase(conversation.getCreatedBy().getId())) {
+                if (LocalDataManager.getCurrentUserInfo().getId().equalsIgnoreCase(conversation.getCreatedBy().getId())) {
                     adapter.setOnRemoveUserListener(user -> {
-                        new AlertDialog.Builder(mainActivity)
-                                .setMessage(getString(R.string.confirm_remove_member))
-                                .setNegativeButton(getString(R.string.no), null)
-                                .setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> {
+                        new iOSDialogBuilder(mainActivity)
+                                .setTitle(getString(R.string.confirm))
+                                .setSubtitle(getString(R.string.confirm_remove_member))
+                                .setPositiveListener(getString(R.string.yes), dialog -> {
+                                    dialog.dismiss();
                                     removeMember(user.getId());
-                                }).show();
+                                })
+                                .setNegativeListener(getString(R.string.no), iOSDialog::dismiss).build().show();
                     });
 
                     adapter.setAdmin(true);
@@ -135,10 +133,10 @@ public class ViewGroupMemberFragment extends Fragment {
         ApiService.apiService.removeMemberFromGroup(body).enqueue(new Callback<Object>() {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                if(response.isSuccessful() && response.code() == 200) {
+                if (response.isSuccessful() && response.code() == 200) {
                     List<User> member = conversation.getMember();
                     for (User user : member) {
-                        if(user.getId().equalsIgnoreCase(memberID)) {
+                        if (user.getId().equalsIgnoreCase(memberID)) {
                             member.remove(user);
                             break;
                         }

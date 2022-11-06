@@ -11,6 +11,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 
+import com.gdacciaro.iOSDialog.iOSDialog;
+import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
@@ -66,14 +68,11 @@ public class SettingFragment extends Fragment {
 
     private void addActionForBtnLogout() {
         mBinding.tvLogout.setOnClickListener(view -> {
-            new AlertDialog.Builder(mainActivity)
-                    .setIcon(R.drawable.ic_alert)
+            new iOSDialogBuilder(mainActivity)
                     .setTitle(getString(R.string.logout))
-                    .setMessage(getString(R.string.logout_confirm))
-                    .setPositiveButton(getString(R.string.logout),
-                            (dialogInterface, i) -> mainActivity.logOut())
-                    .setNegativeButton(getString(R.string.cancel), null)
-                    .show();
+                    .setSubtitle(getString(R.string.logout_confirm))
+                    .setPositiveListener(getString(R.string.logout), dialog -> mainActivity.logOut())
+                    .setNegativeListener(getString(R.string.cancel), iOSDialog::dismiss).build().show();
         });
     }
 
