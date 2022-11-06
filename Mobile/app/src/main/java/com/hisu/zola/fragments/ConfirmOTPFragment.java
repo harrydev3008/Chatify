@@ -10,9 +10,10 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import com.gdacciaro.iOSDialog.iOSDialog;
+import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
@@ -53,7 +54,6 @@ public class ConfirmOTPFragment extends Fragment {
 
     private FragmentConfirmOtpBinding mBinding;
     private MainActivity mainActivity;
-    private AlertDialog dialog;
 
     public static ConfirmOTPFragment newInstance(String argsParam, User user) {
         Bundle args = new Bundle();
@@ -245,28 +245,18 @@ public class ConfirmOTPFragment extends Fragment {
     }
 
     private boolean verifyOTP(String otp) {
-
         if (otp.length() < 6) {
-            showAlertDialog(getString(R.string.empty_otp_err));
+            new iOSDialogBuilder(mainActivity)
+                    .setTitle(getString(R.string.notification_warning))
+                    .setSubtitle(getString(R.string.empty_otp_err))
+                    .setPositiveListener(getString(R.string.confirm), dialog -> {
+                        clearOTPInput();
+                        dialog.dismiss();
+                    }).build().show();
             return false;
         }
 
         return true;
-    }
-
-    private void showAlertDialog(String message) {
-        if (dialog == null) {
-            dialog = new AlertDialog.Builder(mainActivity)
-                    .setIcon(R.drawable.ic_alert)
-                    .setPositiveButton(getString(R.string.confirm), (dialogInterface, i) -> {
-                        clearOTPInput();
-                        mBinding.edtInputOtp1.requestFocus();
-                    })
-                    .create();
-        }
-
-        dialog.setMessage(message);
-        dialog.show();
     }
 
     private void clearOTPInput() {
@@ -276,6 +266,7 @@ public class ConfirmOTPFragment extends Fragment {
         mBinding.edtInputOtp4.setText("");
         mBinding.edtInputOtp5.setText("");
         mBinding.edtInputOtp6.setText("");
+        mBinding.edtInputOtp1.requestFocus();
     }
 
     private void switchToNextPage() {
@@ -284,14 +275,15 @@ public class ConfirmOTPFragment extends Fragment {
                 mainActivity.setFragment(RegisterUserInfoFragment.newInstance(user));
                 break;
             case CHANGE_PHONE_NO_ARGS:
-                new android.app.AlertDialog.Builder(mainActivity)
-                        .setMessage(getString(R.string.change_phone_no_success))
-                        .setPositiveButton(getString(R.string.confirm), (dialogInterface, i) -> {
+                new iOSDialogBuilder(mainActivity)
+                        .setTitle(getString(R.string.notification_warning))
+                        .setSubtitle(getString(R.string.change_phone_no_success))
+                        .setPositiveListener(getString(R.string.confirm), dialog -> {
+                            dialog.dismiss();
                             mainActivity.getSupportFragmentManager().popBackStackImmediate();
                             mainActivity.getSupportFragmentManager().popBackStackImmediate();
                             mainActivity.getSupportFragmentManager().popBackStackImmediate();
-                        })
-                        .show();
+                        }).build().show();
                 break;
             case FORGOT_PWD_ARGS:
                 mainActivity.setFragment(ResetPasswordFragment.newInstance(ResetPasswordFragment.FORGOT_PWD_ARGS));
@@ -317,7 +309,11 @@ public class ConfirmOTPFragment extends Fragment {
 
                             @Override
                             public void onVerificationFailed(@NonNull FirebaseException e) {
-                                showAlertDialog("Đã có lỗi trong quá trình xác thực: " + e.getLocalizedMessage());
+                                new iOSDialogBuilder(mainActivity)
+                                        .setTitle(getString(R.string.otp_verification_err))
+                                        .setSubtitle(e.getLocalizedMessage())
+                                        .setCancelable(true)
+                                        .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
                             }
 
                             @Override
@@ -382,13 +378,15 @@ public class ConfirmOTPFragment extends Fragment {
                         .setCallbacks(new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
                             @Override
                             public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {
-                                showAlertDialog("Đã có lỗi trong quá trình xác thực!");
                                 signInWithPhoneAuthCredential(phoneAuthCredential);
                             }
 
                             @Override
                             public void onVerificationFailed(@NonNull FirebaseException e) {
-                                showAlertDialog("Đã có lỗi trong quá trình xác thực!");
+                                new iOSDialogBuilder(mainActivity)
+                                        .setTitle(getString(R.string.otp_verification_err))
+                                        .setSubtitle(e.getLocalizedMessage())
+                                        .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
                             }
 
                             @Override
@@ -413,7 +411,10 @@ public class ConfirmOTPFragment extends Fragment {
                             switchToNextPage();
                         } else {
                             if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
-                                showAlertDialog(getString(R.string.wrong_otp_err));
+                                new iOSDialogBuilder(mainActivity)
+                                        .setTitle(getString(R.string.otp_verification_err))
+                                        .setSubtitle(getString(R.string.wrong_otp_err))
+                                        .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
                             }
                         }
                     }

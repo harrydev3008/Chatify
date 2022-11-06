@@ -13,7 +13,7 @@ import java.util.List;
 
 @Dao
 public interface MessageDAO {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(Message... messages);
 
     @Query("select * from messages where _id = :messageID")
@@ -27,4 +27,7 @@ public interface MessageDAO {
 
     @Query("update messages set isDeleted = :isDelete where _id = :id")
     void unsent(String id, boolean isDelete);
+
+    @Query("delete from messages")
+    void dropMessageTable();
 }

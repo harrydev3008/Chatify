@@ -1,7 +1,6 @@
 package com.hisu.zola.fragments.profile;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.Color;
@@ -15,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -25,11 +23,14 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.gdacciaro.iOSDialog.iOSDialog;
+import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentEditProfileBinding;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.RealPathUtil;
@@ -62,6 +63,7 @@ public class EditProfileFragment extends Fragment {
     private User currentUser;
     private boolean isGenderChanged;
     private LoadingDialog loadingDialog;
+    private UserRepository repository;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,10 +82,12 @@ public class EditProfileFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        repository = new UserRepository(mainActivity.getApplication());
+
         init();
         loadUserInfo();
         addActionForBtnBackToPrevPage();
-        addActionToPickImageFromGallery();
         addActionForEditTextDateOfBirth();
         addActionForChangeAvatarButton();
         addActionForBtnSave();
@@ -140,10 +144,14 @@ public class EditProfileFragment extends Fragment {
             if (!isDataChanged()) {
                 backToPrevPage();
             } else {
-                new AlertDialog.Builder(mainActivity)
-                        .setMessage(getString(R.string.changes_not_save))
-                        .setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> backToPrevPage())
-                        .setNegativeButton(getString(R.string.no), null).show();
+                new iOSDialogBuilder(mainActivity)
+                        .setTitle(getString(R.string.notification_warning))
+                        .setSubtitle(getString(R.string.changes_not_save))
+                        .setPositiveListener(getString(R.string.yes), dialog -> {
+                            dialog.dismiss();
+                            backToPrevPage();
+                        })
+                        .setNegativeListener(getString(R.string.no), iOSDialog::dismiss).build().show();
             }
         });
     }
@@ -186,12 +194,6 @@ public class EditProfileFragment extends Fragment {
         });
     }
 
-    private void addActionToPickImageFromGallery() {
-        mBinding.imvAvatar.setOnClickListener(view -> {
-            Toast.makeText(mainActivity, "pick img", Toast.LENGTH_SHORT).show();
-        });
-    }
-
     private void addActionForEditTextDateOfBirth() {
         mBinding.edtDob.setOnClickListener(view -> {
 
@@ -214,6 +216,8 @@ public class EditProfileFragment extends Fragment {
             datePickerDialog.setTitle(getString(R.string.dob));
             datePickerDialog.setIcon(R.drawable.ic_calendar);
             datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            datePickerDialog.setButton(DatePickerDialog.BUTTON_NEGATIVE, getString(R.string.cancel), datePickerDialog);
+            datePickerDialog.setButton(DatePickerDialog.BUTTON_POSITIVE, getString(R.string.confirm), datePickerDialog);
             datePickerDialog.show();
         });
     }
@@ -232,15 +236,15 @@ public class EditProfileFragment extends Fragment {
     private void confirmUpdateProfile() {
 
         if (validateUserUpdateData()) {
-            new AlertDialog.Builder(getContext())
+            new iOSDialogBuilder(mainActivity)
                     .setTitle(getString(R.string.confirm_update_profile))
-                    .setMessage(getString(R.string.confirm_update_profile_desc))
-                    .setIcon(R.drawable.ic_alert)
-                    .setPositiveButton(getString(R.string.confirm), (dialogInterface, i) ->
-                            updateProfile()
-                    )
-                    .setNegativeButton(getString(R.string.cancel), null)
-                    .show();
+                    .setSubtitle(getString(R.string.confirm_update_profile_desc))
+                    .setPositiveListener(getString(R.string.confirm), dialog -> {
+                        dialog.dismiss();
+                        updateProfile();
+                    })
+                    .setNegativeListener(getString(R.string.cancel), iOSDialog::dismiss).build().show();
+
         }
     }
 
@@ -316,15 +320,18 @@ public class EditProfileFragment extends Fragment {
                 if (response.isSuccessful() && response.code() == 200) {
                     loadingDialog.dismissDialog();
                     LocalDataManager.setCurrentUserInfo(user);
+                    repository.update(user);
 
-                    new AlertDialog.Builder(mainActivity)
-                            .setMessage("Cập nhật thành công!")
-                            .setPositiveButton("Xác nhận", (dialogInterface, i) -> {
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.update_self_info_success))
+                            .setCancelable(false)
+                            .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                dialog.dismiss();
                                 currentUser = LocalDataManager.getCurrentUserInfo();
                                 loadUserInfo();
                                 backToPrevPage();
-                            })
-                            .setCancelable(false).show();
+                            }).build().show();
                 }
             }
 
@@ -346,21 +353,18 @@ public class EditProfileFragment extends Fragment {
         }
 
         if (TextUtils.isEmpty(mBinding.edtDob.getText().toString().trim())) {
-            new androidx.appcompat.app.AlertDialog.Builder(mainActivity)
-                    .setIcon(R.drawable.ic_alert)
-                    .setMessage(getString(R.string.empty_dob_err))
-                    .setPositiveButton(getString(R.string.confirm), null)
-                    .show();
+            new iOSDialogBuilder(mainActivity)
+                    .setTitle(getString(R.string.notification_warning))
+                    .setSubtitle(getString(R.string.empty_dob_err))
+                    .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
             return false;
         }
 
         if (calculateAge(mBinding.edtDob.getText().toString()) < 15) {
-            new androidx.appcompat.app.AlertDialog.Builder(mainActivity)
-                    .setIcon(R.drawable.ic_alert)
-                    .setMessage(getString(R.string.err_age))
-                    .setPositiveButton(getString(R.string.confirm), null)
-                    .show();
-
+            new iOSDialogBuilder(mainActivity)
+                    .setTitle(getString(R.string.notification_warning))
+                    .setSubtitle(getString(R.string.err_age))
+                    .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
             return false;
         }
 

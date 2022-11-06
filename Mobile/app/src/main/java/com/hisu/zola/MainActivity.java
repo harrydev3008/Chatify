@@ -13,6 +13,7 @@ import androidx.fragment.app.FragmentManager;
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.WanderingCubes;
 import com.google.android.material.badge.BadgeDrawable;
+import com.hisu.zola.database.Database;
 import com.hisu.zola.databinding.ActivityMainBinding;
 import com.hisu.zola.fragments.SplashScreenFragment;
 import com.hisu.zola.fragments.StartScreenFragment;
@@ -114,9 +115,21 @@ public class MainActivity extends AppCompatActivity {
         getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
+    public void clearDB() {
+        Database database = Database.getDatabase(this);
+        Database.dbExecutor.execute(() -> {
+            database.conversationDAO().dropConversationTable();
+            database.messageDAO().dropMessageTable();
+            database.userDAO().dropUserTable();
+        });
+    }
+
     public void logOut() {
         if (LocalDataManager.getUserLoginState()) {
             LocalDataManager.setUserLoginState(false);
+
+            clearDB();
+
             mainBinding.navigationMenu.setSelectedItemId(R.id.action_message);
             setBottomNavVisibility(View.GONE);
             clearFragmentList();

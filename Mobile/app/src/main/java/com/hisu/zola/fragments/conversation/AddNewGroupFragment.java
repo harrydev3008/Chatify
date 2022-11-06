@@ -1,8 +1,8 @@
 package com.hisu.zola.fragments.conversation;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +12,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.gdacciaro.iOSDialog.iOSDialog;
+import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
@@ -21,7 +23,9 @@ import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.FragmentAddNewGroupBinding;
 import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.NetworkUtil;
 import com.hisu.zola.util.SocketIOHandler;
+import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.ArrayList;
@@ -40,6 +44,7 @@ public class AddNewGroupFragment extends Fragment {
     private MainActivity mainActivity;
     private List<String> members;
     private Socket mSocket;
+    private LoadingDialog loadingDialog;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,6 +63,7 @@ public class AddNewGroupFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        loadingDialog = new LoadingDialog(mainActivity, Gravity.CENTER);
         mainActivity.setBottomNavVisibility(View.GONE);
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
         init();
@@ -95,10 +101,14 @@ public class AddNewGroupFragment extends Fragment {
             if (!isDataChanged()) {
                 backToPrevPage();
             } else {
-                new AlertDialog.Builder(mainActivity)
-                        .setMessage(getString(R.string.changes_not_save))
-                        .setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> backToPrevPage())
-                        .setNegativeButton(getString(R.string.no), null).show();
+                new iOSDialogBuilder(mainActivity)
+                        .setTitle(getString(R.string.notification_warning))
+                        .setSubtitle(getString(R.string.changes_not_save))
+                        .setPositiveListener(getString(R.string.yes), dialog -> {
+                            dialog.dismiss();
+                            backToPrevPage();
+                        })
+                        .setNegativeListener(getString(R.string.no), iOSDialog::dismiss).build().show();
             }
         });
     }
@@ -106,7 +116,13 @@ public class AddNewGroupFragment extends Fragment {
     private void addActionForBtnDone() {
         mBinding.iBtnDone.setOnClickListener(view -> {
             if (validateGroupInfo()) {
-                addNewGroup();
+                if (NetworkUtil.isConnectionAvailable(mainActivity))
+                    addNewGroup();
+                else
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.no_network_connection))
+                            .setSubtitle(getString(R.string.no_network_connection))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
             }
         });
     }
@@ -131,6 +147,9 @@ public class AddNewGroupFragment extends Fragment {
     }
 
     private void addNewGroup() {
+
+        loadingDialog.showDialog();
+
         User currentUser = LocalDataManager.getCurrentUserInfo();
         Gson gson = new Gson();
         JsonObject object = new JsonObject();
@@ -146,16 +165,20 @@ public class AddNewGroupFragment extends Fragment {
             public void onResponse(@NonNull Call<Conversation> call, @NonNull Response<Conversation> response) {
                 if (response.isSuccessful() && response.code() == 200) {
 
+                    loadingDialog.dismissDialog();
+
                     Conversation conversation = response.body();
 
-                    new AlertDialog.Builder(mainActivity)
-                            .setMessage(getString(R.string.add_new_group_success))
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.add_new_group_success))
                             .setCancelable(false)
-                            .setPositiveButton(getString(R.string.confirm), (dialogInterface, i) -> {
+                            .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                dialog.dismiss();
                                 emitRemoveMember(conversation);
                                 mainActivity.setBottomNavVisibility(View.VISIBLE);
                                 mainActivity.getSupportFragmentManager().popBackStackImmediate();
-                            }).show();
+                            }).build().show();
                 }
             }
 

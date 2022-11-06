@@ -63,7 +63,7 @@ public class ChangeAdminAdapter extends RecyclerView.Adapter<ChangeAdminAdapter.
 
     @Override
     public int getItemCount() {
-        return 0;
+        return members != null ? members.size() : 0;
     }
 
     public static class ChangeAdminViewHolder extends RecyclerView.ViewHolder {

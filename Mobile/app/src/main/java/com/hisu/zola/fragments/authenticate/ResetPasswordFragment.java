@@ -1,6 +1,5 @@
 package com.hisu.zola.fragments.authenticate;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.PasswordTransformationMethod;
@@ -16,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentResetPasswordBinding;
@@ -63,16 +63,12 @@ public class ResetPasswordFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         addChangeBackgroundColorOnFocusForPasswordEditText(mBinding.edtNewPwd, mBinding.linearLayout);
-
         addChangeBackgroundColorOnFocusForPasswordEditText(mBinding.edtConfirmNewPwd, mBinding.linearLayout2);
-
         addChangeBackgroundColorOnFocusForPasswordEditText(mBinding.edtOldPwd, mBinding.linearLayout3);
 
         addToggleShowPasswordEvent(mBinding.tvTogglePassword, mBinding.edtNewPwd);
-
         addToggleShowPasswordEvent(mBinding.tvToggleConfirmPassword, mBinding.edtConfirmNewPwd);
-
-        addToggleShowPasswordEvent(mBinding.tvToggleOldPassword, mBinding.edtConfirmNewPwd);
+        addToggleShowPasswordEvent(mBinding.tvToggleOldPassword, mBinding.edtOldPwd);
 
         EditTextUtil.toggleShowClearIconOnEditText(mainActivity, mBinding.edtOldPwd);
         EditTextUtil.toggleShowClearIconOnEditText(mainActivity, mBinding.edtNewPwd);
@@ -137,12 +133,13 @@ public class ResetPasswordFragment extends Fragment {
 
     private void updateUserInfo(String newPwd) {
         //Todo: call api to update
-
-        new AlertDialog.Builder(mainActivity)
-                .setMessage(getString(R.string.reset_password_success))
-                .setPositiveButton(getString(R.string.confirm), (dialogInterface, i) ->
-                        switchToNextPage()
-                ).show();
+        new iOSDialogBuilder(mainActivity)
+                .setTitle(getString(R.string.notification_warning))
+                .setSubtitle(getString(R.string.reset_password_success))
+                .setPositiveListener(getString(R.string.confirm), dialog -> {
+                    dialog.dismiss();
+                    switchToNextPage();
+                }).build().show();
     }
 
     private void switchToNextPage() {

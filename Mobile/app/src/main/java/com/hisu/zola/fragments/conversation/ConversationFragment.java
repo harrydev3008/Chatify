@@ -1,6 +1,5 @@
 package com.hisu.zola.fragments.conversation;
 
-import android.content.Context;
 import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,7 +9,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,10 +21,11 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.gdacciaro.iOSDialog.iOSDialog;
+import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.ThreeBounce;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.hisu.zola.MainActivity;
@@ -36,8 +35,10 @@ import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.Media;
 import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentConversationBinding;
 import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.NetworkUtil;
 import com.hisu.zola.util.RealPathUtil;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
@@ -76,6 +77,7 @@ public class ConversationFragment extends Fragment {
     private boolean isToggleEmojiButton = false;
     private MessageAdapter messageAdapter;
     private List<Message> currentMessageList;
+    private ConversationRepository repository;
 
     public static ConversationFragment newInstance(Conversation conversation, String conversationName) {
         Bundle args = new Bundle();
@@ -111,10 +113,15 @@ public class ConversationFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        SocketIOHandler.getInstance().establishSocketConnection();
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
+
+        repository = new ConversationRepository(mMainActivity.getApplication());
 
         mSocket.on("msg-receive", onMessageReceive);
         mSocket.on("delete-receive", onMessageDeleteReceive);
+        mSocket.on("deleteMemberGroup-receiveMobile", onGroupDeleteMember);
+        mSocket.on("deleteGroup-receive", onDisbandGroup);
         mSocket.on("typing", onTyping);
 
         initRecyclerView();
@@ -133,8 +140,6 @@ public class ConversationFragment extends Fragment {
         addToggleShowSendIcon();
 
         mBinding.btnSendImg.setOnClickListener(imgView -> openBottomImagePicker());
-
-        loadConversation(conversation.getId());
     }
 
     private void initEmojiKeyboard() {
@@ -158,12 +163,17 @@ public class ConversationFragment extends Fragment {
                 .title(getString(R.string.pick_img))
                 .buttonText(getString(R.string.send))
                 .startMultiImage(uris -> {
-                    uris.forEach(this::uploadFileToServer);
+                    if (NetworkUtil.isConnectionAvailable(mMainActivity))
+                        uris.forEach(this::uploadFileToServer);
+                    else
+                        new iOSDialogBuilder(mMainActivity)
+                                .setTitle(getString(R.string.no_network_connection))
+                                .setSubtitle(getString(R.string.no_network_connection_desc))
+                                .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
                 });
     }
 
     private void uploadFileToServer(Uri uri) {
-
         File file = new File(RealPathUtil.getRealPath(mMainActivity, uri));
         RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
         String fileName = file.getName();
@@ -185,7 +195,7 @@ public class ConversationFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                Log.e("ERR post img", t.getLocalizedMessage());
+                Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
             }
         });
     }
@@ -199,6 +209,7 @@ public class ConversationFragment extends Fragment {
     private void initRecyclerView() {
         currentMessageList = new ArrayList<>();
         messageAdapter = new MessageAdapter(mMainActivity);
+
         viewModel = new ViewModelProvider(mMainActivity).get(ConversationViewModel.class);
 
         viewModel.getData(conversation.getId()).observe(mMainActivity, new Observer<List<Message>>() {
@@ -206,7 +217,7 @@ public class ConversationFragment extends Fragment {
             public void onChanged(List<Message> messages) {
                 currentMessageList.clear();
                 currentMessageList.addAll(messages);
-                messageAdapter.setMessages(currentMessageList);
+                messageAdapter.setMessages(messages);
                 if (!currentMessageList.isEmpty())
                     mBinding.rvConversation.smoothScrollToPosition(currentMessageList.size() - 1);
             }
@@ -233,7 +244,7 @@ public class ConversationFragment extends Fragment {
         viewModel.getConversationInfo(conversation.getId()).observe(mMainActivity, new Observer<Conversation>() {
             @Override
             public void onChanged(Conversation conversation) {
-                if(conversation == null) return;
+                if (conversation == null) return;
                 if (conversation.getLabel() != null)
                     mBinding.tvUsername.setText(conversation.getLabel());
                 else
@@ -244,7 +255,6 @@ public class ConversationFragment extends Fragment {
 
     private void addActionForBackBtn() {
         mBinding.btnBack.setOnClickListener(view -> {
-//            mMainActivity.setProgressbarVisibility(View.VISIBLE);
             mMainActivity.setBottomNavVisibility(View.VISIBLE);
             mMainActivity.getSupportFragmentManager().popBackStackImmediate();
         });
@@ -299,7 +309,13 @@ public class ConversationFragment extends Fragment {
 
     private void addActionForSendMessageBtn() {
         mBinding.btnSend.setOnClickListener(view -> {
-            sendMessageViaApi(mBinding.edtChat.getText().toString().trim(), "", "", "text");
+            if (NetworkUtil.isConnectionAvailable(mMainActivity))
+                sendMessageViaApi(mBinding.edtChat.getText().toString().trim(), "", "", "text");
+            else
+                new iOSDialogBuilder(mMainActivity)
+                        .setTitle(getString(R.string.no_network_connection))
+                        .setSubtitle(getString(R.string.no_network_connection_desc))
+                        .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
         });
     }
 
@@ -335,7 +351,7 @@ public class ConversationFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                Log.e("API_ERR", t.getLocalizedMessage());
+                Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
             }
         });
     }
@@ -372,13 +388,13 @@ public class ConversationFragment extends Fragment {
         }
 
         Gson gson = new Gson();
-        viewModel.insertOrUpdate(message);
 
         JsonObject emitMsg = new JsonObject();
         emitMsg.add("conversation", gson.toJsonTree(conversation));
         emitMsg.add("sender", gson.toJsonTree(LocalDataManager.getCurrentUserInfo()));
         emitMsg.addProperty("text", message.getText());
         emitMsg.addProperty("type", message.getType());
+        emitMsg.addProperty("_id", message.getId());
         emitMsg.add("media", gson.toJsonTree(message.getMedia()));
         emitMsg.add("isDelete", gson.toJsonTree(message.getDeleted()));
 
@@ -386,14 +402,8 @@ public class ConversationFragment extends Fragment {
 
         mBinding.edtChat.setText("");
         mBinding.edtChat.requestFocus();
-    }
 
-    private void closeSoftKeyboard() {
-        InputMethodManager manager = (InputMethodManager) mMainActivity.getSystemService(
-                Context.INPUT_METHOD_SERVICE
-        );
-
-        manager.hideSoftInputFromWindow(mBinding.edtChat.getWindowToken(), 0);
+        viewModel.unsent(message);
     }
 
     private void addToggleShowSendIcon() {
@@ -418,39 +428,6 @@ public class ConversationFragment extends Fragment {
                     mBinding.btnSendImg.setVisibility(View.VISIBLE);
                 }
             }
-        });
-    }
-
-    private void loadConversation(String conversationID) {
-
-        Executors.newSingleThreadExecutor().execute(() -> {
-
-            JsonObject object = new JsonObject();
-            object.addProperty("conversation", conversationID);
-
-            RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
-
-            ApiService.apiService.getConversationMessages(body).enqueue(new Callback<Object>() {
-                @Override
-                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                    Gson gson = new Gson();
-
-                    String json = gson.toJson(response.body());
-
-                    JsonObject obj = gson.fromJson(json, JsonObject.class);
-                    JsonArray array = obj.getAsJsonArray("data");
-
-                    Message[] listArr = new Gson().fromJson(array, Message[].class);
-
-                    for (Message message : listArr)
-                        viewModel.insertOrUpdate(message);
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                    Log.e("API_ERR", t.getLocalizedMessage());
-                }
-            });
         });
     }
 
@@ -529,7 +506,7 @@ public class ConversationFragment extends Fragment {
 
                 @Override
                 public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                    Log.e("API_ERR", t.getLocalizedMessage());
+                    Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
                 }
             });
         });
@@ -583,14 +560,73 @@ public class ConversationFragment extends Fragment {
 
         @Override
         public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-
             new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
                     .addSwipeLeftBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.white))
                     .addSwipeLeftActionIcon(R.drawable.ic_remove_msg_outline_rounded)
                     .create()
                     .decorate();
+            super.onChildDraw(c, recyclerView, viewHolder, -150f, dY, actionState, isCurrentlyActive);
+        }
+    };
 
-            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+    private final Emitter.Listener onGroupDeleteMember = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            mMainActivity.runOnUiThread(() -> {
+                JSONObject data = (JSONObject) args[0];
+                if (data != null) {
+
+                    try {
+                        String deleteUserId = data.getString("id");
+
+                        if (LocalDataManager.getCurrentUserInfo().getId().equalsIgnoreCase(deleteUserId)) {
+                            new iOSDialogBuilder(mMainActivity)
+                                    .setTitle(getString(R.string.notification_warning))
+                                    .setSubtitle(getString(R.string.use_removed))
+                                    .setCancelable(false)
+                                    .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                        dialog.dismiss();
+                                        repository.delete(conversation.getId());
+                                        mMainActivity.setBottomNavVisibility(View.VISIBLE);
+                                        mMainActivity.getSupportFragmentManager().popBackStackImmediate();
+                                    }).build().show();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    };
+
+    private final Emitter.Listener onDisbandGroup = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            mMainActivity.runOnUiThread(() -> {
+                JSONObject data = (JSONObject) args[0];
+                if (data != null) {
+
+                    try {
+                        Gson gson = new Gson();
+
+                        Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+
+                        new iOSDialogBuilder(mMainActivity)
+                                .setTitle(getString(R.string.notification_warning))
+                                .setSubtitle(getString(R.string.group_disbanded))
+                                .setCancelable(false)
+                                .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                    dialog.dismiss();
+                                    repository.delete(conversation.getId());
+                                    mMainActivity.setBottomNavVisibility(View.VISIBLE);
+                                    mMainActivity.getSupportFragmentManager().popBackStackImmediate();
+                                }).build().show();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
     };
 }

@@ -3,7 +3,9 @@ package com.hisu.zola.database.entity;
 import android.graphics.Bitmap;
 import android.net.Uri;
 
-public class ContactUser {
+import java.io.Serializable;
+
+public class ContactUser implements Serializable {
     private String name;
     private String phoneNumber;
     private String avatar;

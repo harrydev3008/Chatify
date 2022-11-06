@@ -161,12 +161,23 @@
     <string name="add_member_to_group_success">Thêm thành viên vào nhóm thành công!</string>
     <string name="just_now">Vừa xong</string>
     <string name="confirm_out_group">Bạn có thực sự muốn rời khởi nhóm?!</string>
+    <string name="confirm_out_group_admin_ask">Chọn trưởng nhóm mới trước khi rời nhóm?</string>
+    <string name="confirm_out_group_admin">Bạn có thể chọn một trưởng nhóm mới trước khi rời nhóm. Nếu không, quyền trưởng nhóm sẽ được trao ngẫu nhiên cho một thành viên còn lại.</string>
     <string name="change_group_name">Đổi tên nhóm</string>
     <string name="change_group_name_success">Đổi tên nhóm</string>
     <string name="confirm_remove_member">Bạn có chắc muốn xoá thành viên này khỏi nhóm?</string>
+    <string name="use_removed">Bạn đã bị nhóm trưởng xoá khỏi nhóm!</string>
+    <string name="group_disbanded">Nhóm đã bị giải tán!</string>
+    <string name="change_admin_success">Chuyển trưởng nhóm thành công!</string>
+    <string name="change_admin_confirm">Chọn người này làm trưởng nhóm mới?</string>
+    <string name="pick_new_admin">Chọn</string>
+    <string name="update_self_info_success">Cập nhật thông tin cá nhân thành công!</string>
 
 
     <!--Error Messages-->
+    <string name="notification_warning">Thông báo</string>
+    <string name="otp_verification_err">Lỗi xác thực</string>
+    <string name="otp_verification_err_msg">Đã có lỗi trong quá trình xác thực! Vui lòng thử lại sau!</string>
     <string name="empty_phone_no_err">Bạn chưa điền số điện thoại!</string>
     <string name="empty_display_name_err">Bạn chưa điền tên hiển thị!</string>
     <string name="invalid_phone_format_err">Số điện thoại sai định dạng!</string>
@@ -179,7 +190,7 @@
     <string name="empty_dob_err">Bạn chưa chọn ngày sinh!</string>
     <string name="empty_nickname_err">Bạn vui lòng nhập tên gợi nhớ!</string>
     <string name="empty_err_displayname">Bạn chưa nhập tên hiển thị!</string>
-    <string name="user_not_found">Số điện thoại bạn tìm kiếm chưa đăng ký tài khoản!</string>
+    <string name="user_not_found">Số điện thoại bạn tìm kiếm có thể chưa đăng ký tài khoản hoặc không tồn tại!</string>
     <string name="message_removed">Tin nhắn đã thu hồi</string>
     <string name="user_message_removed">Bạn: Tin nhắn đã thu hồi</string>
     <string name="user_message_sent_image">[Hình ảnh]</string>
@@ -190,6 +201,8 @@
     <string name="empty_group_name_err">Bạn chưa nhập tên nhóm!</string>
     <string name="yes">Có</string>
     <string name="no">Không</string>
+    <string name="no_network_connection">Không có kết nối mạng!</string>
+    <string name="no_network_connection_desc">Vui lòng kiểm tra kết nối mạng của bạn và thử lại sau!</string>
 
     <!--Notification Channels-->
     <string name="system_noty_channel_id">zola notification id</string>

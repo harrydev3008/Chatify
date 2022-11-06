@@ -51,6 +51,7 @@
             android:paddingVertical="10dp"
             android:textCursorDrawable="@drawable/edt_cursor"
             android:textSize="20sp"
+            android:imeOptions="actionNext"
             app:layout_constraintEnd_toStartOf="@+id/guideline3"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@+id/guideline2"
@@ -79,6 +80,7 @@
                 android:inputType="textPassword"
                 android:paddingHorizontal="2dp"
                 android:paddingVertical="6dp"
+                android:imeOptions="actionDone"
                 android:textCursorDrawable="@drawable/edt_cursor"
                 android:textSize="20sp"
                 tools:ignore="Autofill" />

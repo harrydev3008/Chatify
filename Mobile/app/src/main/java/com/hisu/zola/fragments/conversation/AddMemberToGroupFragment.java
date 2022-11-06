@@ -1,8 +1,8 @@
 package com.hisu.zola.fragments.conversation;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,24 +13,21 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.gdacciaro.iOSDialog.iOSDialog;
+import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.AddGroupMemberAdapter;
 import com.hisu.zola.database.entity.Conversation;
-import com.hisu.zola.database.entity.Media;
-import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentAddMemberToGroupBinding;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.SocketIOHandler;
+import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +35,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -55,6 +51,7 @@ public class AddMemberToGroupFragment extends Fragment {
     private Conversation conversation;
     private ConversationRepository repository;
     private Socket mSocket;
+    private LoadingDialog loadingDialog;
 
     public static AddMemberToGroupFragment newInstance(Conversation conversation) {
         Bundle args = new Bundle();
@@ -85,7 +82,7 @@ public class AddMemberToGroupFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        loadingDialog = new LoadingDialog(mainActivity, Gravity.CENTER);
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
         repository = new ConversationRepository(mainActivity.getApplication());
         addActionForBtnCancel();
@@ -102,33 +99,33 @@ public class AddMemberToGroupFragment extends Fragment {
         repository.getConversationInfo(conversation.getId()).observe(mainActivity, new Observer<Conversation>() {
             @Override
             public void onChanged(Conversation dbConversation) {
-                if(dbConversation == null) return;
+                if (dbConversation == null) return;
 
                 conversation = dbConversation;
+
+                AddGroupMemberAdapter adapter = new AddGroupMemberAdapter(
+                        getFriendNotInGroup(), mainActivity
+                );
+
+                adapter.setOnItemCheckedChangListener((friend, isCheck) -> {
+                    if (isCheck) {
+                        members.add(friend.getId());
+                        newMembers.add(friend);
+                    } else {
+                        members.remove(friend.getId());
+                        newMembers.remove(friend);
+                    }
+
+                    if (members.size() > 0)
+                        mBinding.iBtnDone.setVisibility(View.VISIBLE);
+                    else
+                        mBinding.iBtnDone.setVisibility(View.GONE);
+                });
+
+                mBinding.rvMembers.setAdapter(adapter);
+                mBinding.rvMembers.setLayoutManager(new LinearLayoutManager(mainActivity));
             }
         });
-
-        AddGroupMemberAdapter adapter = new AddGroupMemberAdapter(
-                getFriendNotInGroup(), mainActivity
-        );
-
-        adapter.setOnItemCheckedChangListener((friend, isCheck) -> {
-            if (isCheck) {
-                members.add(friend.getId());
-                newMembers.add(friend);
-            } else {
-                members.remove(friend.getId());
-                newMembers.remove(friend);
-            }
-
-            if (members.size() > 0)
-                mBinding.iBtnDone.setVisibility(View.VISIBLE);
-            else
-                mBinding.iBtnDone.setVisibility(View.GONE);
-        });
-
-        mBinding.rvMembers.setAdapter(adapter);
-        mBinding.rvMembers.setLayoutManager(new LinearLayoutManager(mainActivity));
     }
 
     private List<User> getFriendNotInGroup() {
@@ -149,10 +146,14 @@ public class AddMemberToGroupFragment extends Fragment {
             if (!isDataChanged()) {
                 backToPrevPage();
             } else {
-                new AlertDialog.Builder(mainActivity)
-                        .setMessage(getString(R.string.changes_not_save))
-                        .setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> backToPrevPage())
-                        .setNegativeButton(getString(R.string.no), null).show();
+                new iOSDialogBuilder(mainActivity)
+                        .setTitle(getString(R.string.notification_warning))
+                        .setSubtitle(getString(R.string.changes_not_save))
+                        .setPositiveListener(getString(R.string.yes), dialog -> {
+                            dialog.dismiss();
+                            backToPrevPage();
+                        })
+                        .setNegativeListener(getString(R.string.no), iOSDialog::dismiss).build().show();
             }
         });
     }
@@ -169,6 +170,9 @@ public class AddMemberToGroupFragment extends Fragment {
     }
 
     private void addMember() {
+
+        loadingDialog.showDialog();
+
         Gson gson = new Gson();
         JsonObject object = new JsonObject();
         object.addProperty("conversationId", conversation.getId());
@@ -200,6 +204,8 @@ public class AddMemberToGroupFragment extends Fragment {
         if (!mSocket.connected()) {
             mSocket.connect();
         }
+
+        loadingDialog.dismissDialog();
 
         Gson gson = new Gson();
 

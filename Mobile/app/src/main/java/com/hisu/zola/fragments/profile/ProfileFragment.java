@@ -8,12 +8,14 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentProfileBinding;
 import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.local.LocalDataManager;
@@ -22,6 +24,7 @@ public class ProfileFragment extends Fragment {
 
     private FragmentProfileBinding mBinding;
     private MainActivity mMainActivity;
+    private UserRepository repository;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,6 +42,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        repository = new UserRepository(mMainActivity.getApplication());
         loadUserInfo();
         addActionForBtnEditProfile();
         addActionForBtnSetting();
@@ -46,18 +50,25 @@ public class ProfileFragment extends Fragment {
     }
 
     private void loadUserInfo() {
-        User user = LocalDataManager.getCurrentUserInfo();
+        User currentUser = LocalDataManager.getCurrentUserInfo();
 
-        if(user.getAvatarURL() == null || user.getAvatarURL().isEmpty())
-            mBinding.cimvUserAvatar.setImageBitmap(ImageConvertUtil.createImageFromText(mMainActivity, 150, 150, user.getUsername()));
-        else
-            Glide.with(mMainActivity).load(user.getAvatarURL())
-                    .placeholder(R.drawable.bg_profile).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(mBinding.cimvUserAvatar);
+        repository.getUser(currentUser.getId()).observe(mMainActivity, new Observer<User>() {
+            @Override
+            public void onChanged(User user) {
+                if(user == null) return;
 
-        mBinding.tvGender.setText(user.isGender() ? getString(R.string.gender_m) : getString(R.string.gender_f));
-        mBinding.tvDob.setText(user.getDob());
-        mBinding.tvDisplayName.setText(user.getUsername());
-        mBinding.tvPhoneNumber.setText(user.getPhoneNumber());
+                if(user.getAvatarURL() == null || user.getAvatarURL().isEmpty())
+                    mBinding.cimvUserAvatar.setImageBitmap(ImageConvertUtil.createImageFromText(mMainActivity, 150, 150, user.getUsername()));
+                else
+                    Glide.with(mMainActivity).load(user.getAvatarURL())
+                            .placeholder(R.drawable.bg_profile).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(mBinding.cimvUserAvatar);
+
+                mBinding.tvGender.setText(user.isGender() ? getString(R.string.gender_m) : getString(R.string.gender_f));
+                mBinding.tvDob.setText(user.getDob());
+                mBinding.tvDisplayName.setText(user.getUsername());
+                mBinding.tvPhoneNumber.setText(user.getPhoneNumber());
+            }
+        });
     }
 
     private void addActionForBtnEditProfile() {

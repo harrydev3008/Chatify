@@ -13,7 +13,7 @@ import java.util.List;
 
 @Dao
 public interface ConversationDAO {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(Conversation...conversations);
 
     @Query("select * from conversations where _id = :conversationID")
@@ -22,7 +22,7 @@ public interface ConversationDAO {
     @Query("select * from conversations where _id = :id")
     LiveData<Conversation> getConversationInfoById(String id);
 
-    @Query("Select * from conversations")
+    @Query("Select * from conversations order by updatedAt desc")
     LiveData<List<Conversation>> getConversation();
 
     @Query("update conversations set label = :label where _id = :id")
@@ -33,4 +33,7 @@ public interface ConversationDAO {
 
     @Query("delete from conversations where _id = :id")
     void delete(String id);
+
+    @Query("delete from conversations")
+    void dropConversationTable();
 }

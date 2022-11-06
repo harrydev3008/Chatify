@@ -1,6 +1,7 @@
 package com.hisu.zola.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,11 +9,14 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.databinding.LayoutConversationBinding;
@@ -71,10 +75,16 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         User conUser = getConversationAvatar(conversation.getMember());
 
         if (conversation.getLabel() == null) {
-            Glide.with(mContext).load(conUser.getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(holder.binding.ivConversationCoverPhoto);
+            Glide.with(mContext).asBitmap().load(conUser.getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    .into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            holder.binding.ivConversationCoverPhoto.setImageBitmap(resource);
+                        }
+                    });
             holder.binding.tvConversationName.setText(conUser.getUsername());
         } else {
-//            holder.binding.ivConversationCoverPhoto.setImageBitmap(ImageConvertUtil.createImageFromText(mContext, 150,150, conversation.getLabel()));
+            holder.binding.ivConversationCoverPhoto.setImageBitmap(ImageConvertUtil.createImageFromText(mContext, 150,150, conversation.getLabel()));
             holder.binding.tvConversationName.setText(conversation.getLabel());
         }
 
@@ -92,8 +102,23 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                     }
                 }
             } else {
-//                if(conversation.getLabel() != null) todo: if group -> display sender name
-                    holder.binding.tvLastMsg.setText(lastMessage.getText());
+               if(conversation.getLabel() != null) {
+                   if(lastMessage.getDeleted()) {
+                       String textPlaceHolder = lastMessage.getSender().getUsername() + ": Đã thu hồi tin nhắn.";
+                       holder.binding.tvLastMsg.setText(textPlaceHolder);
+                   } else {
+                       String textPlaceHolder = lastMessage.getSender().getUsername() + ": " + lastMessage.getText();
+                       holder.binding.tvLastMsg.setText(textPlaceHolder);
+                   }
+               } else {
+                   if(lastMessage.getDeleted()) {
+                       String textPlaceHolder = "Đã thu hồi tin nhắn.";
+                       holder.binding.tvLastMsg.setText(textPlaceHolder);
+                   } else {
+                       holder.binding.tvLastMsg.setText(lastMessage.getText());
+                   }
+               }
+
             }
 
             Date date = TimeConverterUtil.getDateFromString(lastMessage.getUpdatedAt());

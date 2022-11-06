@@ -2,6 +2,8 @@ package com.hisu.zola.database.repository;
 
 import android.app.Application;
 
+import androidx.lifecycle.LiveData;
+
 import com.hisu.zola.database.Database;
 import com.hisu.zola.database.dao.UserDAO;
 import com.hisu.zola.database.entity.User;
@@ -14,14 +16,20 @@ public class UserRepository {
         userDAO = database.userDAO();
     }
 
-    public User getUser(String userID) {
+    public LiveData<User> getUser(String userID) {
         return userDAO.getUser(userID);
     }
 
     public void insert(User user) {
         Database.dbExecutor.execute(() -> {
-            if(userDAO.getUser(user.getId()) == null)
+//            if(userDAO.getUser(user.getId()) == null)
                 userDAO.insert(user);
+        });
+    }
+
+    public void update(User user) {
+        Database.dbExecutor.execute(() -> {
+            userDAO.update(user);
         });
     }
 }

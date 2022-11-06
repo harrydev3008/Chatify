@@ -21,6 +21,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.gdacciaro.iOSDialog.iOSDialog;
+import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
@@ -29,6 +31,7 @@ import com.hisu.zola.databinding.FragmentRegisterBinding;
 import com.hisu.zola.fragments.ConfirmOTPFragment;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.EditTextUtil;
+import com.hisu.zola.util.NetworkUtil;
 import com.hisu.zola.util.dialog.ConfirmSendOTPDialog;
 import com.hisu.zola.util.dialog.LoadingDialog;
 
@@ -105,7 +108,14 @@ public class RegisterFragment extends Fragment {
 
     private void addActionForBtnRegister() {
         mBinding.btnRegister.setOnClickListener(view -> {
-            register();
+            if (NetworkUtil.isConnectionAvailable(mMainActivity))
+                register();
+            else {
+                new iOSDialogBuilder(mMainActivity)
+                        .setTitle(getString(R.string.no_network_connection))
+                        .setSubtitle(getString(R.string.no_network_connection_desc))
+                        .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+            }
         });
     }
 
@@ -200,22 +210,18 @@ public class RegisterFragment extends Fragment {
         }
 
         if (TextUtils.isEmpty(mBinding.edtDob.getText().toString())) {
-            new AlertDialog.Builder(mMainActivity)
-                    .setIcon(R.drawable.ic_alert)
-                    .setMessage(getString(R.string.empty_dob_err))
-                    .setPositiveButton(getString(R.string.confirm), null)
-                    .show();
-
+            new iOSDialogBuilder(mMainActivity)
+                    .setTitle(getString(R.string.notification_warning))
+                    .setSubtitle(getString(R.string.empty_dob_err))
+                    .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
             return false;
         }
 
         if (calculateAge(mBinding.edtDob.getText().toString()) < 15) {
-            new AlertDialog.Builder(mMainActivity)
-                    .setIcon(R.drawable.ic_alert)
-                    .setMessage(getString(R.string.err_age))
-                    .setPositiveButton(getString(R.string.confirm), null)
-                    .show();
-
+            new iOSDialogBuilder(mMainActivity)
+                    .setTitle(getString(R.string.notification_warning))
+                    .setSubtitle(getString(R.string.err_age))
+                    .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
             return false;
         }
 
@@ -385,6 +391,8 @@ public class RegisterFragment extends Fragment {
             datePickerDialog.setTitle(getString(R.string.dob));
             datePickerDialog.setIcon(R.drawable.ic_calendar);
             datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            datePickerDialog.setButton(DatePickerDialog.BUTTON_NEGATIVE, getString(R.string.cancel), datePickerDialog);
+            datePickerDialog.setButton(DatePickerDialog.BUTTON_POSITIVE, getString(R.string.confirm), datePickerDialog);
             datePickerDialog.show();
         });
     }
