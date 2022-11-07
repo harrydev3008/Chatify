@@ -17,7 +17,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -137,16 +136,6 @@ public class RegisterFragment extends Fragment {
                 loadingDialog.showDialog();
             });
 
-            mMainActivity.runOnUiThread(() -> {
-                loadingDialog.dismissDialog();
-
-                if (dialog == null)
-                    initDialog();
-
-                dialog.setNewPhoneNumber(user.getPhoneNumber());
-                dialog.showDialog();
-            });
-
             JsonObject object = new JsonObject();
             object.addProperty("phoneNumber", mBinding.edtPhoneNumber.getText().toString());
             RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
@@ -155,26 +144,33 @@ public class RegisterFragment extends Fragment {
                 @Override
                 public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
                     if (response.isSuccessful() && response.code() == 200) {
-                        User foundUser = response.body();
-                        if (foundUser != null) {
-                            mMainActivity.runOnUiThread(() -> {
+                        mMainActivity.runOnUiThread(() -> {
+
+                            loadingDialog.dismissDialog();
+                            User foundUser = response.body();
+
+                            if (foundUser != null) {
                                 mBinding.edtPhoneNumber.setError(getString(R.string.registered_phone_err));
                                 mBinding.edtPhoneNumber.requestFocus();
-                            });
-                        } else {
-                            mMainActivity.runOnUiThread(() -> {
-                                if (dialog == null)
-                                    initDialog();
 
+                            } else {
+                                if (dialog == null) initDialog();
                                 dialog.setNewPhoneNumber(user.getPhoneNumber());
                                 dialog.showDialog();
-                            });
-                        }
+                            }
+                        });
                     }
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                    mMainActivity.runOnUiThread(() -> {
+                        loadingDialog.dismissDialog();
+                        new iOSDialogBuilder(mMainActivity)
+                                .setTitle(getString(R.string.notification_warning))
+                                .setSubtitle(getString(R.string.notification_warning_msg))
+                                .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                    });
                     Log.e(RegisterFragment.class.getName(), t.getLocalizedMessage());
                 }
             });

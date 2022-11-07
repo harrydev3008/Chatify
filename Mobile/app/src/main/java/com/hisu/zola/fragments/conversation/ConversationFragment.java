@@ -320,39 +320,46 @@ public class ConversationFragment extends Fragment {
     }
 
     private void sendMessageViaApi(String text, String url, String imgType, String type) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            JsonObject object = new JsonObject();
+            Gson gson = new Gson();
+            object.add("conversation", gson.toJsonTree(conversation));
+            object.addProperty("sender", LocalDataManager.getCurrentUserInfo().getId());
+            object.addProperty("text", text);
+            object.addProperty("type", type);
 
-        JsonObject object = new JsonObject();
-        Gson gson = new Gson();
-        object.add("conversation", gson.toJsonTree(conversation));
-        object.addProperty("sender", LocalDataManager.getCurrentUserInfo().getId());
-        object.addProperty("text", text);
-        object.addProperty("type", type);
+            JsonObject media = new JsonObject();
+            media.addProperty("url", url);
+            media.addProperty("type", imgType);
 
-        JsonObject media = new JsonObject();
-        media.addProperty("url", url);
-        media.addProperty("type", imgType);
+            object.add("media", gson.toJsonTree(media));
 
-        object.add("media", gson.toJsonTree(media));
+            RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
 
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+            ApiService.apiService.sendMessage(body).enqueue(new Callback<Object>() {
+                @Override
+                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                    if (response.isSuccessful() && response.code() == 200) {
+                        String json = gson.toJson(response.body());
 
-        ApiService.apiService.sendMessage(body).enqueue(new Callback<Object>() {
-            @Override
-            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                if (response.isSuccessful() && response.code() == 200) {
-                    String json = gson.toJson(response.body());
+                        JsonObject obj = gson.fromJson(json, JsonObject.class);
 
-                    JsonObject obj = gson.fromJson(json, JsonObject.class);
-
-                    Message message = gson.fromJson(obj.get("data"), Message.class);
-                    sendMessage(message);
+                        Message message = gson.fromJson(obj.get("data"), Message.class);
+                        sendMessage(message);
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
-            }
+                @Override
+                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                    mMainActivity.runOnUiThread(() -> {
+                        new iOSDialogBuilder(mMainActivity)
+                                .setTitle(getString(R.string.notification_warning))
+                                .setSubtitle(getString(R.string.notification_warning_msg))
+                                .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                    });
+                    Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
+                }
+            });
         });
     }
 
@@ -363,6 +370,8 @@ public class ConversationFragment extends Fragment {
 
         Gson gson = new Gson();
         viewModel.insertOrUpdate(message);
+//        conversation.setLastMessage(message);
+//        repository.insertOrUpdate(conversation);
 
         JsonObject emitMsg = new JsonObject();
         emitMsg.add("conversation", gson.toJsonTree(conversation));
@@ -434,59 +443,54 @@ public class ConversationFragment extends Fragment {
     private final Emitter.Listener onMessageReceive = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            mMainActivity.runOnUiThread(() -> {
-                JSONObject data = (JSONObject) args[0];
-                if (data != null) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+                try {
+                    Gson gson = new Gson();
 
-                    try {
-                        Gson gson = new Gson();
+                    Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
 
-                        Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
+                    User sender = gson.fromJson(data.getString("sender"), User.class);
 
-                        User sender = gson.fromJson(data.getString("sender"), User.class);
+                    List<Media> media = gson.fromJson(data.get("media").toString(), new TypeToken<List<Media>>() {
+                    }.getType());
 
-                        List<Media> media = gson.fromJson(data.get("media").toString(), new TypeToken<List<Media>>() {
-                        }.getType());
+                    Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
+                            data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, false);
 
-                        Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
-                                data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, false);
+                    viewModel.insertOrUpdate(message);
 
-                        viewModel.insertOrUpdate(message);
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            });
+            }
         }
     };
 
     private final Emitter.Listener onMessageDeleteReceive = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            mMainActivity.runOnUiThread(() -> {
-                JSONObject data = (JSONObject) args[0];
-                if (data != null) {
-                    try {
-                        Gson gson = new Gson();
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+                try {
+                    Gson gson = new Gson();
 
-                        Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
+                    Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
 
-                        User sender = gson.fromJson(data.getString("sender"), User.class);
+                    User sender = gson.fromJson(data.getString("sender"), User.class);
 
-                        List<Media> media = gson.fromJson(data.get("media").toString(), new TypeToken<List<Media>>() {
-                        }.getType());
+                    List<Media> media = gson.fromJson(data.get("media").toString(), new TypeToken<List<Media>>() {
+                    }.getType());
 
-                        Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
-                                data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, true);
+                    Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
+                            data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, true);
 
-                        viewModel.unsent(message);
+                    viewModel.unsent(message);
 
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            });
+            }
         }
     };
 
@@ -506,6 +510,12 @@ public class ConversationFragment extends Fragment {
 
                 @Override
                 public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                    mMainActivity.runOnUiThread(() -> {
+                        new iOSDialogBuilder(mMainActivity)
+                                .setTitle(getString(R.string.notification_warning))
+                                .setSubtitle(getString(R.string.notification_warning_msg))
+                                .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                    });
                     Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
                 }
             });

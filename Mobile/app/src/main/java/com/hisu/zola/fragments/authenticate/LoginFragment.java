@@ -216,6 +216,13 @@ public class LoginFragment extends Fragment {
 
                 @Override
                 public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                    mMainActivity.runOnUiThread(() -> {
+                        loadingDialog.dismissDialog();
+                        new iOSDialogBuilder(mMainActivity)
+                                .setTitle(getString(R.string.notification_warning))
+                                .setSubtitle(getString(R.string.notification_warning_msg))
+                                .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                    });
                     Log.e(LoginFragment.class.getName(), t.getLocalizedMessage());
                 }
             });

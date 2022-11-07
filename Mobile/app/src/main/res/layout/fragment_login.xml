@@ -80,7 +80,7 @@
                 android:inputType="textPassword"
                 android:paddingHorizontal="2dp"
                 android:paddingVertical="6dp"
-                android:imeOptions="actionDone"
+                android:imeOptions="actionGo"
                 android:textCursorDrawable="@drawable/edt_cursor"
                 android:textSize="20sp"
                 tools:ignore="Autofill" />

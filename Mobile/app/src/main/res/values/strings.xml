@@ -170,12 +170,13 @@
     <string name="group_disbanded">Nhóm đã bị giải tán!</string>
     <string name="change_admin_success">Chuyển trưởng nhóm thành công!</string>
     <string name="change_admin_confirm">Chọn người này làm trưởng nhóm mới?</string>
-    <string name="pick_new_admin">Chọn</string>
+    <string name="pick_new_admin">Chọn trưởng nhóm mới</string>
     <string name="update_self_info_success">Cập nhật thông tin cá nhân thành công!</string>
 
 
     <!--Error Messages-->
     <string name="notification_warning">Thông báo</string>
+    <string name="notification_warning_msg">Đã xảy ra lỗi trong quá trình xử lý. Bạn vui lòng thử lại sau!</string>
     <string name="otp_verification_err">Lỗi xác thực</string>
     <string name="otp_verification_err_msg">Đã có lỗi trong quá trình xác thực! Vui lòng thử lại sau!</string>
     <string name="empty_phone_no_err">Bạn chưa điền số điện thoại!</string>

@@ -30,6 +30,7 @@ import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import io.socket.client.Socket;
 import okhttp3.MediaType;
@@ -121,38 +122,48 @@ public class ViewGroupMemberFragment extends Fragment {
     }
 
     private void removeMember(String memberID) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            mainActivity.runOnUiThread(() -> {
+                loadingDialog.showDialog();
+            });
 
-        loadingDialog.showDialog();
+            JsonObject object = new JsonObject();
+            object.addProperty("conversationId", conversation.getId());
+            object.addProperty("deleteMemberId", memberID);
 
-        JsonObject object = new JsonObject();
-        object.addProperty("conversationId", conversation.getId());
-        object.addProperty("deleteMemberId", memberID);
+            RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
 
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
-
-        ApiService.apiService.removeMemberFromGroup(body).enqueue(new Callback<Object>() {
-            @Override
-            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                if (response.isSuccessful() && response.code() == 200) {
-                    List<User> member = conversation.getMember();
-                    for (User user : member) {
-                        if (user.getId().equalsIgnoreCase(memberID)) {
-                            member.remove(user);
-                            break;
+            ApiService.apiService.removeMemberFromGroup(body).enqueue(new Callback<Object>() {
+                @Override
+                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                    if (response.isSuccessful() && response.code() == 200) {
+                        List<User> member = conversation.getMember();
+                        for (User user : member) {
+                            if (user.getId().equalsIgnoreCase(memberID)) {
+                                member.remove(user);
+                                break;
+                            }
                         }
+
+                        conversation.setMember(member);
+                        adapter.setMembers(member);
+                        repository.insertOrUpdate(conversation);
+                        emitRemoveMember(memberID);
                     }
-
-                    conversation.setMember(member);
-                    adapter.setMembers(member);
-                    repository.insertOrUpdate(conversation);
-                    emitRemoveMember(memberID);
                 }
-            }
 
-            @Override
-            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                Log.e(ViewGroupMemberFragment.class.getName(), t.getLocalizedMessage());
-            }
+                @Override
+                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                    mainActivity.runOnUiThread(() -> {
+                        loadingDialog.dismissDialog();
+                        new iOSDialogBuilder(mainActivity)
+                                .setTitle(getString(R.string.notification_warning))
+                                .setSubtitle(getString(R.string.notification_warning_msg))
+                                .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                    });
+                    Log.e(ViewGroupMemberFragment.class.getName(), t.getLocalizedMessage());
+                }
+            });
         });
     }
 

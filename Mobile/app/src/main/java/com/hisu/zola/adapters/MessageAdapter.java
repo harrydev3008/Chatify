@@ -3,6 +3,7 @@ package com.hisu.zola.adapters;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,7 +90,13 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             final MessageReceiveViewHolder receiveViewHolder = ((MessageReceiveViewHolder) holder);
 
-            Glide.with(mContext).load(message.getSender().getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(receiveViewHolder.binding.ivUserPfp);
+            Glide.with(mContext)
+                    .asBitmap().load(message.getSender().getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.ALL).into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            receiveViewHolder.binding.ivUserPfp.setImageBitmap(resource);
+                        }
+                    });
 
             if (position == 0)
                 receiveViewHolder.binding.ivUserPfp.setVisibility(View.VISIBLE);
@@ -169,7 +176,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     binding.groupImg.setVisibility(View.GONE);
                     Media media = message.getMedia().get(0);
                     Glide.with(context)
-                            .asBitmap().load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(new SimpleTarget<Bitmap>() {
+                            .asBitmap().load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.ALL).into(new SimpleTarget<Bitmap>() {
                                 @Override
                                 public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                                     binding.imgMsgSend.setImageBitmap(resource);
@@ -213,14 +220,16 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             } else {
                 if (message.getMedia().size() <= 1) {
                     binding.tvMsgReceive.setVisibility(View.GONE);
-                    binding.msgWrapper.setVisibility(View.VISIBLE);
+                    binding.msgWrapper.setVisibility(View.GONE);
                     binding.groupImg.setVisibility(View.GONE);
                     Media media = message.getMedia().get(0);
+
                     Glide.with(context)
-                            .asBitmap().load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(new SimpleTarget<Bitmap>() {
+                            .asBitmap().load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.ALL).into(new SimpleTarget<Bitmap>() {
                                 @Override
                                 public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                                     binding.imgMsgReceive.setImageBitmap(resource);
+                                    binding.imgMsgReceive.setVisibility(View.VISIBLE);
                                 }
                             });
                 } else {

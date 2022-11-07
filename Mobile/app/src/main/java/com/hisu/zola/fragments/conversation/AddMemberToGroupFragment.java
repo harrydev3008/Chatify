@@ -32,6 +32,7 @@ import com.hisu.zola.util.local.LocalDataManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import io.socket.client.Socket;
@@ -170,33 +171,49 @@ public class AddMemberToGroupFragment extends Fragment {
     }
 
     private void addMember() {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            mainActivity.runOnUiThread(() -> {
+                loadingDialog.showDialog();
+            });
 
-        loadingDialog.showDialog();
+            Gson gson = new Gson();
+            JsonObject object = new JsonObject();
+            object.addProperty("conversationId", conversation.getId());
+            object.add("newMember", gson.toJsonTree(members));
 
-        Gson gson = new Gson();
-        JsonObject object = new JsonObject();
-        object.addProperty("conversationId", conversation.getId());
-        object.add("newMember", gson.toJsonTree(members));
+            RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+            ApiService.apiService.addMemberToGroup(body).enqueue(new Callback<Object>() {
+                @Override
+                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                    if (response.isSuccessful() && response.code() == 200) {
 
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
-        ApiService.apiService.addMemberToGroup(body).enqueue(new Callback<Object>() {
-            @Override
-            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                if (response.isSuccessful() && response.code() == 200) {
-                    List<User> newGroupMembers = conversation.getMember();
-                    newGroupMembers.addAll(newMembers);
+                        mainActivity.runOnUiThread(() -> {
+                            loadingDialog.dismissDialog();
+                        });
 
-                    conversation.setMember(newGroupMembers);
-                    repository.insertOrUpdate(conversation);
-                    emitAddMember();
-                    mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                        List<User> newGroupMembers = conversation.getMember();
+                        newGroupMembers.addAll(newMembers);
+
+                        conversation.setMember(newGroupMembers);
+                        repository.insertOrUpdate(conversation);
+                        emitAddMember();
+                        mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                Log.e(AddMemberToGroupFragment.class.getName(), t.getLocalizedMessage());
-            }
+                @Override
+                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                    mainActivity.runOnUiThread(() -> {
+                        loadingDialog.dismissDialog();
+                        new iOSDialogBuilder(mainActivity)
+                                .setTitle(getString(R.string.notification_warning))
+                                .setSubtitle(getString(R.string.notification_warning_msg))
+                                .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                    });
+
+                    Log.e(AddMemberToGroupFragment.class.getName(), t.getLocalizedMessage());
+                }
+            });
         });
     }
 
@@ -204,8 +221,6 @@ public class AddMemberToGroupFragment extends Fragment {
         if (!mSocket.connected()) {
             mSocket.connect();
         }
-
-        loadingDialog.dismissDialog();
 
         Gson gson = new Gson();
 
