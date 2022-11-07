@@ -25,6 +25,7 @@ import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentRegisterUserInfoBinding;
 import com.hisu.zola.fragments.greet_new_user.WelcomeOnBoardingFragment;
 import com.hisu.zola.util.ApiService;
@@ -49,7 +50,7 @@ public class RegisterUserInfoFragment extends Fragment {
     public static final String REGISTER_KEY = "NEW_USER";
     private User user;
     private LoadingDialog loadingDialog;
-
+    private UserRepository userRepository;
     private FragmentRegisterUserInfoBinding mBinding;
     private MainActivity mainActivity;
     private Uri avatarUri;
@@ -85,6 +86,7 @@ public class RegisterUserInfoFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        userRepository = new UserRepository(mainActivity.getApplication());
         init();
     }
 
@@ -199,8 +201,11 @@ public class RegisterUserInfoFragment extends Fragment {
 
                 if (response.isSuccessful() && response.code() == 200) {
 
+                    User newUser = ObjectConvertUtil.getResponseUser(response);
+
                     LocalDataManager.setUserLoginState(true);
-                    LocalDataManager.setCurrentUserInfo(ObjectConvertUtil.getResponseUser(response));
+                    LocalDataManager.setCurrentUserInfo(newUser);
+                    userRepository.insert(newUser);
 
                     mainActivity.runOnUiThread(() -> {
                         loadingDialog.dismissDialog();

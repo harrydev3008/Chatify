@@ -18,9 +18,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.gdacciaro.iOSDialog.iOSDialog;
-import com.gdacciaro.iOSDialog.iOSDialogBuilder;
-import com.gdacciaro.iOSDialog.iOSDialogClickListener;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -47,7 +44,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.Executors;
 
 import io.socket.client.Socket;
@@ -167,34 +163,27 @@ public class ConversationListFragment extends Fragment {
         mBinding.edtSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
             }
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
                 filteredList.clear();
                 String query = editable.toString().trim();
-                if(query.isEmpty()) {
+                if (query.isEmpty())
                     adapter.setConversations(conversationList);
-                } else {
+                else {
                     for (Conversation conversation : conversationList) {
-                        if(conversation.getLabel() == null) {
+                        if (conversation.getLabel() == null) {
                             User other = getConversation(conversation.getMember());
-                            if(other.getUsername().toLowerCase().contains(query)) {
+                            if (other.getUsername().toLowerCase().contains(query))
                                 filteredList.add(conversation);
-                            }
-                        } else {
-                            if(conversation.getLabel().toLowerCase().contains(query)) {
-                                filteredList.add(conversation);
-                            }
-                        }
+                        } else if (conversation.getLabel().toLowerCase().contains(query))
+                            filteredList.add(conversation);
                     }
-
                     adapter.setConversations(filteredList);
                 }
             }
@@ -455,8 +444,6 @@ public class ConversationListFragment extends Fragment {
                 if (data != null) {
 
                     try {
-
-                        Log.e("msg", data.toString());
 
                         Gson gson = new Gson();
 
