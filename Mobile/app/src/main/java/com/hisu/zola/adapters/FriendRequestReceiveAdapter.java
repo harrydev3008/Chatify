@@ -1,16 +1,22 @@
 package com.hisu.zola.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.LayoutFriendRequestReceiveBinding;
+import com.hisu.zola.listeners.IOnUserClickListener;
 
 import java.util.List;
 
@@ -19,9 +25,9 @@ public class FriendRequestReceiveAdapter extends
 
     private List<User> requestList;
     private final Context context;
+    private IOnUserClickListener acceptClickListener, denyClickListener;
 
-    public FriendRequestReceiveAdapter(List<User> requestList, Context context) {
-        this.requestList = requestList;
+    public FriendRequestReceiveAdapter(Context context) {
         this.context = context;
         notifyDataSetChanged();
     }
@@ -33,6 +39,14 @@ public class FriendRequestReceiveAdapter extends
     public void setRequestList(List<User> requestList) {
         this.requestList = requestList;
         notifyDataSetChanged();
+    }
+
+    public void setAcceptClickListener(IOnUserClickListener acceptClickListener) {
+        this.acceptClickListener = acceptClickListener;
+    }
+
+    public void setDenyClickListener(IOnUserClickListener denyClickListener) {
+        this.denyClickListener = denyClickListener;
     }
 
     @NonNull
@@ -49,8 +63,17 @@ public class FriendRequestReceiveAdapter extends
     public void onBindViewHolder(@NonNull RequestReceiveViewHolder holder, int position) {
         User friendRequest = requestList.get(position);
         holder.mBinding.tvRequestName.setText(friendRequest.getUsername());
-        Glide.with(context).load(friendRequest.getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                .into(holder.mBinding.cimvRequestAvatar);
+        Glide.with(context).asBitmap().load(friendRequest.getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                .into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        holder.mBinding.cimvRequestAvatar.setImageBitmap(resource);
+                        holder.mBinding.cimvRequestAvatar.setVisibility(View.VISIBLE);
+                    }
+                });
+
+        holder.mBinding.btnAccept.setOnClickListener(view -> acceptClickListener.onClick(friendRequest));
+        holder.mBinding.btnDecline.setOnClickListener(view -> denyClickListener.onClick(friendRequest));
     }
 
     @Override

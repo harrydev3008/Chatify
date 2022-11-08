@@ -30,7 +30,6 @@ import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.List;
-import java.util.concurrent.Executors;
 
 import io.socket.client.Socket;
 import okhttp3.MediaType;
@@ -138,79 +137,73 @@ public class ChangeAdminFragment extends Fragment {
     }
 
     private void changeAdmin(User newAdmin) {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            mainActivity.runOnUiThread(() -> {
-                loadingDialog.showDialog();
-            });
+        loadingDialog.showDialog();
 
-            Gson gson = new Gson();
-            JsonObject object = new JsonObject();
-            object.addProperty("conversationId", conversation.getId());
-            object.add("newCreator", gson.toJsonTree(newAdmin));
+        Gson gson = new Gson();
+        JsonObject object = new JsonObject();
+        object.addProperty("conversationId", conversation.getId());
+        object.add("newCreator", gson.toJsonTree(newAdmin));
 
-            RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
 
-            ApiService.apiService.changeGroupAdmin(body).enqueue(new Callback<Object>() {
-                @Override
-                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                    if (response.isSuccessful() && response.code() == 200) {
+        ApiService.apiService.changeGroupAdmin(body).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if (response.isSuccessful() && response.code() == 200) {
 
-                        conversation.setCreatedBy(newAdmin);
-                        repository.insertOrUpdate(conversation);
+                    conversation.setCreatedBy(newAdmin);
+                    repository.insertOrUpdate(conversation);
 
-                        mainActivity.runOnUiThread(() -> {
-                            loadingDialog.dismissDialog();
-                            new iOSDialogBuilder(mainActivity)
-                                    .setTitle(getString(R.string.notification_warning))
-                                    .setSubtitle(getString(R.string.change_admin_success))
-                                    .setCancelable(false)
-                                    .setPositiveListener(getString(R.string.confirm), dialog -> {
-                                        dialog.dismiss();
-                                        if (option.equalsIgnoreCase(CHANGE_ADMIN_OPTION_CHANGE_ARGS)) {
-                                            emitChangeAdmin(conversation);
-                                            mainActivity.getSupportFragmentManager().popBackStackImmediate();
-                                        } else if (option.equalsIgnoreCase(CHANGE_ADMIN_OPTION_DELETE_ARGS)) {
-                                            outGroup();
-                                        }
-                                    })
-                                    .build().show();
-                        });
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
                     mainActivity.runOnUiThread(() -> {
                         loadingDialog.dismissDialog();
                         new iOSDialogBuilder(mainActivity)
                                 .setTitle(getString(R.string.notification_warning))
-                                .setSubtitle(getString(R.string.notification_warning_msg))
-                                .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                                .setSubtitle(getString(R.string.change_admin_success))
+                                .setCancelable(false)
+                                .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                    dialog.dismiss();
+                                    if (option.equalsIgnoreCase(CHANGE_ADMIN_OPTION_CHANGE_ARGS)) {
+                                        emitChangeAdmin(conversation);
+                                        mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                                    } else if (option.equalsIgnoreCase(CHANGE_ADMIN_OPTION_DELETE_ARGS)) {
+                                        outGroup();
+                                    }
+                                })
+                                .build().show();
                     });
-                    Log.e(ChangeAdminFragment.class.getName(), t.getLocalizedMessage());
                 }
-            });
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.notification_warning_msg))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
+                Log.e(ChangeAdminFragment.class.getName(), t.getLocalizedMessage());
+            }
         });
     }
 
     private void outGroup() {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            JsonObject object = new JsonObject();
-            object.addProperty("conversationId", conversation.getId());
-            RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
-            ApiService.apiService.outGroup(body).enqueue(new Callback<Object>() {
-                @Override
-                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                    if (response.isSuccessful() && response.code() == 200) {
-                        emitOutGroup(conversation);
-                    }
+        JsonObject object = new JsonObject();
+        object.addProperty("conversationId", conversation.getId());
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        ApiService.apiService.outGroup(body).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if (response.isSuccessful() && response.code() == 200) {
+                    emitOutGroup(conversation);
                 }
+            }
 
-                @Override
-                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                    Log.e(ConversationGroupDetailFragment.class.getName(), t.getLocalizedMessage());
-                }
-            });
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                Log.e(ConversationGroupDetailFragment.class.getName(), t.getLocalizedMessage());
+            }
         });
     }
 

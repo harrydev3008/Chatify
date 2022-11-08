@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/action_message"
-        android:icon="@drawable/ic_message_rounded"
+        android:icon="@drawable/ic_message_fill"
         android:title="@string/action_message" />
 
     <item
@@ -12,6 +12,6 @@
 
     <item
         android:id="@+id/action_profile"
-        android:icon="@drawable/ic_profile"
+        android:icon="@drawable/ic_contact_fill"
         android:title="@string/action_profile" />
 </menu>

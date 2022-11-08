@@ -36,6 +36,12 @@ public class MessageRepository {
         });
     }
 
+    public void insertAll(List<Message> messages) {
+        Database.dbExecutor.execute(() -> {
+            messageDAO.insertAll(messages);
+        });
+    }
+
     private void insert(Message message) {
         Database.dbExecutor.execute(() -> {
             messageDAO.insert(message);

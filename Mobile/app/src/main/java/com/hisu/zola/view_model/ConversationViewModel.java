@@ -2,7 +2,6 @@ package com.hisu.zola.view_model;
 
 import android.app.Application;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
@@ -26,6 +25,10 @@ public class ConversationViewModel extends AndroidViewModel {
 
     public void insertOrUpdate(Message message) {
         repository.insertOrUpdate(message);
+    }
+
+    public void insertAll(List<Message> messages) {
+        repository.insertAll(messages);
     }
 
     public void unsent(Message message) {
