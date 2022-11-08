@@ -2,6 +2,7 @@ package com.hisu.zola.fragments.conversation;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentChangeAdminBinding;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.SocketIOHandler;
+import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.List;
@@ -37,10 +39,12 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ChangeAdminFragment extends Fragment {
+
     public static final String CHANGE_ADMIN_ARGS = "CHANGE_ADMIN_ARGS";
     public static final String CHANGE_ADMIN_OPTION_ARGS = "CHANGE_ADMIN_OPTION_ARGS";
     public static final String CHANGE_ADMIN_OPTION_CHANGE_ARGS = "CHANGE_ADMIN_OPTION_CHANGE_ARGS";
     public static final String CHANGE_ADMIN_OPTION_DELETE_ARGS = "CHANGE_ADMIN_OPTION_DELETE_ARGS";
+
     private FragmentChangeAdminBinding mBinding;
     private MainActivity mainActivity;
     private ChangeAdminAdapter adapter;
@@ -48,6 +52,7 @@ public class ChangeAdminFragment extends Fragment {
     private Conversation conversation;
     private Socket mSocket;
     private String option;
+    private LoadingDialog loadingDialog;
 
     public static ChangeAdminFragment newInstance(Conversation conversation, String option) {
         Bundle args = new Bundle();
@@ -79,6 +84,7 @@ public class ChangeAdminFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        loadingDialog = new LoadingDialog(mainActivity, Gravity.CENTER);
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
         repository = new ConversationRepository(mainActivity.getApplication());
         init();
@@ -131,9 +137,9 @@ public class ChangeAdminFragment extends Fragment {
     }
 
     private void changeAdmin(User newAdmin) {
+        loadingDialog.showDialog();
 
         Gson gson = new Gson();
-
         JsonObject object = new JsonObject();
         object.addProperty("conversationId", conversation.getId());
         object.add("newCreator", gson.toJsonTree(newAdmin));
@@ -148,25 +154,35 @@ public class ChangeAdminFragment extends Fragment {
                     conversation.setCreatedBy(newAdmin);
                     repository.insertOrUpdate(conversation);
 
-                    new iOSDialogBuilder(mainActivity)
-                            .setTitle(getString(R.string.notification_warning))
-                            .setSubtitle(getString(R.string.change_admin_success))
-                            .setCancelable(false)
-                            .setPositiveListener(getString(R.string.confirm), dialog -> {
-                                dialog.dismiss();
-                                if (option.equalsIgnoreCase(CHANGE_ADMIN_OPTION_CHANGE_ARGS)) {
-                                    emitChangeAdmin(conversation);
-                                    mainActivity.getSupportFragmentManager().popBackStackImmediate();
-                                } else if (option.equalsIgnoreCase(CHANGE_ADMIN_OPTION_DELETE_ARGS)) {
-                                    outGroup();
-                                }
-                            })
-                            .build().show();
+                    mainActivity.runOnUiThread(() -> {
+                        loadingDialog.dismissDialog();
+                        new iOSDialogBuilder(mainActivity)
+                                .setTitle(getString(R.string.notification_warning))
+                                .setSubtitle(getString(R.string.change_admin_success))
+                                .setCancelable(false)
+                                .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                    dialog.dismiss();
+                                    if (option.equalsIgnoreCase(CHANGE_ADMIN_OPTION_CHANGE_ARGS)) {
+                                        emitChangeAdmin(conversation);
+                                        mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                                    } else if (option.equalsIgnoreCase(CHANGE_ADMIN_OPTION_DELETE_ARGS)) {
+                                        outGroup();
+                                    }
+                                })
+                                .build().show();
+                    });
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.notification_warning_msg))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
                 Log.e(ChangeAdminFragment.class.getName(), t.getLocalizedMessage());
             }
         });

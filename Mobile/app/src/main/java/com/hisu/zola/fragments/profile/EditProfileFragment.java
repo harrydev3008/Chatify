@@ -116,6 +116,7 @@ public class EditProfileFragment extends Fragment {
                     .placeholder(R.drawable.bg_profile).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(mBinding.imvAvatar);
 
         mBinding.edtDisplayName.setText(currentUser.getUsername());
+        mBinding.edtDisplayName.setHint(currentUser.getUsername());
 
         try {
             Date dateObj = parseDate(currentUser.getDob());

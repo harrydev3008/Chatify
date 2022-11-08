@@ -121,7 +121,7 @@ public class AddNewGroupFragment extends Fragment {
                 else
                     new iOSDialogBuilder(mainActivity)
                             .setTitle(getString(R.string.no_network_connection))
-                            .setSubtitle(getString(R.string.no_network_connection))
+                            .setSubtitle(getString(R.string.no_network_connection_desc))
                             .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
             }
         });
@@ -147,7 +147,6 @@ public class AddNewGroupFragment extends Fragment {
     }
 
     private void addNewGroup() {
-
         loadingDialog.showDialog();
 
         User currentUser = LocalDataManager.getCurrentUserInfo();
@@ -164,26 +163,34 @@ public class AddNewGroupFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<Conversation> call, @NonNull Response<Conversation> response) {
                 if (response.isSuccessful() && response.code() == 200) {
-
-                    loadingDialog.dismissDialog();
-
                     Conversation conversation = response.body();
 
-                    new iOSDialogBuilder(mainActivity)
-                            .setTitle(getString(R.string.notification_warning))
-                            .setSubtitle(getString(R.string.add_new_group_success))
-                            .setCancelable(false)
-                            .setPositiveListener(getString(R.string.confirm), dialog -> {
-                                dialog.dismiss();
-                                emitRemoveMember(conversation);
-                                mainActivity.setBottomNavVisibility(View.VISIBLE);
-                                mainActivity.getSupportFragmentManager().popBackStackImmediate();
-                            }).build().show();
+                    mainActivity.runOnUiThread(() -> {
+                        loadingDialog.dismissDialog();
+
+                        new iOSDialogBuilder(mainActivity)
+                                .setTitle(getString(R.string.notification_warning))
+                                .setSubtitle(getString(R.string.add_new_group_success))
+                                .setCancelable(false)
+                                .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                    dialog.dismiss();
+                                    emitRemoveMember(conversation);
+                                    mainActivity.setBottomNavVisibility(View.VISIBLE);
+                                    mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                                }).build().show();
+                    });
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<Conversation> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.notification_warning_msg))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
                 Log.e(AddNewGroupFragment.class.getName(), t.getLocalizedMessage());
             }
         });

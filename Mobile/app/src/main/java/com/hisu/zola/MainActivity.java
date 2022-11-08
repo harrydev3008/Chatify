@@ -121,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
             database.conversationDAO().dropConversationTable();
             database.messageDAO().dropMessageTable();
             database.userDAO().dropUserTable();
+            database.contactUserDAO().dropTableContactUser();
         });
     }
 

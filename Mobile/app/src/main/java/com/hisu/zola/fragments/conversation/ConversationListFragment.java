@@ -1,6 +1,8 @@
 package com.hisu.zola.fragments.conversation;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -16,16 +18,15 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.gdacciaro.iOSDialog.iOSDialog;
-import com.gdacciaro.iOSDialog.iOSDialogBuilder;
-import com.gdacciaro.iOSDialog.iOSDialogClickListener;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.ConversationAdapter;
+import com.hisu.zola.database.Database;
 import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.Media;
 import com.hisu.zola.database.entity.Message;
@@ -44,6 +45,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 
@@ -64,6 +66,8 @@ public class ConversationListFragment extends Fragment {
     private PopupMenu popupMenu;
     private Socket mSocket;
     private MessageRepository messageRepository;
+    private List<Conversation> conversationList;
+    private List<Conversation> filteredList;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -81,7 +85,8 @@ public class ConversationListFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        conversationList = new ArrayList<>();
+        filteredList = new ArrayList<>();
         mMainActivity.setProgressbarVisibility(View.GONE);
         messageRepository = new MessageRepository(mMainActivity.getApplication());
 
@@ -98,9 +103,8 @@ public class ConversationListFragment extends Fragment {
         mSocket.on("deleteGroup-receive", onDisbandGroup);
         mSocket.on("msg-receive", onMessageReceive);
         mSocket.on("delete-receive", onMessageDeleteReceive);
-
         initConversationListRecyclerView();
-
+        filter();
         initPopupMenu();
 
         tapToCloseApp();
@@ -121,6 +125,8 @@ public class ConversationListFragment extends Fragment {
             public void onChanged(List<Conversation> conversations) {
 
                 if (conversations == null) return;
+                conversationList.clear();
+                conversationList.addAll(conversations);
 
                 List<Conversation> curConversations = new ArrayList<>();
                 conversations.forEach(conversation -> {
@@ -156,33 +162,68 @@ public class ConversationListFragment extends Fragment {
         mBinding.rvConversationList.setLayoutManager(linearLayoutManager);
     }
 
-    private void loadConversationList() {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            ApiService.apiService.getConversations().enqueue(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<List<Conversation>> call, @NonNull Response<List<Conversation>> response) {
+    private void filter() {
+        mBinding.edtSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
 
-                    if (response.isSuccessful() && response.code() == 200) {
-                        List<Conversation> conversations = response.body();
-                        if (conversations != null && conversations.size() != 0) {
-                            conversations.forEach(conversation -> {
-                                viewModel.insertOrUpdate(conversation);
-                            });
-                            loadMessageList(conversations);
-                        }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                filteredList.clear();
+                String query = editable.toString().trim();
+                if (query.isEmpty())
+                    adapter.setConversations(conversationList);
+                else {
+                    for (Conversation conversation : conversationList) {
+                        if (conversation.getLabel() == null) {
+                            User other = getConversation(conversation.getMember());
+                            if (other.getUsername().toLowerCase().contains(query))
+                                filteredList.add(conversation);
+                        } else if (conversation.getLabel().toLowerCase().contains(query))
+                            filteredList.add(conversation);
+                    }
+                    adapter.setConversations(filteredList);
+                }
+            }
+        });
+    }
+
+    private User getConversation(List<User> members) {
+        User currentUser = LocalDataManager.getCurrentUserInfo();
+        for (User member : members) {
+            if (!member.getId().equalsIgnoreCase(currentUser.getId()))
+                return member;
+        }
+        return currentUser;
+    }
+
+    private void loadConversationList() {
+        ApiService.apiService.getConversations().enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Conversation>> call, @NonNull Response<List<Conversation>> response) {
+                if (response.isSuccessful() && response.code() == 200) {
+                    List<Conversation> conversations = response.body();
+                    if (conversations != null && conversations.size() != 0) {
+                        viewModel.insertAll(conversations);
+                        loadMessageList(conversations);
                     }
                 }
+            }
 
-                @Override
-                public void onFailure(@NonNull Call<List<Conversation>> call, @NonNull Throwable t) {
-                    Log.e("API_ERR", t.getLocalizedMessage());
-                }
-            });
+            @Override
+            public void onFailure(@NonNull Call<List<Conversation>> call, @NonNull Throwable t) {
+                Log.e("API_ERR", t.getLocalizedMessage());
+            }
         });
     }
 
     private void loadMessageList(List<Conversation> conversations) {
-        Executors.newSingleThreadExecutor().execute(() -> {
+        Database.dbExecutor.execute(() -> {
             conversations.forEach(conversation -> {
                 loadConversationMessage(conversation.getId());
             });
@@ -200,15 +241,14 @@ public class ConversationListFragment extends Fragment {
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
                 Gson gson = new Gson();
 
-                String json = gson.toJson(response.body());
+                JsonElement json = gson.toJsonTree(response.body());
 
                 JsonObject obj = gson.fromJson(json, JsonObject.class);
                 JsonArray array = obj.getAsJsonArray("data");
 
-                Message[] listArr = new Gson().fromJson(array, Message[].class);
+                List<Message> messages = gson.fromJson(array, new TypeToken<List<Message>>() {}.getType());
 
-                for (Message message : listArr)
-                    messageRepository.insertOrUpdate(message);
+                messageRepository.insertAll(messages);
             }
 
             @Override
@@ -401,8 +441,6 @@ public class ConversationListFragment extends Fragment {
                 if (data != null) {
 
                     try {
-
-                        Log.e("msg", data.toString());
 
                         Gson gson = new Gson();
 

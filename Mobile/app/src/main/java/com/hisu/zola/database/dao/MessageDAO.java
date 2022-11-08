@@ -16,6 +16,9 @@ public interface MessageDAO {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(Message... messages);
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    void insertAll(List<Message> messages);
+
     @Query("select * from messages where _id = :messageID")
     Message getMessageById(String messageID);
 

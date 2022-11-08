@@ -25,6 +25,7 @@ import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentAddMemberToGroupBinding;
 import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.NetworkUtil;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
@@ -165,12 +166,17 @@ public class AddMemberToGroupFragment extends Fragment {
 
     private void addActionForBtnDone() {
         mBinding.iBtnDone.setOnClickListener(view -> {
-            addMember();
+            if (NetworkUtil.isConnectionAvailable(mainActivity))
+                addMember();
+            else
+                new iOSDialogBuilder(mainActivity)
+                        .setTitle(getString(R.string.no_network_connection))
+                        .setSubtitle(getString(R.string.no_network_connection_desc))
+                        .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
         });
     }
 
     private void addMember() {
-
         loadingDialog.showDialog();
 
         Gson gson = new Gson();
@@ -183,6 +189,9 @@ public class AddMemberToGroupFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
                 if (response.isSuccessful() && response.code() == 200) {
+
+                    loadingDialog.dismissDialog();
+
                     List<User> newGroupMembers = conversation.getMember();
                     newGroupMembers.addAll(newMembers);
 
@@ -195,6 +204,14 @@ public class AddMemberToGroupFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.notification_warning_msg))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
+
                 Log.e(AddMemberToGroupFragment.class.getName(), t.getLocalizedMessage());
             }
         });
@@ -204,8 +221,6 @@ public class AddMemberToGroupFragment extends Fragment {
         if (!mSocket.connected()) {
             mSocket.connect();
         }
-
-        loadingDialog.dismissDialog();
 
         Gson gson = new Gson();
 

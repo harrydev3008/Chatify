@@ -25,6 +25,7 @@ import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentRegisterUserInfoBinding;
 import com.hisu.zola.fragments.greet_new_user.WelcomeOnBoardingFragment;
 import com.hisu.zola.util.ApiService;
@@ -49,7 +50,7 @@ public class RegisterUserInfoFragment extends Fragment {
     public static final String REGISTER_KEY = "NEW_USER";
     private User user;
     private LoadingDialog loadingDialog;
-
+    private UserRepository userRepository;
     private FragmentRegisterUserInfoBinding mBinding;
     private MainActivity mainActivity;
     private Uri avatarUri;
@@ -85,6 +86,7 @@ public class RegisterUserInfoFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        userRepository = new UserRepository(mainActivity.getApplication());
         init();
     }
 
@@ -115,8 +117,8 @@ public class RegisterUserInfoFragment extends Fragment {
             new iOSDialogBuilder(mainActivity)
                     .setTitle(getString(R.string.notification_warning))
                     .setSubtitle(getString(R.string.confirm_skip))
-                    .setNegativeListener(getString(R.string.cancel), iOSDialog::dismiss)
-                    .setPositiveListener(getString(R.string.confirm), dialog -> {
+                    .setNegativeListener(getString(R.string.change), iOSDialog::dismiss)
+                    .setPositiveListener(getString(R.string.skip), dialog -> {
                         dialog.dismiss();
                         updateProfile();
                     }).build().show();
@@ -142,7 +144,7 @@ public class RegisterUserInfoFragment extends Fragment {
 
         if (NetworkUtil.isConnectionAvailable(mainActivity)) {
             if (avatarUri != null) {
-                Toast.makeText(mainActivity, "here", Toast.LENGTH_SHORT).show();
+
                 File file = new File(RealPathUtil.getRealPath(mainActivity, avatarUri));
                 RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
                 String fileName = file.getName();
@@ -169,6 +171,13 @@ public class RegisterUserInfoFragment extends Fragment {
 
                     @Override
                     public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                        mainActivity.runOnUiThread(() -> {
+                            loadingDialog.dismissDialog();
+                            new iOSDialogBuilder(mainActivity)
+                                    .setTitle(getString(R.string.notification_warning))
+                                    .setSubtitle(getString(R.string.notification_warning_msg))
+                                    .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                        });
                         Log.e(RegisterUserInfoFragment.class.getName(), t.getLocalizedMessage());
                     }
                 });
@@ -192,8 +201,11 @@ public class RegisterUserInfoFragment extends Fragment {
 
                 if (response.isSuccessful() && response.code() == 200) {
 
+                    User newUser = ObjectConvertUtil.getResponseUser(response);
+
                     LocalDataManager.setUserLoginState(true);
-                    LocalDataManager.setCurrentUserInfo(ObjectConvertUtil.getResponseUser(response));
+                    LocalDataManager.setCurrentUserInfo(newUser);
+                    userRepository.insert(newUser);
 
                     mainActivity.runOnUiThread(() -> {
                         loadingDialog.dismissDialog();
@@ -205,6 +217,13 @@ public class RegisterUserInfoFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.notification_warning_msg))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
                 Log.e(RegisterUserInfoFragment.class.getName(), t.getLocalizedMessage());
             }
         });

@@ -58,6 +58,15 @@ public interface ApiService {
     @POST("api/user/requestAddFriend")
     Call<Object> sendFriendRequest(@Body RequestBody friendID);
 
+    @POST("api/user/acceptFriend")
+    Call<User> acceptFriendRequest(@Body RequestBody friendID);
+
+    @POST("api/user/deniedFriend")
+    Call<User> denyFriendRequest(@Body RequestBody friendID);
+
+    @POST("api/user/deleteFriend")
+    Call<Object> unfriend(@Body RequestBody friendID);
+
     @POST("api/user/getUserByPhonenumber")
     Call<User> findFriendByPhoneNumber(@Body RequestBody phoneNumber);
 

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="320dp"
+    android:layout_height="wrap_content"
+    android:backgroundTint="@color/white"
+    app:cardCornerRadius="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/border_bottom"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="8dp"
+            android:text="@string/confirm_out_group_admin_ask"
+            android:textAlignment="center"
+            android:textColor="@color/chat_text_color"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto"
+            android:paddingHorizontal="18dp"
+            android:paddingVertical="10dp"
+            android:text="@string/confirm_out_group_admin"
+            android:background="@drawable/border_bottom"
+            android:textAlignment="center"
+            android:textColor="@color/gray"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tv_negative"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/out_group"
+            android:paddingVertical="8dp"
+            android:textAlignment="center"
+            android:textColor="@color/danger"
+            android:textSize="18sp"
+            android:background="@drawable/border_bottom"/>
+
+        <TextView
+            android:id="@+id/tv_positive"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/pick_new_admin"
+            android:paddingVertical="8dp"
+            android:textAlignment="center"
+            android:textColor="@color/primary_color"
+            android:textSize="18sp"
+            android:background="@drawable/border_bottom"/>
+
+        <TextView
+            android:id="@+id/tv_cancel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel"
+            android:paddingVertical="8dp"
+            android:textAlignment="center"
+            android:textColor="@color/primary_color"
+            android:textSize="18sp"/>
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

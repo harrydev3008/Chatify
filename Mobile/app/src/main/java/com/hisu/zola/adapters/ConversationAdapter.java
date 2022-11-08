@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,18 +17,19 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.hisu.zola.R;
-import com.hisu.zola.database.entity.Message;
-import com.hisu.zola.databinding.LayoutConversationBinding;
 import com.hisu.zola.database.entity.Conversation;
+import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.databinding.LayoutConversationBinding;
 import com.hisu.zola.listeners.IOnConversationItemSelectedListener;
 import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.converter.TimeConverterUtil;
 import com.hisu.zola.util.local.LocalDataManager;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -71,7 +71,6 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
     @Override
     public void onBindViewHolder(@NonNull ConversationViewHolder holder, int position) {
         Conversation conversation = conversations.get(position);
-
         User conUser = getConversationAvatar(conversation.getMember());
 
         if (conversation.getLabel() == null) {
@@ -84,7 +83,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                     });
             holder.binding.tvConversationName.setText(conUser.getUsername());
         } else {
-            holder.binding.ivConversationCoverPhoto.setImageBitmap(ImageConvertUtil.createImageFromText(mContext, 150,150, conversation.getLabel()));
+            holder.binding.ivConversationCoverPhoto.setImageBitmap(ImageConvertUtil.createImageFromText(mContext, 150, 150, conversation.getLabel()));
             holder.binding.tvConversationName.setText(conversation.getLabel());
         }
 
@@ -102,43 +101,45 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                     }
                 }
             } else {
-               if(conversation.getLabel() != null) {
-                   if(lastMessage.getDeleted()) {
-                       String textPlaceHolder = lastMessage.getSender().getUsername() + ": Đã thu hồi tin nhắn.";
-                       holder.binding.tvLastMsg.setText(textPlaceHolder);
-                   } else {
-                       String textPlaceHolder = lastMessage.getSender().getUsername() + ": " + lastMessage.getText();
-                       holder.binding.tvLastMsg.setText(textPlaceHolder);
-                   }
-               } else {
-                   if(lastMessage.getDeleted()) {
-                       String textPlaceHolder = "Đã thu hồi tin nhắn.";
-                       holder.binding.tvLastMsg.setText(textPlaceHolder);
-                   } else {
-                       holder.binding.tvLastMsg.setText(lastMessage.getText());
-                   }
-               }
-
+                if (conversation.getLabel() != null) {
+                    if (lastMessage.getDeleted()) {
+                        String textPlaceHolder = lastMessage.getSender().getUsername() + ": Đã thu hồi tin nhắn.";
+                        holder.binding.tvLastMsg.setText(textPlaceHolder);
+                    } else {
+                        String textPlaceHolder = lastMessage.getSender().getUsername() + ": " + lastMessage.getText();
+                        holder.binding.tvLastMsg.setText(textPlaceHolder);
+                    }
+                } else {
+                    if (lastMessage.getDeleted()) {
+                        String textPlaceHolder = "Đã thu hồi tin nhắn.";
+                        holder.binding.tvLastMsg.setText(textPlaceHolder);
+                    } else {
+                        holder.binding.tvLastMsg.setText(lastMessage.getText());
+                    }
+                }
             }
 
             Date date = TimeConverterUtil.getDateFromString(lastMessage.getUpdatedAt());
 
-            if(date != null) {
-                Date today = new Date();
+            if (date != null) {
+                Date today = Calendar.getInstance().getTime();
                 Duration duration = Duration.between(date.toInstant(), today.toInstant());
 
-                if(duration.toDays() < 1) {
-                    if(duration.toHours() > 0 && duration.toHours() < 24)
+                if (duration.toDays() < 1) {
+                    if (duration.toHours() > 0 && duration.toHours() < 24)
                         holder.binding.tvConversationActiveTime.setText(duration.toHours() + " giờ");
-                    else if(duration.toHours() < 1 && (duration.toMinutes() > 0 && duration.toMinutes() < 60))
+                    else if (duration.toHours() < 1 && (duration.toMinutes() > 0 && duration.toMinutes() < 60))
                         holder.binding.tvConversationActiveTime.setText(duration.toMinutes() + " phút");
-                    else if(duration.toMinutes() == 0 && duration.toMinutes() == 0)
+                    else if (duration.toMinutes() < 1)
                         holder.binding.tvConversationActiveTime.setText(mContext.getString(R.string.just_now));
                 } else {
                     SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM", Locale.ENGLISH);
                     holder.binding.tvConversationActiveTime.setText(outputFormat.format(date));
                 }
             }
+        } else {
+            holder.binding.tvLastMsg.setText("");
+            holder.binding.tvConversationActiveTime.setText("");
         }
 
         int unreadMsgQuantity = 0;

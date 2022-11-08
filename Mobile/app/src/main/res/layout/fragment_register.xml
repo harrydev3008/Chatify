@@ -183,7 +183,7 @@
                 android:background="@color/white"
                 android:hint="@string/confirm_password"
                 android:inputType="textPassword"
-                android:imeOptions="actionDone"
+                android:imeOptions="actionGo"
                 android:paddingHorizontal="2dp"
                 android:paddingVertical="6dp"
                 android:textSize="20sp"

@@ -34,6 +34,12 @@ public class ConversationRepository {
         });
     }
 
+    public void insertAll(List<Conversation> conversations) {
+        Database.dbExecutor.execute(() -> {
+            conversationDAO.insertAll(conversations);
+        });
+    }
+
     private void insert(Conversation conversation) {
         Database.dbExecutor.execute(() -> {
             conversationDAO.insert(conversation);

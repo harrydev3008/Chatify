@@ -46,6 +46,7 @@ public class EditTextUtil {
                         editText.getCompoundDrawables()[2].getBounds().width())) {
 
                     editText.setText("");
+                    editText.clearFocus();
 
                     return true;
                 }

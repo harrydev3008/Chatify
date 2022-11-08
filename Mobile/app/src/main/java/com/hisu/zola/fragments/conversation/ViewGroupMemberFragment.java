@@ -121,7 +121,6 @@ public class ViewGroupMemberFragment extends Fragment {
     }
 
     private void removeMember(String memberID) {
-
         loadingDialog.showDialog();
 
         JsonObject object = new JsonObject();
@@ -151,6 +150,13 @@ public class ViewGroupMemberFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.notification_warning_msg))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
                 Log.e(ViewGroupMemberFragment.class.getName(), t.getLocalizedMessage());
             }
         });

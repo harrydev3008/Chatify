@@ -52,9 +52,6 @@ public class ContactsFragment extends Fragment {
         tapToCloseApp();
         initTabLabLayout();
         addMoreFriendEvent();
-
-        EditTextUtil.toggleShowClearIconOnEditText(mMainActivity, mBinding.edtSearch);
-        EditTextUtil.clearTextOnSearchEditText(mBinding.edtSearch);
     }
 
     private void initTabLabLayout() {

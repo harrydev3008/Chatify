@@ -50,7 +50,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 import gun0912.tedimagepicker.builder.TedImagePicker;
 import io.socket.client.Socket;
@@ -320,7 +319,6 @@ public class ConversationFragment extends Fragment {
     }
 
     private void sendMessageViaApi(String text, String url, String imgType, String type) {
-
         JsonObject object = new JsonObject();
         Gson gson = new Gson();
         object.add("conversation", gson.toJsonTree(conversation));
@@ -351,6 +349,12 @@ public class ConversationFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                mMainActivity.runOnUiThread(() -> {
+                    new iOSDialogBuilder(mMainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.notification_warning_msg))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
                 Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
             }
         });
@@ -363,6 +367,8 @@ public class ConversationFragment extends Fragment {
 
         Gson gson = new Gson();
         viewModel.insertOrUpdate(message);
+//        conversation.setLastMessage(message);
+//        repository.insertOrUpdate(conversation);
 
         JsonObject emitMsg = new JsonObject();
         emitMsg.add("conversation", gson.toJsonTree(conversation));
@@ -431,84 +437,29 @@ public class ConversationFragment extends Fragment {
         });
     }
 
-    private final Emitter.Listener onMessageReceive = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            mMainActivity.runOnUiThread(() -> {
-                JSONObject data = (JSONObject) args[0];
-                if (data != null) {
-
-                    try {
-                        Gson gson = new Gson();
-
-                        Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
-
-                        User sender = gson.fromJson(data.getString("sender"), User.class);
-
-                        List<Media> media = gson.fromJson(data.get("media").toString(), new TypeToken<List<Media>>() {
-                        }.getType());
-
-                        Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
-                                data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, false);
-
-                        viewModel.insertOrUpdate(message);
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }
-    };
-
-    private final Emitter.Listener onMessageDeleteReceive = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            mMainActivity.runOnUiThread(() -> {
-                JSONObject data = (JSONObject) args[0];
-                if (data != null) {
-                    try {
-                        Gson gson = new Gson();
-
-                        Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
-
-                        User sender = gson.fromJson(data.getString("sender"), User.class);
-
-                        List<Media> media = gson.fromJson(data.get("media").toString(), new TypeToken<List<Media>>() {
-                        }.getType());
-
-                        Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
-                                data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, true);
-
-                        viewModel.unsent(message);
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }
-    };
-
     private void unsentMessage(Message message) {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            JsonObject object = new JsonObject();
-            object.addProperty("id", message.getId());
-            RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
-            ApiService.apiService.unsentMessage(body).enqueue(new Callback<Object>() {
-                @Override
-                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                    if (response.isSuccessful() && response.code() == 200) {
-                        message.setDeleted(true);
-                        delete(message);
-                    }
+        JsonObject object = new JsonObject();
+        object.addProperty("id", message.getId());
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        ApiService.apiService.unsentMessage(body).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if (response.isSuccessful() && response.code() == 200) {
+                    message.setDeleted(true);
+                    delete(message);
                 }
+            }
 
-                @Override
-                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                    Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
-                }
-            });
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                mMainActivity.runOnUiThread(() -> {
+                    new iOSDialogBuilder(mMainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.notification_warning_msg))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
+                Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
+            }
         });
     }
 
@@ -627,6 +578,60 @@ public class ConversationFragment extends Fragment {
                     }
                 }
             });
+        }
+    };
+
+    private final Emitter.Listener onMessageReceive = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+                try {
+                    Gson gson = new Gson();
+
+                    Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
+
+                    User sender = gson.fromJson(data.getString("sender"), User.class);
+
+                    List<Media> media = gson.fromJson(data.get("media").toString(), new TypeToken<List<Media>>() {
+                    }.getType());
+
+                    Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
+                            data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, false);
+
+                    viewModel.insertOrUpdate(message);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
+    private final Emitter.Listener onMessageDeleteReceive = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+                try {
+                    Gson gson = new Gson();
+
+                    Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
+
+                    User sender = gson.fromJson(data.getString("sender"), User.class);
+
+                    List<Media> media = gson.fromJson(data.get("media").toString(), new TypeToken<List<Media>>() {
+                    }.getType());
+
+                    Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
+                            data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, true);
+
+                    viewModel.unsent(message);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     };
 }

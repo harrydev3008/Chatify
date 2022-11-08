@@ -17,7 +17,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -40,7 +39,6 @@ import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 import okhttp3.MediaType;
@@ -131,53 +129,43 @@ public class RegisterFragment extends Fragment {
     }
 
     private void saveUserInfo() {
-        Executors.newSingleThreadExecutor().execute(() -> {
+        loadingDialog.showDialog();
 
-            mMainActivity.runOnUiThread(() -> {
-                loadingDialog.showDialog();
-            });
+        JsonObject object = new JsonObject();
+        object.addProperty("phoneNumber", mBinding.edtPhoneNumber.getText().toString());
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
 
-            mMainActivity.runOnUiThread(() -> {
-                loadingDialog.dismissDialog();
+        ApiService.apiService.findFriendByPhoneNumber(body).enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                if (response.isSuccessful() && response.code() == 200) {
 
-                if (dialog == null)
-                    initDialog();
+                    loadingDialog.dismissDialog();
+                    User foundUser = response.body();
 
-                dialog.setNewPhoneNumber(user.getPhoneNumber());
-                dialog.showDialog();
-            });
+                    if (foundUser != null) {
+                        mBinding.edtPhoneNumber.setError(getString(R.string.registered_phone_err));
+                        mBinding.edtPhoneNumber.requestFocus();
 
-            JsonObject object = new JsonObject();
-            object.addProperty("phoneNumber", mBinding.edtPhoneNumber.getText().toString());
-            RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
-
-            ApiService.apiService.findFriendByPhoneNumber(body).enqueue(new Callback<User>() {
-                @Override
-                public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
-                    if (response.isSuccessful() && response.code() == 200) {
-                        User foundUser = response.body();
-                        if (foundUser != null) {
-                            mMainActivity.runOnUiThread(() -> {
-                                mBinding.edtPhoneNumber.setError(getString(R.string.registered_phone_err));
-                                mBinding.edtPhoneNumber.requestFocus();
-                            });
-                        } else {
-                            mMainActivity.runOnUiThread(() -> {
-                                if (dialog == null)
-                                    initDialog();
-
-                                dialog.setNewPhoneNumber(user.getPhoneNumber());
-                                dialog.showDialog();
-                            });
-                        }
+                    } else {
+                        if (dialog == null) initDialog();
+                        dialog.setNewPhoneNumber(user.getPhoneNumber());
+                        dialog.showDialog();
                     }
                 }
+            }
 
-                @Override
-                public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
-                    Log.e(RegisterFragment.class.getName(), t.getLocalizedMessage());
-                }
-            });
+            @Override
+            public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                mMainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mMainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.notification_warning_msg))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
+                Log.e(RegisterFragment.class.getName(), t.getLocalizedMessage());
+            }
         });
     }
 

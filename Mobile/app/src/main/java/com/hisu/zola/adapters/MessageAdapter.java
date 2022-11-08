@@ -38,11 +38,13 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private boolean isGroup;
 
     public MessageAdapter(Context mContext) {
+        setHasStableIds(true);
         this.mContext = mContext;
         messages = new ArrayList<>();
     }
 
     public MessageAdapter(List<Message> messages, Context context) {
+        setHasStableIds(true);
         this.messages = messages;
         this.mContext = context;
         notifyDataSetChanged();
@@ -78,6 +80,8 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
+        holder.setIsRecyclable(false);
+
         Message message = messages.get(position);
 
         if (holder.getItemViewType() == MSG_SEND_TYPE) {
@@ -89,7 +93,13 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             final MessageReceiveViewHolder receiveViewHolder = ((MessageReceiveViewHolder) holder);
 
-            Glide.with(mContext).load(message.getSender().getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(receiveViewHolder.binding.ivUserPfp);
+            Glide.with(mContext)
+                    .asBitmap().load(message.getSender().getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.ALL).into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            receiveViewHolder.binding.ivUserPfp.setImageBitmap(resource);
+                        }
+                    });
 
             if (position == 0)
                 receiveViewHolder.binding.ivUserPfp.setVisibility(View.VISIBLE);
@@ -123,6 +133,11 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             receiveViewHolder.displayMessageContent(mContext, message);
         }
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
     }
 
     @Override
@@ -169,7 +184,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     binding.groupImg.setVisibility(View.GONE);
                     Media media = message.getMedia().get(0);
                     Glide.with(context)
-                            .asBitmap().load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(new SimpleTarget<Bitmap>() {
+                            .asBitmap().load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.ALL).into(new SimpleTarget<Bitmap>() {
                                 @Override
                                 public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                                     binding.imgMsgSend.setImageBitmap(resource);
@@ -196,7 +211,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
 
         private void displayMessageContent(Context context, Message message) {
-            binding.tvMsgReceive.setTypeface(null, Typeface.NORMAL);
             if (message.getDeleted()) {
                 binding.imgMsgReceive.setVisibility(View.GONE);
                 binding.msgWrapper.setVisibility(View.VISIBLE);
@@ -204,31 +218,38 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 binding.msgWrapper.setBackground(ContextCompat.getDrawable(context, R.drawable.message_removed));
                 binding.tvMsgReceive.setText(context.getString(R.string.message_removed));
                 binding.tvMsgReceive.setTypeface(null, Typeface.ITALIC);
-            } else if (message.getType().equalsIgnoreCase("text")) {
-                binding.imgMsgReceive.setVisibility(View.GONE);
-                binding.tvMsgReceive.setVisibility(View.VISIBLE);
-                binding.tvMsgReceive.setTextColor(context.getColor(R.color.chat_text_color));
-                binding.msgWrapper.setBackground(ContextCompat.getDrawable(context, R.drawable.message_receive));
-                binding.tvMsgReceive.setText(message.getText());
             } else {
-                if (message.getMedia().size() <= 1) {
-                    binding.tvMsgReceive.setVisibility(View.GONE);
-                    binding.msgWrapper.setVisibility(View.VISIBLE);
-                    binding.groupImg.setVisibility(View.GONE);
-                    Media media = message.getMedia().get(0);
-                    Glide.with(context)
-                            .asBitmap().load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(new SimpleTarget<Bitmap>() {
-                                @Override
-                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                    binding.imgMsgReceive.setImageBitmap(resource);
-                                }
-                            });
-                } else {
-                    binding.msgWrapper.setVisibility(View.GONE);
+
+                binding.tvMsgReceive.setTypeface(null, Typeface.NORMAL);
+
+                if (message.getType().equalsIgnoreCase("text")) {
                     binding.imgMsgReceive.setVisibility(View.GONE);
-                    binding.groupImg.setVisibility(View.VISIBLE);
-                    binding.groupImg.setLayoutManager(new GridLayoutManager(context, 2));
-                    binding.groupImg.setAdapter(new ImageGroupAdapter(message.getMedia(), context));
+                    binding.tvMsgReceive.setVisibility(View.VISIBLE);
+                    binding.tvMsgReceive.setTextColor(context.getColor(R.color.chat_text_color));
+                    binding.msgWrapper.setBackground(ContextCompat.getDrawable(context, R.drawable.message_receive));
+                    binding.tvMsgReceive.setText(message.getText());
+                } else {
+                    if (message.getMedia().size() <= 1) {
+                        binding.tvMsgReceive.setVisibility(View.GONE);
+                        binding.msgWrapper.setVisibility(View.GONE);
+                        binding.groupImg.setVisibility(View.GONE);
+                        Media media = message.getMedia().get(0);
+
+                        Glide.with(context)
+                                .asBitmap().load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.ALL).into(new SimpleTarget<Bitmap>() {
+                                    @Override
+                                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                        binding.imgMsgReceive.setImageBitmap(resource);
+                                        binding.imgMsgReceive.setVisibility(View.VISIBLE);
+                                    }
+                                });
+                    } else {
+                        binding.msgWrapper.setVisibility(View.GONE);
+                        binding.imgMsgReceive.setVisibility(View.GONE);
+                        binding.groupImg.setVisibility(View.VISIBLE);
+                        binding.groupImg.setLayoutManager(new GridLayoutManager(context, 2));
+                        binding.groupImg.setAdapter(new ImageGroupAdapter(message.getMedia(), context));
+                    }
                 }
             }
         }

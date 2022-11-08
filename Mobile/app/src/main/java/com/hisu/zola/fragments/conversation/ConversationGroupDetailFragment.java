@@ -26,6 +26,8 @@ import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.dialog.ChangeGroupNameDialog;
+import com.hisu.zola.util.dialog.HisuIOSDialog;
+import com.hisu.zola.util.dialog.HisuIOSDialogBuilder;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
@@ -146,7 +148,6 @@ public class ConversationGroupDetailFragment extends Fragment {
     }
 
     private void changeGroupLabel(String label) {
-
         loadingDialog.showDialog();
 
         JsonObject object = new JsonObject();
@@ -157,6 +158,9 @@ public class ConversationGroupDetailFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
                 if (response.isSuccessful() && response.code() == 200) {
+
+                    loadingDialog.dismissDialog();
+
                     conversation.setLabel(label);
                     repository.changeGroupName(conversation);
                     groupNameDialog.dismissDialog();
@@ -166,6 +170,13 @@ public class ConversationGroupDetailFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.notification_warning_msg))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
                 Log.e(ConversationGroupDetailFragment.class.getName(), t.getLocalizedMessage());
             }
         });
@@ -185,6 +196,8 @@ public class ConversationGroupDetailFragment extends Fragment {
     }
 
     private void disbandGroup() {
+        loadingDialog.showDialog();
+
         JsonObject object = new JsonObject();
         object.addProperty("conversationId", conversation.getId());
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
@@ -192,19 +205,29 @@ public class ConversationGroupDetailFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
                 if (response.isSuccessful() && response.code() == 200) {
-                    new iOSDialogBuilder(mainActivity)
-                            .setTitle(getString(R.string.notification_warning))
-                            .setSubtitle(getString(R.string.disband_group_success))
-                            .setCancelable(false)
-                            .setPositiveListener(getString(R.string.confirm), dialog -> {
-                                dialog.dismiss();
-                                emitDisbandGroup(conversation);
-                            }).build().show();
+                    mainActivity.runOnUiThread(() -> {
+                        loadingDialog.dismissDialog();
+                        new iOSDialogBuilder(mainActivity)
+                                .setTitle(getString(R.string.notification_warning))
+                                .setSubtitle(getString(R.string.disband_group_success))
+                                .setCancelable(false)
+                                .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                    dialog.dismiss();
+                                    emitDisbandGroup(conversation);
+                                }).build().show();
+                    });
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.notification_warning_msg))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
                 Log.e(ConversationGroupDetailFragment.class.getName(), t.getLocalizedMessage());
             }
         });
@@ -219,17 +242,10 @@ public class ConversationGroupDetailFragment extends Fragment {
     private void addActionForBtnOutGroup() {
         mBinding.tvOutGroup.setOnClickListener(view -> {
             if (conversation.getCreatedBy().getId().equalsIgnoreCase(currentUser.getId())) {
-                new iOSDialogBuilder(mainActivity)
-                        .setTitle(getString(R.string.confirm_out_group_admin_ask))
-                        .setSubtitle(getString(R.string.confirm_out_group_admin))
-                        .setCancelable(true)
-                        .setPositiveListener(getString(R.string.pick_new_admin), dialog -> {
-                            dialog.dismiss();
-                            mainActivity.addFragmentToBackStack(ChangeAdminFragment.newInstance(
-                                    conversation, ChangeAdminFragment.CHANGE_ADMIN_OPTION_DELETE_ARGS)
-                            );
-                        })
-                        .setNegativeListener(getString(R.string.out_group), dialog -> {
+                new HisuIOSDialogBuilder(mainActivity)
+                        .setGravity(Gravity.CENTER)
+                        .setCancelListener(HisuIOSDialog::dismiss)
+                        .setNegativeListener(dialog -> {
                             dialog.dismiss();
                             for (User user : conversation.getMember()) {
                                 if (!user.getId().equalsIgnoreCase(currentUser.getId())) {
@@ -238,7 +254,14 @@ public class ConversationGroupDetailFragment extends Fragment {
                                 }
                             }
                             outGroup(conversation);
-                        }).build().show();
+                        })
+                        .setPositiveListener(dialog -> {
+                            dialog.dismiss();
+                            mainActivity.addFragmentToBackStack(ChangeAdminFragment.newInstance(
+                                    conversation, ChangeAdminFragment.CHANGE_ADMIN_OPTION_DELETE_ARGS)
+                            );
+                        })
+                        .build().show();
             } else {
                 new iOSDialogBuilder(mainActivity)
                         .setTitle(getString(R.string.confirm))
@@ -261,7 +284,6 @@ public class ConversationGroupDetailFragment extends Fragment {
     }
 
     private void outGroup(Conversation conversationEmit) {
-
         loadingDialog.showDialog();
 
         JsonObject object = new JsonObject();
@@ -282,6 +304,13 @@ public class ConversationGroupDetailFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.notification_warning_msg))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
                 Log.e(ConversationGroupDetailFragment.class.getName(), t.getLocalizedMessage());
             }
         });
@@ -320,7 +349,6 @@ public class ConversationGroupDetailFragment extends Fragment {
     }
 
     private void changeAdmin(User newAdmin) {
-
         loadingDialog.showDialog();
 
         Gson gson = new Gson();
@@ -354,6 +382,13 @@ public class ConversationGroupDetailFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.notification_warning_msg))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
                 Log.e(ChangeAdminFragment.class.getName(), t.getLocalizedMessage());
             }
         });

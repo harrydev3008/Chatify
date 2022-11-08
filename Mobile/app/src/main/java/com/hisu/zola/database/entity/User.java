@@ -142,6 +142,7 @@ public class User implements Serializable {
                 ", dob='" + dob + '\'' +
                 ", gender=" + gender +
                 ", friends=" + friends +
+                ", friendsQueue=" + friendsQueue +
                 '}';
     }
 }

@@ -28,6 +28,10 @@ public class ConversationListViewModel extends AndroidViewModel {
         repository.insertOrUpdate(conversation);
     }
 
+    public void insertAll(List<Conversation> conversations) {
+        repository.insertAll(conversations);
+    }
+
     public void delete(Conversation conversation) {
         repository.delete(conversation.getId());
     }
