@@ -172,6 +172,9 @@
     <string name="change_admin_confirm">Chọn người này làm trưởng nhóm mới?</string>
     <string name="pick_new_admin">Chọn trưởng nhóm mới</string>
     <string name="update_self_info_success">Cập nhật thông tin cá nhân thành công!</string>
+    <string name="accept_friend_request_success">Các bạn giờ đã là bạn bè! Giờ đây các bạn có thể liên lạc với nhau mọi lúc mọi nơi!</string>
+    <string name="deny_friend_request_success">Đã từ chối lời mời kết bạn!</string>
+    <string name="unfriend_success">Thật tiếc khi các bạn không còn là bạn bè nữa…</string>
 
 
     <!--Error Messages-->
@@ -203,7 +206,8 @@
     <string name="yes">Có</string>
     <string name="no">Không</string>
     <string name="no_network_connection">Không có kết nối mạng!</string>
-    <string name="no_network_connection_desc">Vui lòng kiểm tra kết nối mạng của bạn và thử lại sau!</string>
+    <string name="no_network_connection_desc">Vui lòng kiểm tra lại kết nối mạng của bạn và thử lại sau!</string>
+    <string name="no_network_connection_to_sync">Cần có kết nối mạng để thực hiện việc đồng bộ! Vui lòng kiểm tra lại kết nối mạng của bạn và thử lại sau!</string>
 
     <!--Notification Channels-->
     <string name="system_noty_channel_id">zola notification id</string>

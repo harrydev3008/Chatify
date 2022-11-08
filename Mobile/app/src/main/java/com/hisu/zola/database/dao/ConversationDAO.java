@@ -16,6 +16,9 @@ public interface ConversationDAO {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(Conversation...conversations);
 
+    @Insert(onConflict =  OnConflictStrategy.REPLACE)
+    void insertAll(List<Conversation> conversations);
+
     @Query("select * from conversations where _id = :conversationID")
     Conversation getConversationById(String conversationID);
 

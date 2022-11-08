@@ -26,7 +26,6 @@ import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.NetworkUtil;
 import com.hisu.zola.util.dialog.AddFriendDialog;
 
-import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 import okhttp3.MediaType;
@@ -133,39 +132,36 @@ public class AddFriendFragment extends Fragment {
     }
 
     private void findFriend() {
-        Executors.newSingleThreadExecutor().execute(() -> {
+        JsonObject object = new JsonObject();
+        object.addProperty("phoneNumber", mBinding.edtPhoneNumber.getText().toString());
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
 
-            JsonObject object = new JsonObject();
-            object.addProperty("phoneNumber", mBinding.edtPhoneNumber.getText().toString());
-            RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        ApiService.apiService.findFriendByPhoneNumber(body).enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                if (response.isSuccessful() && response.code() == 200) {
+                    User foundUser = response.body();
 
-            ApiService.apiService.findFriendByPhoneNumber(body).enqueue(new Callback<User>() {
-                @Override
-                public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
-                    if (response.isSuccessful() && response.code() == 200) {
-                        User foundUser = response.body();
-
-                        if (foundUser != null) {
-                            mainActivity.runOnUiThread(() -> {
-                                AddFriendDialog dialog = new AddFriendDialog(mainActivity, Gravity.CENTER, foundUser);
-                                dialog.showDialog();
-                            });
-                        } else {
-                            mainActivity.runOnUiThread(() -> {
-                                new iOSDialogBuilder(mainActivity)
-                                        .setTitle(getString(R.string.notification_warning))
-                                        .setSubtitle(getString(R.string.user_not_found))
-                                        .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
-                            });
-                        }
+                    if (foundUser != null) {
+                        mainActivity.runOnUiThread(() -> {
+                            AddFriendDialog dialog = new AddFriendDialog(mainActivity, Gravity.CENTER, foundUser);
+                            dialog.showDialog();
+                        });
+                    } else {
+                        mainActivity.runOnUiThread(() -> {
+                            new iOSDialogBuilder(mainActivity)
+                                    .setTitle(getString(R.string.notification_warning))
+                                    .setSubtitle(getString(R.string.user_not_found))
+                                    .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                        });
                     }
                 }
+            }
 
-                @Override
-                public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
-                    Log.e(AddFriendFragment.class.getName(), t.getLocalizedMessage());
-                }
-            });
+            @Override
+            public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                Log.e(AddFriendFragment.class.getName(), t.getLocalizedMessage());
+            }
         });
     }
 

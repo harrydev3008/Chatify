@@ -32,7 +32,6 @@ import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.List;
-import java.util.concurrent.Executors;
 
 import io.socket.client.Socket;
 import okhttp3.MediaType;
@@ -149,44 +148,37 @@ public class ConversationGroupDetailFragment extends Fragment {
     }
 
     private void changeGroupLabel(String label) {
+        loadingDialog.showDialog();
 
-        Executors.newSingleThreadExecutor().execute(() -> {
-            mainActivity.runOnUiThread(() -> {
-                loadingDialog.showDialog();
-            });
+        JsonObject object = new JsonObject();
+        object.addProperty("newLabel", label);
+        object.addProperty("conversationId", conversation.getId());
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        ApiService.apiService.changeGroupName(body).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if (response.isSuccessful() && response.code() == 200) {
 
-            JsonObject object = new JsonObject();
-            object.addProperty("newLabel", label);
-            object.addProperty("conversationId", conversation.getId());
-            RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
-            ApiService.apiService.changeGroupName(body).enqueue(new Callback<Object>() {
-                @Override
-                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                    if (response.isSuccessful() && response.code() == 200) {
+                    loadingDialog.dismissDialog();
 
-                        mainActivity.runOnUiThread(() -> {
-                            loadingDialog.dismissDialog();
-                        });
-
-                        conversation.setLabel(label);
-                        repository.changeGroupName(conversation);
-                        groupNameDialog.dismissDialog();
-                        emitChangeLabel();
-                    }
+                    conversation.setLabel(label);
+                    repository.changeGroupName(conversation);
+                    groupNameDialog.dismissDialog();
+                    emitChangeLabel();
                 }
+            }
 
-                @Override
-                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                    mainActivity.runOnUiThread(() -> {
-                        loadingDialog.dismissDialog();
-                        new iOSDialogBuilder(mainActivity)
-                                .setTitle(getString(R.string.notification_warning))
-                                .setSubtitle(getString(R.string.notification_warning_msg))
-                                .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
-                    });
-                    Log.e(ConversationGroupDetailFragment.class.getName(), t.getLocalizedMessage());
-                }
-            });
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.notification_warning_msg))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
+                Log.e(ConversationGroupDetailFragment.class.getName(), t.getLocalizedMessage());
+            }
         });
     }
 
@@ -204,45 +196,40 @@ public class ConversationGroupDetailFragment extends Fragment {
     }
 
     private void disbandGroup() {
+        loadingDialog.showDialog();
 
-        Executors.newSingleThreadExecutor().execute(() -> {
-            mainActivity.runOnUiThread(() -> {
-                loadingDialog.showDialog();
-            });
-
-            JsonObject object = new JsonObject();
-            object.addProperty("conversationId", conversation.getId());
-            RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
-            ApiService.apiService.disbandGroup(body).enqueue(new Callback<Object>() {
-                @Override
-                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                    if (response.isSuccessful() && response.code() == 200) {
-                        mainActivity.runOnUiThread(() -> {
-                            loadingDialog.dismissDialog();
-                            new iOSDialogBuilder(mainActivity)
-                                    .setTitle(getString(R.string.notification_warning))
-                                    .setSubtitle(getString(R.string.disband_group_success))
-                                    .setCancelable(false)
-                                    .setPositiveListener(getString(R.string.confirm), dialog -> {
-                                        dialog.dismiss();
-                                        emitDisbandGroup(conversation);
-                                    }).build().show();
-                        });
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+        JsonObject object = new JsonObject();
+        object.addProperty("conversationId", conversation.getId());
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        ApiService.apiService.disbandGroup(body).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if (response.isSuccessful() && response.code() == 200) {
                     mainActivity.runOnUiThread(() -> {
                         loadingDialog.dismissDialog();
                         new iOSDialogBuilder(mainActivity)
                                 .setTitle(getString(R.string.notification_warning))
-                                .setSubtitle(getString(R.string.notification_warning_msg))
-                                .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                                .setSubtitle(getString(R.string.disband_group_success))
+                                .setCancelable(false)
+                                .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                    dialog.dismiss();
+                                    emitDisbandGroup(conversation);
+                                }).build().show();
                     });
-                    Log.e(ConversationGroupDetailFragment.class.getName(), t.getLocalizedMessage());
                 }
-            });
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.notification_warning_msg))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
+                Log.e(ConversationGroupDetailFragment.class.getName(), t.getLocalizedMessage());
+            }
         });
     }
 
@@ -297,39 +284,35 @@ public class ConversationGroupDetailFragment extends Fragment {
     }
 
     private void outGroup(Conversation conversationEmit) {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            mainActivity.runOnUiThread(() -> {
-                loadingDialog.showDialog();
-            });
+        loadingDialog.showDialog();
 
-            JsonObject object = new JsonObject();
-            object.addProperty("conversationId", conversationEmit.getId());
-            RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
-            ApiService.apiService.outGroup(body).enqueue(new Callback<Object>() {
-                @Override
-                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                    if (response.isSuccessful() && response.code() == 200) {
+        JsonObject object = new JsonObject();
+        object.addProperty("conversationId", conversationEmit.getId());
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        ApiService.apiService.outGroup(body).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if (response.isSuccessful() && response.code() == 200) {
 
-                        emitOutGroup(conversationEmit);
+                    emitOutGroup(conversationEmit);
 
-                        mainActivity.setBottomNavVisibility(View.VISIBLE);
-                        mainActivity.getSupportFragmentManager().popBackStackImmediate();
-                        mainActivity.getSupportFragmentManager().popBackStackImmediate();
-                    }
+                    mainActivity.setBottomNavVisibility(View.VISIBLE);
+                    mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                    mainActivity.getSupportFragmentManager().popBackStackImmediate();
                 }
+            }
 
-                @Override
-                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                    mainActivity.runOnUiThread(() -> {
-                        loadingDialog.dismissDialog();
-                        new iOSDialogBuilder(mainActivity)
-                                .setTitle(getString(R.string.notification_warning))
-                                .setSubtitle(getString(R.string.notification_warning_msg))
-                                .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
-                    });
-                    Log.e(ConversationGroupDetailFragment.class.getName(), t.getLocalizedMessage());
-                }
-            });
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.notification_warning_msg))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
+                Log.e(ConversationGroupDetailFragment.class.getName(), t.getLocalizedMessage());
+            }
         });
     }
 
@@ -366,52 +349,48 @@ public class ConversationGroupDetailFragment extends Fragment {
     }
 
     private void changeAdmin(User newAdmin) {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            mainActivity.runOnUiThread(() -> {
-                loadingDialog.showDialog();
-            });
+        loadingDialog.showDialog();
 
-            Gson gson = new Gson();
+        Gson gson = new Gson();
 
-            JsonObject object = new JsonObject();
-            object.addProperty("conversationId", conversation.getId());
-            object.add("newCreator", gson.toJsonTree(newAdmin));
+        JsonObject object = new JsonObject();
+        object.addProperty("conversationId", conversation.getId());
+        object.add("newCreator", gson.toJsonTree(newAdmin));
 
-            RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
 
-            ApiService.apiService.changeGroupAdmin(body).enqueue(new Callback<Object>() {
-                @Override
-                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                    if (response.isSuccessful() && response.code() == 200) {
+        ApiService.apiService.changeGroupAdmin(body).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if (response.isSuccessful() && response.code() == 200) {
 
-                        conversation.setCreatedBy(newAdmin);
+                    conversation.setCreatedBy(newAdmin);
 
-                        List<User> members = conversation.getMember();
-                        for (User member : members) {
-                            if (member.getId().equalsIgnoreCase(currentUser.getId())) {
-                                members.remove(member);
-                                break;
-                            }
+                    List<User> members = conversation.getMember();
+                    for (User member : members) {
+                        if (member.getId().equalsIgnoreCase(currentUser.getId())) {
+                            members.remove(member);
+                            break;
                         }
-
-                        conversation.setMember(members);
-                        repository.insertOrUpdate(conversation);
-                        emitChangeAdmin(conversation);
                     }
-                }
 
-                @Override
-                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                    mainActivity.runOnUiThread(() -> {
-                        loadingDialog.dismissDialog();
-                        new iOSDialogBuilder(mainActivity)
-                                .setTitle(getString(R.string.notification_warning))
-                                .setSubtitle(getString(R.string.notification_warning_msg))
-                                .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
-                    });
-                    Log.e(ChangeAdminFragment.class.getName(), t.getLocalizedMessage());
+                    conversation.setMember(members);
+                    repository.insertOrUpdate(conversation);
+                    emitChangeAdmin(conversation);
                 }
-            });
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.notification_warning_msg))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
+                Log.e(ChangeAdminFragment.class.getName(), t.getLocalizedMessage());
+            }
         });
     }
 

@@ -20,11 +20,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.ConversationAdapter;
+import com.hisu.zola.database.Database;
 import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.Media;
 import com.hisu.zola.database.entity.Message;
@@ -43,6 +45,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 
@@ -200,32 +203,27 @@ public class ConversationListFragment extends Fragment {
     }
 
     private void loadConversationList() {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            ApiService.apiService.getConversations().enqueue(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<List<Conversation>> call, @NonNull Response<List<Conversation>> response) {
-
-                    if (response.isSuccessful() && response.code() == 200) {
-                        List<Conversation> conversations = response.body();
-                        if (conversations != null && conversations.size() != 0) {
-                            conversations.forEach(conversation -> {
-                                viewModel.insertOrUpdate(conversation);
-                            });
-                            loadMessageList(conversations);
-                        }
+        ApiService.apiService.getConversations().enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Conversation>> call, @NonNull Response<List<Conversation>> response) {
+                if (response.isSuccessful() && response.code() == 200) {
+                    List<Conversation> conversations = response.body();
+                    if (conversations != null && conversations.size() != 0) {
+                        viewModel.insertAll(conversations);
+                        loadMessageList(conversations);
                     }
                 }
+            }
 
-                @Override
-                public void onFailure(@NonNull Call<List<Conversation>> call, @NonNull Throwable t) {
-                    Log.e("API_ERR", t.getLocalizedMessage());
-                }
-            });
+            @Override
+            public void onFailure(@NonNull Call<List<Conversation>> call, @NonNull Throwable t) {
+                Log.e("API_ERR", t.getLocalizedMessage());
+            }
         });
     }
 
     private void loadMessageList(List<Conversation> conversations) {
-        Executors.newSingleThreadExecutor().execute(() -> {
+        Database.dbExecutor.execute(() -> {
             conversations.forEach(conversation -> {
                 loadConversationMessage(conversation.getId());
             });
@@ -243,15 +241,14 @@ public class ConversationListFragment extends Fragment {
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
                 Gson gson = new Gson();
 
-                String json = gson.toJson(response.body());
+                JsonElement json = gson.toJsonTree(response.body());
 
                 JsonObject obj = gson.fromJson(json, JsonObject.class);
                 JsonArray array = obj.getAsJsonArray("data");
 
-                Message[] listArr = new Gson().fromJson(array, Message[].class);
+                List<Message> messages = gson.fromJson(array, new TypeToken<List<Message>>() {}.getType());
 
-                for (Message message : listArr)
-                    messageRepository.insertOrUpdate(message);
+                messageRepository.insertAll(messages);
             }
 
             @Override
