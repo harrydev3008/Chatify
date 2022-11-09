@@ -37,6 +37,8 @@ import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentConversationBinding;
+import com.hisu.zola.fragments.StickerBottomSheetFragment;
+import com.hisu.zola.listeners.IOnSendStickerListener;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.NetworkUtil;
 import com.hisu.zola.util.RealPathUtil;
@@ -73,10 +75,10 @@ public class ConversationFragment extends Fragment {
     private Socket mSocket;
     private Conversation conversation;
     private String conversationName;
-    private boolean isToggleEmojiButton = false;
     private MessageAdapter messageAdapter;
     private List<Message> currentMessageList;
     private ConversationRepository repository;
+    private StickerBottomSheetFragment sheetFragment;
 
     public static ConversationFragment newInstance(Conversation conversation, String conversationName) {
         Bundle args = new Bundle();
@@ -124,37 +126,36 @@ public class ConversationFragment extends Fragment {
         mSocket.on("typing", onTyping);
 
         initRecyclerView();
-
-        initEmojiKeyboard();
+        initStickerBottomDialog();
         initProgressBar();
 
         mBinding.tvLastActive.setText(getString(R.string.user_active));
+
         loadConversationInfo();
         addActionForBackBtn();
         addActionForAudioCallBtn();
         addActionForVideoCallBtn();
         addActionForSideMenu();
-
+        addActionForBtnShowStickerBottomDialog();
         addActionForSendMessageBtn();
         addToggleShowSendIcon();
 
         mBinding.btnSendImg.setOnClickListener(imgView -> openBottomImagePicker());
     }
 
-    private void initEmojiKeyboard() {
-        mBinding.btnEmoji.setOnClickListener(view -> {
-            isToggleEmojiButton = !isToggleEmojiButton;
-
-            toggleEmojiButtonIcon();
+    private void initStickerBottomDialog() {
+        sheetFragment = new StickerBottomSheetFragment();
+        sheetFragment.setOnSendStickerListener(url -> {
+            sheetFragment.dismiss();
+            Toast.makeText(mMainActivity, url, Toast.LENGTH_SHORT).show();
+//            sendMessageViaApi("", url, "image/jpeg", "image");
         });
     }
 
-    private void toggleEmojiButtonIcon() {
-        if (isToggleEmojiButton) {
-            mBinding.btnEmoji.setImageDrawable(ContextCompat.getDrawable(mMainActivity, R.drawable.ic_keyboard));
-        } else {
-            mBinding.btnEmoji.setImageDrawable(ContextCompat.getDrawable(mMainActivity, R.drawable.ic_sticker));
-        }
+    private void addActionForBtnShowStickerBottomDialog() {
+        mBinding.btnEmoji.setOnClickListener(view -> {
+            sheetFragment.show(mMainActivity.getSupportFragmentManager(), sheetFragment.getTag());
+        });
     }
 
     private void openBottomImagePicker() {

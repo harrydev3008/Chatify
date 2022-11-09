@@ -1,17 +1,19 @@
 package com.hisu.zola.fragments.conversation;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -33,6 +35,7 @@ import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.MessageRepository;
 import com.hisu.zola.databinding.FragmentConversationListBinding;
+import com.hisu.zola.databinding.LayoutPopupBinding;
 import com.hisu.zola.fragments.AddFriendFragment;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.EditTextUtil;
@@ -45,9 +48,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -63,7 +64,7 @@ public class ConversationListFragment extends Fragment {
     private MainActivity mMainActivity;
     private ConversationListViewModel viewModel;
     private ConversationAdapter adapter;
-    private PopupMenu popupMenu;
+    private PopupWindow popupMenu;
     private Socket mSocket;
     private MessageRepository messageRepository;
     private List<Conversation> conversationList;
@@ -246,7 +247,8 @@ public class ConversationListFragment extends Fragment {
                 JsonObject obj = gson.fromJson(json, JsonObject.class);
                 JsonArray array = obj.getAsJsonArray("data");
 
-                List<Message> messages = gson.fromJson(array, new TypeToken<List<Message>>() {}.getType());
+                List<Message> messages = gson.fromJson(array, new TypeToken<List<Message>>() {
+                }.getType());
 
                 messageRepository.insertAll(messages);
             }
@@ -266,23 +268,31 @@ public class ConversationListFragment extends Fragment {
 
     private void addMoreFriendEvent() {
         mBinding.mBtnAddFriend.setOnClickListener(view -> {
-            popupMenu.show();
+            popupMenu.showAsDropDown(view, 0, 0);
+            View container = (View) popupMenu.getContentView().getParent();
+            WindowManager wm = (WindowManager) mMainActivity.getSystemService(Context.WINDOW_SERVICE);
+            WindowManager.LayoutParams p = (WindowManager.LayoutParams) container.getLayoutParams();
+            p.flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+            p.dimAmount = 0.3f;
+            wm.updateViewLayout(container, p);
         });
     }
 
     private void initPopupMenu() {
-        popupMenu = new PopupMenu(mMainActivity, mBinding.mBtnAddFriend, Gravity.END, 0, R.style.MyPopupMenu);
-        popupMenu.setForceShowIcon(true);
-        popupMenu.getMenuInflater().inflate(R.menu.feature_menu, popupMenu.getMenu());
+        LayoutInflater inflater = (LayoutInflater)
+                mMainActivity.getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        popupMenu.setOnMenuItemClickListener(item -> {
+        LayoutPopupBinding popupBinding = LayoutPopupBinding.inflate(inflater, null, false);
 
-            if (item.getItemId() == R.id.action_new_group)
-                mMainActivity.addFragmentToBackStack(new AddNewGroupFragment());
-            else if (item.getItemId() == R.id.action_new_friend)
-                mMainActivity.addFragmentToBackStack(new AddFriendFragment());
+        popupMenu = new PopupWindow(popupBinding.getRoot(), 520, RelativeLayout.LayoutParams.WRAP_CONTENT, true);
+        popupBinding.tvAddGroup.setOnClickListener(view -> {
+            popupMenu.dismiss();
+            mMainActivity.addFragmentToBackStack(new AddNewGroupFragment());
+        });
 
-            return true;
+        popupBinding.tvAddFriend.setOnClickListener(view -> {
+            popupMenu.dismiss();
+            mMainActivity.addFragmentToBackStack(new AddFriendFragment());
         });
     }
 

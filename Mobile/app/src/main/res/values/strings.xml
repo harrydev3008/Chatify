@@ -220,4 +220,14 @@
     <string name="action_remove_msg">Thu hồi</string>
     <string name="action_forward_msg">Chuyển tiếp</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string-array name="stickers">
+        <item>https://i.imgur.com/AD3MbBi.jpeg</item>
+        <item>https://i.imgur.com/AD3MbBi.jpeg</item>
+        <item>https://i.imgur.com/AD3MbBi.jpeg</item>
+        <item>https://i.imgur.com/AD3MbBi.jpeg</item>
+        <item>https://i.imgur.com/AD3MbBi.jpeg</item>
+        <item>https://i.imgur.com/AD3MbBi.jpeg</item>
+        <item>https://i.imgur.com/AD3MbBi.jpeg</item>
+    </string-array>
 </resources>

@@ -14,11 +14,6 @@
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="MyPopupMenu" parent="@style/Widget.AppCompat.PopupMenu">
-        <item name="android:popupBackground">@drawable/bg_rounded</item>
-        <item name="android:popupElevation">4dp</item>
-    </style>
-
     <style name="EditTextTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="colorControlNormal">@color/gray</item>
         <item name="colorControlActivated">@color/primary_color</item>
