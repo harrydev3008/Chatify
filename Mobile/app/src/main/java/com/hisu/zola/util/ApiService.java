@@ -65,7 +65,16 @@ public interface ApiService {
     Call<User> denyFriendRequest(@Body RequestBody friendID);
 
     @POST("api/user/deleteFriend")
-    Call<Object> unfriend(@Body RequestBody friendID);
+    Call<User> unfriend(@Body RequestBody friendID);
+
+    @POST("api/auth/updatePassword")
+    Call<Object> changePassword(@Body RequestBody newPassword);
+
+    @POST("api/auth/updatePhonenumber")
+    Call<Object> changePhoneNumber(@Body RequestBody newPhoneNumber);
+
+    @POST("api/auth/checkPhonenumber")
+    Call<Object> checkUserExistByPhoneNumber(@Body RequestBody phoneNumber);
 
     @POST("api/user/getUserByPhonenumber")
     Call<User> findFriendByPhoneNumber(@Body RequestBody phoneNumber);

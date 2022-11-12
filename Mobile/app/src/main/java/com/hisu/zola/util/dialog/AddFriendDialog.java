@@ -14,10 +14,12 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 
 import com.bumptech.glide.Glide;
+import com.gdacciaro.iOSDialog.iOSDialog;
+import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.google.gson.JsonObject;
 import com.hisu.zola.R;
-import com.hisu.zola.databinding.LayoutAddFriendBinding;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.databinding.LayoutAddFriendBinding;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.local.LocalDataManager;
 
@@ -70,7 +72,7 @@ public class AddFriendDialog {
 
         binding.tvFriendName.setText(findUser.getUsername());
         binding.tvGender.setText(findUser.isGender() ? context.getString(R.string.gender_m) : context.getString(R.string.gender_f));
-//        binding.tvDob.setText(findUser.getDob());
+        binding.tvDob.setText(findUser.getDob());
         Glide.with(context).load(findUser.getAvatarURL()).into(binding.cimvFriendPfp);
 
         User currentUser = LocalDataManager.getCurrentUserInfo();
@@ -96,23 +98,24 @@ public class AddFriendDialog {
 
             JsonObject object = new JsonObject();
             object.addProperty("userId", findUser.getId());
-            RequestBody body = RequestBody.create(MediaType.parse("application/json"),object.toString());
+            RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
 
             ApiService.apiService.sendFriendRequest(body).enqueue(new Callback<Object>() {
                 @Override
                 public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
                     if (response.isSuccessful() && response.code() == 200) {
-                        new AlertDialog.Builder(context)
-                                .setMessage(context.getString(R.string.friend_request_sent_success))
-                                .setPositiveButton(context.getString(R.string.confirm), (dialogInterface, i) -> {
-                                    dismissDialog();
-                                }).show();
+                        new iOSDialogBuilder(context)
+                                .setTitle(context.getString(R.string.notification_warning))
+                                .setTitle(context.getString(R.string.friend_request_sent_success))
+                                .setCancelable(false)
+                                .setPositiveListener(context.getString(R.string.confirm), iOSDialog::dismiss)
+                                .build().show();
                     }
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                    Log.e("API_ERR", t.getLocalizedMessage());
+                    Log.e(AddFriendDialog.class.getName(), t.getLocalizedMessage());
                 }
             });
 

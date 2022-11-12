@@ -15,18 +15,26 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.gdacciaro.iOSDialog.iOSDialog;
 import com.gdacciaro.iOSDialog.iOSDialogBuilder;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.FriendRequestReceiveAdapter;
+import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentFriendRequestReceiveBinding;
+import com.hisu.zola.fragments.conversation.AddNewGroupFragment;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.NetworkUtil;
+import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import io.socket.client.Socket;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -39,6 +47,7 @@ public class FriendRequestReceiveFragment extends Fragment {
     private MainActivity mainActivity;
     private FriendRequestReceiveAdapter adapter;
     private UserRepository userRepository;
+    private Socket mSocket;
     private LoadingDialog loadingDialog;
 
     @Override
@@ -57,6 +66,8 @@ public class FriendRequestReceiveFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mSocket = SocketIOHandler.getInstance().getSocketConnection();
 
         userRepository = new UserRepository(mainActivity.getApplication());
         loadingDialog = new LoadingDialog(mainActivity, Gravity.CENTER);
@@ -102,7 +113,7 @@ public class FriendRequestReceiveFragment extends Fragment {
             object.addProperty("acceptFriendId", friend.getId());
             RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
 
-            accept(body);
+            accept(body, friend.getId());
 
         } else
             new iOSDialogBuilder(mainActivity)
@@ -128,14 +139,14 @@ public class FriendRequestReceiveFragment extends Fragment {
                     .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
     }
 
-    private void accept(RequestBody body) {
+    private void accept(RequestBody body, String acceptID) {
         ApiService.apiService.acceptFriendRequest(body).enqueue(new Callback<User>() {
             @Override
             public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
                 if (response.isSuccessful() && response.code() == 200) {
                     User updatedUser = response.body();
                     userRepository.update(updatedUser);
-
+                    addNewGroup(acceptID);
                     mainActivity.runOnUiThread(() -> {
                         loadingDialog.dismissDialog();
                         new iOSDialogBuilder(mainActivity)
@@ -190,5 +201,56 @@ public class FriendRequestReceiveFragment extends Fragment {
                 Log.e(FriendRequestReceiveFragment.class.getName(), t.getLocalizedMessage());
             }
         });
+    }
+
+    private void addNewGroup(String acceptID) {
+
+        User currentUser = LocalDataManager.getCurrentUserInfo();
+        Gson gson = new Gson();
+        JsonObject object = new JsonObject();
+
+        List<String> members = new ArrayList<>();
+        members.add(acceptID);
+        members.add(currentUser.getId());
+
+        object.add("member", gson.toJsonTree(members));
+        object.add("createdBy", gson.toJsonTree(currentUser));
+
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+
+        ApiService.apiService.createConversation(body).enqueue(new Callback<Conversation>() {
+            @Override
+            public void onResponse(@NonNull Call<Conversation> call, @NonNull Response<Conversation> response) {
+                if (response.isSuccessful() && response.code() == 200) {
+                    Conversation conversation = response.body();
+                    emitCreateGroup(conversation);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Conversation> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(getString(R.string.notification_warning))
+                            .setSubtitle(getString(R.string.notification_warning_msg))
+                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
+                Log.e(AddNewGroupFragment.class.getName(), t.getLocalizedMessage());
+            }
+        });
+    }
+
+    private void emitCreateGroup(Conversation conversation) {
+        if (!mSocket.connected()) {
+            mSocket.connect();
+        }
+
+        Gson gson = new Gson();
+
+        JsonObject emitMsg = new JsonObject();
+        emitMsg.add("conversation", gson.toJsonTree(conversation));
+
+        mSocket.emit("addConversation", emitMsg);
     }
 }

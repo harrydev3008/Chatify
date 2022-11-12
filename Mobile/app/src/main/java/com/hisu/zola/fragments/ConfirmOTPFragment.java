@@ -3,6 +3,7 @@ package com.hisu.zola.fragments;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,20 +24,31 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentConfirmOtpBinding;
 import com.hisu.zola.fragments.authenticate.RegisterFragment;
 import com.hisu.zola.fragments.authenticate.RegisterUserInfoFragment;
 import com.hisu.zola.fragments.authenticate.ResetPasswordFragment;
+import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.dialog.LoadingDialog;
+import com.hisu.zola.util.local.LocalDataManager;
 
 import java.text.DecimalFormat;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ConfirmOTPFragment extends Fragment {
 
@@ -51,6 +63,7 @@ public class ConfirmOTPFragment extends Fragment {
     private String verificationID = "";
     private LoadingDialog loadingDialog;
     private PhoneAuthProvider.ForceResendingToken token;
+    private UserRepository userRepository;
 
     private FragmentConfirmOtpBinding mBinding;
     private MainActivity mainActivity;
@@ -89,12 +102,13 @@ public class ConfirmOTPFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        userRepository = new UserRepository(mainActivity.getApplication());
         loadingDialog = new LoadingDialog(mainActivity, Gravity.CENTER);
 
         backToPrevPage();
         initOTPInput();
         addActionForBtnVerifyOTP();
-        handleSendOTP();
+//        handleSendOTP();
     }
 
     private void backToPrevPage() {
@@ -228,9 +242,10 @@ public class ConfirmOTPFragment extends Fragment {
     private void addActionForBtnVerifyOTP() {
         mBinding.btnVerifyOtp.setOnClickListener(view -> {
             if (verifyOTP(getOtpInput())) {
-                loadingDialog.showDialog();
-                PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationID, getOtpInput());
-                signInWithPhoneAuthCredential(credential);
+                switchToNextPage();
+//                loadingDialog.showDialog();
+//                PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationID, getOtpInput());
+//                signInWithPhoneAuthCredential(credential);
             }
         });
     }
@@ -275,15 +290,7 @@ public class ConfirmOTPFragment extends Fragment {
                 mainActivity.setFragment(RegisterUserInfoFragment.newInstance(user));
                 break;
             case CHANGE_PHONE_NO_ARGS:
-                new iOSDialogBuilder(mainActivity)
-                        .setTitle(getString(R.string.notification_warning))
-                        .setSubtitle(getString(R.string.change_phone_no_success))
-                        .setPositiveListener(getString(R.string.confirm), dialog -> {
-                            dialog.dismiss();
-                            mainActivity.getSupportFragmentManager().popBackStackImmediate();
-                            mainActivity.getSupportFragmentManager().popBackStackImmediate();
-                            mainActivity.getSupportFragmentManager().popBackStackImmediate();
-                        }).build().show();
+                changeNewPhoneNumber(user.getPhoneNumber());
                 break;
             case FORGOT_PWD_ARGS:
                 mainActivity.setFragment(ResetPasswordFragment.newInstance(ResetPasswordFragment.FORGOT_PWD_ARGS));
@@ -419,6 +426,45 @@ public class ConfirmOTPFragment extends Fragment {
                         }
                     }
                 });
+    }
+
+    private void changeNewPhoneNumber(String newPhoneNumber) {
+        JsonObject object = new JsonObject();
+        object.addProperty("phoneNumber", newPhoneNumber);
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        ApiService.apiService.changePhoneNumber(body).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if(response.isSuccessful() && response.code() == 200) {
+
+                    Gson gson = new Gson();
+
+                    String json = gson.toJson(response.body());
+                    JsonObject obj = gson.fromJson(json, JsonObject.class);
+
+                    User updatedUser = gson.fromJson(obj.get("existingUser"), User.class);
+                    userRepository.update(updatedUser);
+                    LocalDataManager.setCurrentUserInfo(updatedUser);
+
+                    mainActivity.runOnUiThread(() -> {
+                        new iOSDialogBuilder(mainActivity)
+                                .setTitle(getString(R.string.notification_warning))
+                                .setSubtitle(getString(R.string.change_phone_no_success))
+                                .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                    dialog.dismiss();
+                                    mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                                    mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                                    mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                                }).build().show();
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                Log.e(ConfirmOTPFragment.class.getName(), t.getLocalizedMessage());
+            }
+        });
     }
 
     @Override

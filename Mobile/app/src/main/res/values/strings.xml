@@ -175,6 +175,9 @@
     <string name="accept_friend_request_success">Các bạn giờ đã là bạn bè! Giờ đây các bạn có thể liên lạc với nhau mọi lúc mọi nơi!</string>
     <string name="deny_friend_request_success">Đã từ chối lời mời kết bạn!</string>
     <string name="unfriend_success">Thật tiếc khi các bạn không còn là bạn bè nữa…</string>
+    <string name="unfriend_confirm">Bạn có chắc chắn muốn huỷ kết bạn với người này chứ?!</string>
+    <string name="unsent_message">Thu hồi</string>
+    <string name="forward_message">Chuyển tiếp</string>
 
 
     <!--Error Messages-->

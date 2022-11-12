@@ -23,6 +23,7 @@ import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.LayoutChatReceiveBinding;
 import com.hisu.zola.databinding.LayoutChatSendBinding;
+import com.hisu.zola.listeners.IOnItemTouchListener;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.ArrayList;
@@ -33,9 +34,14 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public static final int MSG_SEND_TYPE = 0;
     public static final int MSG_RECEIVE_TYPE = 1;
 
-    private List<Message> messages;
+    private final List<Message> messages;
     private final Context mContext;
     private boolean isGroup;
+    private IOnItemTouchListener onItemTouchListener;
+
+    public void setOnItemTouchListener(IOnItemTouchListener onItemTouchListener) {
+        this.onItemTouchListener = onItemTouchListener;
+    }
 
     public MessageAdapter(Context mContext) {
         setHasStableIds(true);
@@ -88,6 +94,12 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             final MessageSendViewHolder sendViewHolder = ((MessageSendViewHolder) holder);
             sendViewHolder.displayMessageContent(mContext, message);
+
+            if (!message.getDeleted())
+                sendViewHolder.binding.msgSendParent.setOnLongClickListener(view -> {
+                    onItemTouchListener.longPress(message, sendViewHolder.binding.msgSendParent);
+                    return false;
+                });
 
         } else if (holder.getItemViewType() == MSG_RECEIVE_TYPE) {
 

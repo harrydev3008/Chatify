@@ -1,22 +1,36 @@
 package com.hisu.zola.fragments.conversation;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.gdacciaro.iOSDialog.iOSDialog;
+import com.gdacciaro.iOSDialog.iOSDialogBuilder;
+import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
+import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentConversationDetailBinding;
+import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.local.LocalDataManager;
+
+import java.util.List;
+
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ConversationDetailFragment extends Fragment {
 
@@ -24,6 +38,7 @@ public class ConversationDetailFragment extends Fragment {
     private FragmentConversationDetailBinding mBinding;
     private MainActivity mainActivity;
     private User user;
+    private UserRepository userRepository;
 
     public static ConversationDetailFragment newInstance(User user) {
         Bundle args = new Bundle();
@@ -54,18 +69,23 @@ public class ConversationDetailFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        userRepository = new UserRepository(mainActivity.getApplication());
+
         loadUserDetail(user);
         addActionForBackBtn();
         addActionForEventChangeNickName();
         addActionForEventViewSentFiles();
         addActionForEventDeleteConversation();
         addActionForEventUnfriend();
+        addActionForEventAddFriend();
     }
 
     private void loadUserDetail(User user) {
         mBinding.tvFriendName.setText(user.getUsername());
         Glide.with(mainActivity).load(user.getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                 .into(mBinding.imvFriendPfp);
+        checkFriendInfo();
     }
 
     private void addActionForBackBtn() {
@@ -97,9 +117,106 @@ public class ConversationDetailFragment extends Fragment {
     }
 
     private void addActionForEventUnfriend() {
-        //Todo: allow user unfriend
         mBinding.tvUnfriend.setOnClickListener(view -> {
-            Toast.makeText(mainActivity, "Unfriend", Toast.LENGTH_SHORT).show();
+            new iOSDialogBuilder(mainActivity)
+                    .setTitle(getString(R.string.confirm))
+                    .setSubtitle(getString(R.string.unfriend_confirm))
+                    .setCancelable(false)
+                    .setNegativeListener(getString(R.string.no), iOSDialog::dismiss)
+                    .setPositiveListener(getString(R.string.yes), dialog -> {
+                        dialog.dismiss();
+                        unfriend();
+                    }).build().show();
+        });
+    }
+
+    private void addActionForEventAddFriend() {
+        mBinding.tvAddFriend.setOnClickListener(view -> {
+            addFriend(user.getId());
+        });
+    }
+
+    private void addFriend(String friendID) {
+        JsonObject object = new JsonObject();
+        object.addProperty("userId", friendID);
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+
+        ApiService.apiService.sendFriendRequest(body).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if (response.isSuccessful() && response.code() == 200) {
+                    mainActivity.runOnUiThread(() -> {
+                        new iOSDialogBuilder(mainActivity)
+                                .setTitle(getString(R.string.notification_warning))
+                                .setSubtitle(getString(R.string.friend_request_sent_success))
+                                .setCancelable(false)
+                                .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                    dialog.dismiss();
+                                    mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                                    mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                                })
+                                .build().show();
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                Log.e(ConversationDetailFragment.class.getName(), t.getLocalizedMessage());
+            }
+        });
+    }
+
+    private void checkFriendInfo() {
+        if (isFriend()) {
+            mBinding.tvUnfriend.setVisibility(View.VISIBLE);
+            mBinding.tvAddFriend.setVisibility(View.GONE);
+        } else {
+            mBinding.tvUnfriend.setVisibility(View.GONE);
+            mBinding.tvAddFriend.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private boolean isFriend() {
+        List<User> friends = LocalDataManager.getCurrentUserInfo().getFriends();
+
+        for (User friend : friends) {
+            if (friend.getId().equalsIgnoreCase(user.getId()))
+                return true;
+        }
+
+        return false;
+    }
+
+    private void unfriend() {
+        JsonObject object = new JsonObject();
+        object.addProperty("deleteFriendId", user.getId());
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        ApiService.apiService.unfriend(body).enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                if (response.isSuccessful() && response.code() == 200) {
+                    User curUser = response.body();
+                    userRepository.update(curUser);
+
+                    mainActivity.runOnUiThread(() -> {
+                        new iOSDialogBuilder(mainActivity)
+                                .setTitle(getString(R.string.notification_warning))
+                                .setSubtitle(getString(R.string.unfriend_success))
+                                .setCancelable(false)
+                                .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                    dialog.dismiss();
+                                    mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                                    mainActivity.getSupportFragmentManager().popBackStackImmediate();
+                                }).build().show();
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                Log.e(ConversationDetailFragment.class.getName(), t.getLocalizedMessage());
+            }
         });
     }
 }
