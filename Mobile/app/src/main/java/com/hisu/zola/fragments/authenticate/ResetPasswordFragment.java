@@ -3,6 +3,7 @@ package com.hisu.zola.fragments.authenticate;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,12 +17,26 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.gdacciaro.iOSDialog.iOSDialogBuilder;
+import com.google.android.gms.common.api.Api;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
+import com.hisu.zola.database.entity.User;
+import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentResetPasswordBinding;
+import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.EditTextUtil;
+import com.hisu.zola.util.NetworkUtil;
+import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.regex.Pattern;
+
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ResetPasswordFragment extends Fragment {
 
@@ -31,6 +46,7 @@ public class ResetPasswordFragment extends Fragment {
 
     private FragmentResetPasswordBinding mBinding;
     private MainActivity mainActivity;
+    private UserRepository userRepository;
     private String arguments;
 
     public static ResetPasswordFragment newInstance(String argsValue) {
@@ -61,6 +77,13 @@ public class ResetPasswordFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        userRepository = new UserRepository(mainActivity.getApplication());
+
+        if(arguments.equalsIgnoreCase(RESET_PWD_ARGS))
+            mBinding.linearLayout3.setVisibility(View.VISIBLE);
+        else
+            mBinding.linearLayout3.setVisibility(View.GONE);
 
         addChangeBackgroundColorOnFocusForPasswordEditText(mBinding.edtNewPwd, mBinding.linearLayout);
         addChangeBackgroundColorOnFocusForPasswordEditText(mBinding.edtConfirmNewPwd, mBinding.linearLayout2);
@@ -126,20 +149,47 @@ public class ResetPasswordFragment extends Fragment {
         mBinding.btnSave.setOnClickListener(view -> {
             if (validateNewPassword(mBinding.edtNewPwd.getText().toString().trim(),
                     mBinding.edtConfirmNewPwd.getText().toString().trim())) {
-                updateUserInfo(mBinding.edtNewPwd.getText().toString().trim());
+                if (NetworkUtil.isConnectionAvailable(mainActivity))
+                    updateUserInfo(mBinding.edtNewPwd.getText().toString().trim());
             }
         });
     }
 
     private void updateUserInfo(String newPwd) {
-        //Todo: call api to update
-        new iOSDialogBuilder(mainActivity)
-                .setTitle(getString(R.string.notification_warning))
-                .setSubtitle(getString(R.string.reset_password_success))
-                .setPositiveListener(getString(R.string.confirm), dialog -> {
-                    dialog.dismiss();
-                    switchToNextPage();
-                }).build().show();
+
+        JsonObject object = new JsonObject();
+        object.addProperty("password", newPwd);
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        ApiService.apiService.changePassword(body).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if(response.isSuccessful() && response.code() == 200) {
+                    Gson gson = new Gson();
+
+                    String json = gson.toJson(response.body());
+                    JsonObject obj = gson.fromJson(json, JsonObject.class);
+
+                    User updatedUser = gson.fromJson(obj.get("existingUser"), User.class);
+                    userRepository.update(updatedUser);
+                    LocalDataManager.setCurrentUserInfo(updatedUser);
+
+                    mainActivity.runOnUiThread(() -> {
+                        new iOSDialogBuilder(mainActivity)
+                                .setTitle(getString(R.string.notification_warning))
+                                .setSubtitle(getString(R.string.reset_password_success))
+                                .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                    dialog.dismiss();
+                                    switchToNextPage();
+                                }).build().show();
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                Log.e(ResetPasswordFragment.class.getName(), t.getLocalizedMessage());
+            }
+        });
     }
 
     private void switchToNextPage() {

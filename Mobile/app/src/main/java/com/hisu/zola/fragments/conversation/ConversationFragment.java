@@ -1,14 +1,18 @@
 package com.hisu.zola.fragments.conversation;
 
-import android.graphics.Canvas;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,9 +21,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.gdacciaro.iOSDialog.iOSDialog;
 import com.gdacciaro.iOSDialog.iOSDialogBuilder;
@@ -37,6 +39,9 @@ import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentConversationBinding;
+import com.hisu.zola.databinding.LayoutChatPopupBinding;
+import com.hisu.zola.fragments.StickerBottomSheetFragment;
+import com.hisu.zola.listeners.IOnItemTouchListener;
 import com.hisu.zola.util.ApiService;
 import com.hisu.zola.util.NetworkUtil;
 import com.hisu.zola.util.RealPathUtil;
@@ -54,7 +59,6 @@ import java.util.List;
 import gun0912.tedimagepicker.builder.TedImagePicker;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
-import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -73,10 +77,11 @@ public class ConversationFragment extends Fragment {
     private Socket mSocket;
     private Conversation conversation;
     private String conversationName;
-    private boolean isToggleEmojiButton = false;
     private MessageAdapter messageAdapter;
     private List<Message> currentMessageList;
     private ConversationRepository repository;
+    private StickerBottomSheetFragment sheetFragment;
+    private PopupWindow popupMenu;
 
     public static ConversationFragment newInstance(Conversation conversation, String conversationName) {
         Bundle args = new Bundle();
@@ -124,37 +129,36 @@ public class ConversationFragment extends Fragment {
         mSocket.on("typing", onTyping);
 
         initRecyclerView();
-
-        initEmojiKeyboard();
+        initStickerBottomDialog();
         initProgressBar();
 
         mBinding.tvLastActive.setText(getString(R.string.user_active));
+
         loadConversationInfo();
         addActionForBackBtn();
         addActionForAudioCallBtn();
         addActionForVideoCallBtn();
         addActionForSideMenu();
-
+        addActionForBtnShowStickerBottomDialog();
         addActionForSendMessageBtn();
         addToggleShowSendIcon();
 
         mBinding.btnSendImg.setOnClickListener(imgView -> openBottomImagePicker());
     }
 
-    private void initEmojiKeyboard() {
-        mBinding.btnEmoji.setOnClickListener(view -> {
-            isToggleEmojiButton = !isToggleEmojiButton;
-
-            toggleEmojiButtonIcon();
+    private void initStickerBottomDialog() {
+        sheetFragment = new StickerBottomSheetFragment();
+        sheetFragment.setOnSendStickerListener(url -> {
+            sheetFragment.dismiss();
+            Toast.makeText(mMainActivity, url, Toast.LENGTH_SHORT).show();
+//            sendMessageViaApi("", url, "image/jpeg", "image");
         });
     }
 
-    private void toggleEmojiButtonIcon() {
-        if (isToggleEmojiButton) {
-            mBinding.btnEmoji.setImageDrawable(ContextCompat.getDrawable(mMainActivity, R.drawable.ic_keyboard));
-        } else {
-            mBinding.btnEmoji.setImageDrawable(ContextCompat.getDrawable(mMainActivity, R.drawable.ic_sticker));
-        }
+    private void addActionForBtnShowStickerBottomDialog() {
+        mBinding.btnEmoji.setOnClickListener(view -> {
+            sheetFragment.show(mMainActivity.getSupportFragmentManager(), sheetFragment.getTag());
+        });
     }
 
     private void openBottomImagePicker() {
@@ -233,9 +237,32 @@ public class ConversationFragment extends Fragment {
             messageAdapter.setGroup(true);
 
         mBinding.rvConversation.setAdapter(messageAdapter);
+        messageAdapter.setOnItemTouchListener(new IOnItemTouchListener() {
+            @Override
+            public void longPress(Message message, View parent) {
+                showChatPopup(parent, message);
+            }
+        });
+    }
 
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
-        itemTouchHelper.attachToRecyclerView(mBinding.rvConversation);
+    private void showChatPopup(View parent, Message message) {
+        LayoutInflater inflater = (LayoutInflater)
+                mMainActivity.getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutChatPopupBinding popupBinding = LayoutChatPopupBinding.inflate(inflater, null, false);
+        popupMenu = new PopupWindow(popupBinding.getRoot(), 400, RelativeLayout.LayoutParams.WRAP_CONTENT, true);
+
+        popupBinding.tvUnsent.setOnClickListener(view -> {
+            unsentMessage(message);
+            popupMenu.dismiss();
+        });
+
+        popupMenu.showAsDropDown(parent, -40, 10, Gravity.END);
+        View container = (View) popupMenu.getContentView().getParent();
+        WindowManager wm = (WindowManager) mMainActivity.getSystemService(Context.WINDOW_SERVICE);
+        WindowManager.LayoutParams p = (WindowManager.LayoutParams) container.getLayoutParams();
+        p.flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+        p.dimAmount = 0.3f;
+        wm.updateViewLayout(container, p);
     }
 
     private void loadConversationInfo() {
@@ -480,43 +507,6 @@ public class ConversationFragment extends Fragment {
                         mBinding.typing.setVisibility(View.GONE);
                 }
             });
-        }
-    };
-
-    ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-        @Override
-        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-            return false;
-        }
-
-        @Override
-        public int getSwipeDirs(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-            if (viewHolder instanceof MessageAdapter.MessageReceiveViewHolder) return 0;
-
-            int pos = viewHolder.getBindingAdapterPosition();
-            if (currentMessageList.get(pos).getDeleted()) return 0;
-
-            return super.getSwipeDirs(recyclerView, viewHolder);
-        }
-
-        @Override
-        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-            int pos = viewHolder.getBindingAdapterPosition();
-            Message message = currentMessageList.get(pos);
-
-            if (direction == ItemTouchHelper.LEFT) {
-                unsentMessage(message);
-            }
-        }
-
-        @Override
-        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-            new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
-                    .addSwipeLeftBackgroundColor(ContextCompat.getColor(mMainActivity, R.color.white))
-                    .addSwipeLeftActionIcon(R.drawable.ic_remove_msg_outline_rounded)
-                    .create()
-                    .decorate();
-            super.onChildDraw(c, recyclerView, viewHolder, -150f, dY, actionState, isCurrentlyActive);
         }
     };
 

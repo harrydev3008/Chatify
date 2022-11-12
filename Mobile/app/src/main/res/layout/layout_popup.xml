@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/rl_caret"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_gravity="end"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="14dp"
+        android:layout_marginBottom="-15dp"
+        android:rotation="45"
+        android:background="@color/white"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/bg_popup_menu"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_add_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/border_bottom"
+            android:drawableLeft="@drawable/ic_add_group"
+            android:drawablePadding="12dp"
+            android:textColor="@color/black"
+            android:padding="8dp"
+            android:text="@string/create_group"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tv_add_friend"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_user_add"
+            android:drawablePadding="12dp"
+            android:padding="8dp"
+            android:textColor="@color/black"
+            android:text="@string/add_friend"
+            android:textSize="16sp" />
+    </LinearLayout>
+</LinearLayout>

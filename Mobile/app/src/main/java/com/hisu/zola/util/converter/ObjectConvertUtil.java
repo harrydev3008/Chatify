@@ -16,6 +16,6 @@ public class ObjectConvertUtil {
 
         LocalDataManager.setUserToken(obj.get("token").getAsString());
 
-        return new Gson().fromJson(obj.get("user"), User.class);
+        return gson.fromJson(obj.get("user"), User.class);
     }
 }
