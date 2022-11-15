@@ -14,6 +14,16 @@ public class ContactUser implements Serializable {
     @NonNull
     private String _id;
     private String username;
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
+    }
+
+    private String appName;
     private String phoneNumber;
     private String avatarURL;
     private String dob;
@@ -24,21 +34,15 @@ public class ContactUser implements Serializable {
     public ContactUser() {
     }
 
-    public ContactUser(@NonNull String _id, String username, String phoneNumber, String avatarURL, String dob, boolean gender, boolean isFriend) {
+    public ContactUser(@NonNull String _id, String username, String appName, String phoneNumber, String avatarURL, String dob, boolean gender, boolean isFriend) {
         this._id = _id;
         this.username = username;
+        this.appName = appName;
         this.phoneNumber = phoneNumber;
         this.avatarURL = avatarURL;
         this.dob = dob;
         this.gender = gender;
         this.isFriend = isFriend;
-    }
-
-    @Ignore
-    public ContactUser(@NonNull String _id, String username, String phoneNumber) {
-        this._id = _id;
-        this.username = username;
-        this.phoneNumber = phoneNumber;
     }
 
     public void set_id(@NonNull String _id) {
@@ -97,6 +101,8 @@ public class ContactUser implements Serializable {
     public void setFriend(boolean friend) {
         isFriend = friend;
     }
+
+
 
     @Override
     public String toString() {

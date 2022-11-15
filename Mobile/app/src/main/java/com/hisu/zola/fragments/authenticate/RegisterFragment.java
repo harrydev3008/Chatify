@@ -28,9 +28,10 @@ import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.FragmentRegisterBinding;
 import com.hisu.zola.fragments.ConfirmOTPFragment;
-import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.EditTextUtil;
-import com.hisu.zola.util.NetworkUtil;
+import com.hisu.zola.util.network.Constraints;
+import com.hisu.zola.util.network.NetworkUtil;
 import com.hisu.zola.util.dialog.ConfirmSendOTPDialog;
 import com.hisu.zola.util.dialog.LoadingDialog;
 
@@ -133,7 +134,7 @@ public class RegisterFragment extends Fragment {
 
         JsonObject object = new JsonObject();
         object.addProperty("phoneNumber", mBinding.edtPhoneNumber.getText().toString());
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
 
         ApiService.apiService.findFriendByPhoneNumber(body).enqueue(new Callback<User>() {
             @Override

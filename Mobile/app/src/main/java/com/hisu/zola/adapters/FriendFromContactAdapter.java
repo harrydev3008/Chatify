@@ -2,6 +2,7 @@ package com.hisu.zola.adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -53,14 +54,21 @@ public class FriendFromContactAdapter extends
 
         List<User> friends = LocalDataManager.getCurrentUserInfo().getFriends();
 
-        Map<String, User> temp = friends.stream().collect(Collectors.toMap(User::getPhoneNumber, user -> user));
-
-        for (ContactUser contact : contactUsers) {
-            if (temp.containsKey(contact.getPhoneNumber())) {
+        for (User friend : friends) {
+            if(contactUser.getPhoneNumber().equalsIgnoreCase(friend.getPhoneNumber())) {
                 holder.binding.btnIsFriend.setText(context.getString(R.string.is_a_friend));
                 holder.binding.btnIsFriend.setTextColor(ContextCompat.getColor(context, R.color.gray));
-                holder.binding.btnIsFriend.setBackground(null);
+                holder.binding.btnIsFriend.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.white));
+                String textPlaceHolder = context.getString(R.string.name_in_app) + " " + contactUser.getAppName();
+                holder.binding.tvAppName.setText(textPlaceHolder);
+            } else {
+                holder.binding.btnIsFriend.setText(context.getString(R.string.not_a_friend));
+                holder.binding.btnIsFriend.setTextColor(ContextCompat.getColor(context, R.color.primary_color));
+                holder.binding.btnIsFriend.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.lightBlue));
+                String textPlaceHolder = context.getString(R.string.name_in_app) + " " + contactUser.getAppName();
+                holder.binding.tvAppName.setText(textPlaceHolder);
             }
+            break;
         }
     }
 
@@ -84,14 +92,14 @@ public class FriendFromContactAdapter extends
         }
 
         private void setContactData(Context context, ContactUser contactUser) {
-            if (contactUser.getAvatarURL() == null) {
+            if (contactUser.getAvatarURL() == null || contactUser.getAvatarURL().isEmpty()) {
                 Bitmap imageFromText = ImageConvertUtil.createImageFromText(context,
                         150, 150, contactUser.getUsername());
                 binding.imvContactAvatar.setImageBitmap(imageFromText);
             }
 
             binding.tvContactName.setText(contactUser.getUsername());
-            binding.tvAppName.setText(contactUser.getPhoneNumber());
+//            binding.tvAppName.setText(contactUser.getPhoneNumber());
         }
     }
 }

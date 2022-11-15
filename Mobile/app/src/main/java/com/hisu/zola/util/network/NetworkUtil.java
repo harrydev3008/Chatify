@@ -1,4 +1,4 @@
-package com.hisu.zola.util;
+package com.hisu.zola.util.network;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

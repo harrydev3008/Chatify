@@ -25,6 +25,9 @@ public interface MessageDAO {
     @Query("select * from messages where conversation = :conversationID order by createdAt")
     LiveData<List<Message>> getMessages(String conversationID);
 
+    @Query("select * from messages where conversation = :conversationID and type = :type order by createdAt")
+    LiveData<List<Message>> getMessagesImage(String conversationID, String type);
+
     @Update
     void updateMessage(Message message);
 

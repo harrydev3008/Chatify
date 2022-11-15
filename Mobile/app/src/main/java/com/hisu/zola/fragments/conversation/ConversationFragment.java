@@ -42,11 +42,12 @@ import com.hisu.zola.databinding.FragmentConversationBinding;
 import com.hisu.zola.databinding.LayoutChatPopupBinding;
 import com.hisu.zola.fragments.StickerBottomSheetFragment;
 import com.hisu.zola.listeners.IOnItemTouchListener;
-import com.hisu.zola.util.ApiService;
-import com.hisu.zola.util.NetworkUtil;
 import com.hisu.zola.util.RealPathUtil;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
+import com.hisu.zola.util.network.ApiService;
+import com.hisu.zola.util.network.Constraints;
+import com.hisu.zola.util.network.NetworkUtil;
 import com.hisu.zola.view_model.ConversationViewModel;
 
 import org.json.JSONException;
@@ -126,11 +127,13 @@ public class ConversationFragment extends Fragment {
         mSocket.on("delete-receive", onMessageDeleteReceive);
         mSocket.on("deleteMemberGroup-receiveMobile", onGroupDeleteMember);
         mSocket.on("deleteGroup-receive", onDisbandGroup);
-        mSocket.on("typing", onTyping);
+        mSocket.on("onTypingTextToClient", onTypingReceive);
+        mSocket.on("offTypingTextToClient", onTypingReceive);
 
+        initProgressBar();
+        initProgressBarSending();
         initRecyclerView();
         initStickerBottomDialog();
-        initProgressBar();
 
         mBinding.tvLastActive.setText(getString(R.string.user_active));
 
@@ -178,7 +181,7 @@ public class ConversationFragment extends Fragment {
 
     private void uploadFileToServer(Uri uri) {
         File file = new File(RealPathUtil.getRealPath(mMainActivity, uri));
-        RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        RequestBody requestBody = RequestBody.create(MediaType.parse(Constraints.MULTIPART_FORM_DATA_TYPE), file);
         String fileName = file.getName();
         MultipartBody.Part part = MultipartBody.Part.createFormData("media", fileName, requestBody);
 
@@ -207,6 +210,12 @@ public class ConversationFragment extends Fragment {
         Sprite threeBounce = new ThreeBounce();
         threeBounce.setColor(ContextCompat.getColor(mMainActivity, R.color.primary_color));
         mBinding.progressBar.setIndeterminateDrawable(threeBounce);
+    }
+
+    private void initProgressBarSending() {
+        Sprite threeBounce = new ThreeBounce();
+        threeBounce.setColor(ContextCompat.getColor(mMainActivity, R.color.primary_color));
+        mBinding.progressBarSending.setIndeterminateDrawable(threeBounce);
     }
 
     private void initRecyclerView() {
@@ -307,7 +316,7 @@ public class ConversationFragment extends Fragment {
                                 R.anim.slide_out_right, R.anim.slide_out_right)
                         .replace(
                                 mMainActivity.getViewContainerID(),
-                                ConversationDetailFragment.newInstance(getFriendInfo())
+                                ConversationDetailFragment.newInstance(getFriendInfo(), conversation)
                         )
                         .addToBackStack(null)
                         .commit();
@@ -346,6 +355,11 @@ public class ConversationFragment extends Fragment {
     }
 
     private void sendMessageViaApi(String text, String url, String imgType, String type) {
+        mBinding.edtChat.setText("");
+        mBinding.edtChat.requestFocus();
+
+        mBinding.sending.setVisibility(View.VISIBLE);
+
         JsonObject object = new JsonObject();
         Gson gson = new Gson();
         object.add("conversation", gson.toJsonTree(conversation));
@@ -359,7 +373,7 @@ public class ConversationFragment extends Fragment {
 
         object.add("media", gson.toJsonTree(media));
 
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
 
         ApiService.apiService.sendMessage(body).enqueue(new Callback<Object>() {
             @Override
@@ -377,6 +391,7 @@ public class ConversationFragment extends Fragment {
             @Override
             public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
                 mMainActivity.runOnUiThread(() -> {
+                    mBinding.sending.setVisibility(View.GONE);
                     new iOSDialogBuilder(mMainActivity)
                             .setTitle(getString(R.string.notification_warning))
                             .setSubtitle(getString(R.string.notification_warning_msg))
@@ -392,6 +407,7 @@ public class ConversationFragment extends Fragment {
             mSocket.connect();
         }
 
+        mBinding.sending.setVisibility(View.GONE);
         Gson gson = new Gson();
         viewModel.insertOrUpdate(message);
 //        conversation.setLastMessage(message);
@@ -410,9 +426,6 @@ public class ConversationFragment extends Fragment {
         emitMsg.addProperty("updatedAt", message.getUpdatedAt());
 
         mSocket.emit("send-msg", emitMsg);
-
-        mBinding.edtChat.setText("");
-        mBinding.edtChat.requestFocus();
     }
 
     private void delete(Message message) {
@@ -454,9 +467,11 @@ public class ConversationFragment extends Fragment {
                 int textLength = editable.toString().trim().length();
 
                 if (textLength > 0) {
+                    emitTyping("onTypingText", true);
                     mBinding.btnSend.setVisibility(View.VISIBLE);
                     mBinding.btnSendImg.setVisibility(View.GONE);
                 } else {
+                    emitTyping("offTypingText", false);
                     mBinding.btnSend.setVisibility(View.GONE);
                     mBinding.btnSendImg.setVisibility(View.VISIBLE);
                 }
@@ -467,7 +482,7 @@ public class ConversationFragment extends Fragment {
     private void unsentMessage(Message message) {
         JsonObject object = new JsonObject();
         object.addProperty("id", message.getId());
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
         ApiService.apiService.unsentMessage(body).enqueue(new Callback<Object>() {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
@@ -494,33 +509,60 @@ public class ConversationFragment extends Fragment {
         //Todo: forward message
     }
 
-    private final Emitter.Listener onTyping = new Emitter.Listener() {
+    private void emitTyping(String emit, boolean typing) {
+        if (!mSocket.connected()) {
+            mSocket.connect();
+        }
+
+        Gson gson = new Gson();
+
+        JsonObject emitMsg = new JsonObject();
+        emitMsg.addProperty("conversationId", conversation.getId());
+        emitMsg.addProperty("sender", LocalDataManager.getCurrentUserInfo().getUsername());
+        emitMsg.add("member", gson.toJsonTree(conversation.getMember()));
+        emitMsg.addProperty("isTyping", typing);
+
+        mSocket.emit(emit, emitMsg);
+    }
+
+    private final Emitter.Listener onTypingReceive = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            mMainActivity.runOnUiThread(() -> {
-                String data = (String) args[0];
-                if (data != null) {
-                    boolean isTyping = Boolean.parseBoolean(data.replaceAll("\"", ""));
-                    if (isTyping)
-                        mBinding.typing.setVisibility(View.VISIBLE);
-                    else
-                        mBinding.typing.setVisibility(View.GONE);
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+                try {
+                    String sender = data.getString("sender") + " " + getString(R.string.typing);
+                    boolean isTyping = data.getBoolean("isTyping");
+
+                    if (isTyping) {
+                        mMainActivity.runOnUiThread(() -> {
+                            mBinding.typing.setVisibility(View.VISIBLE);
+                            mBinding.textView.setText(sender);
+                        });
+                    } else {
+                        mMainActivity.runOnUiThread(() -> {
+                            mBinding.typing.setVisibility(View.GONE);
+                            mBinding.textView.setText("");
+                        });
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            });
+            }
         }
     };
 
     private final Emitter.Listener onGroupDeleteMember = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            mMainActivity.runOnUiThread(() -> {
-                JSONObject data = (JSONObject) args[0];
-                if (data != null) {
 
-                    try {
-                        String deleteUserId = data.getString("id");
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+                try {
+                    String deleteUserId = data.getString("id");
 
-                        if (LocalDataManager.getCurrentUserInfo().getId().equalsIgnoreCase(deleteUserId)) {
+                    if (LocalDataManager.getCurrentUserInfo().getId().equalsIgnoreCase(deleteUserId)) {
+                        mMainActivity.runOnUiThread(() -> {
                             new iOSDialogBuilder(mMainActivity)
                                     .setTitle(getString(R.string.notification_warning))
                                     .setSubtitle(getString(R.string.use_removed))
@@ -531,27 +573,25 @@ public class ConversationFragment extends Fragment {
                                         mMainActivity.setBottomNavVisibility(View.VISIBLE);
                                         mMainActivity.getSupportFragmentManager().popBackStackImmediate();
                                     }).build().show();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                        });
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            });
+            }
         }
     };
 
     private final Emitter.Listener onDisbandGroup = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            mMainActivity.runOnUiThread(() -> {
-                JSONObject data = (JSONObject) args[0];
-                if (data != null) {
+            JSONObject data = (JSONObject) args[0];
 
-                    try {
-                        Gson gson = new Gson();
-
-                        Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
-
+            if (data != null) {
+                try {
+                    Gson gson = new Gson();
+                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+                    mMainActivity.runOnUiThread(() -> {
                         new iOSDialogBuilder(mMainActivity)
                                 .setTitle(getString(R.string.notification_warning))
                                 .setSubtitle(getString(R.string.group_disbanded))
@@ -562,12 +602,11 @@ public class ConversationFragment extends Fragment {
                                     mMainActivity.setBottomNavVisibility(View.VISIBLE);
                                     mMainActivity.getSupportFragmentManager().popBackStackImmediate();
                                 }).build().show();
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            });
+            }
         }
     };
 

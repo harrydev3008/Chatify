@@ -56,13 +56,14 @@ public class SettingFragment extends Fragment {
 
     private void loadUserInfo() {
         User localUser = LocalDataManager.getCurrentUserInfo();
-        repository.getUser(localUser.getId()).observe(mainActivity, new Observer<User>() {
-            @Override
-            public void onChanged(User user) {
-                if (user == null) return;
-                mBinding.tvPhoneNo.setText(user.getPhoneNumber());
-            }
-        });
+        if (localUser != null)
+            repository.getUser(localUser.getId()).observe(mainActivity, new Observer<User>() {
+                @Override
+                public void onChanged(User user) {
+                    if (user == null) return;
+                    mBinding.tvPhoneNo.setText(user.getPhoneNumber());
+                }
+            });
 
     }
 

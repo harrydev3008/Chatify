@@ -22,6 +22,9 @@ public interface ContactUserDAO {
     @Query("select * from contact_users")
     LiveData<List<ContactUser>> getContactUsers();
 
+    @Query("select * from contact_users where isFriend = 0")
+    LiveData<List<ContactUser>> getContactUsersNotFriend();
+
     @Query("select * from contact_users where _id = :id")
     ContactUser getContactUserByID(String id);
 

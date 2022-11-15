@@ -24,10 +24,11 @@ import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentChangeAdminBinding;
-import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
+import com.hisu.zola.util.network.Constraints;
 
 import java.util.List;
 
@@ -144,7 +145,7 @@ public class ChangeAdminFragment extends Fragment {
         object.addProperty("conversationId", conversation.getId());
         object.add("newCreator", gson.toJsonTree(newAdmin));
 
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
 
         ApiService.apiService.changeGroupAdmin(body).enqueue(new Callback<Object>() {
             @Override
@@ -191,7 +192,7 @@ public class ChangeAdminFragment extends Fragment {
     private void outGroup() {
         JsonObject object = new JsonObject();
         object.addProperty("conversationId", conversation.getId());
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
         ApiService.apiService.outGroup(body).enqueue(new Callback<Object>() {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {

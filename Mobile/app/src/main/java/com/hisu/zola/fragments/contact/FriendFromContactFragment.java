@@ -3,9 +3,11 @@ package com.hisu.zola.fragments.contact;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,18 +20,29 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.gdacciaro.iOSDialog.iOSDialog;
 import com.gdacciaro.iOSDialog.iOSDialogBuilder;
+import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.FriendFromContactAdapter;
 import com.hisu.zola.database.entity.ContactUser;
+import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.FragmentFriendFromContactBinding;
-import com.hisu.zola.util.NetworkUtil;
+import com.hisu.zola.fragments.SplashScreenFragment;
+import com.hisu.zola.util.network.ApiService;
+import com.hisu.zola.util.network.NetworkUtil;
 import com.hisu.zola.view_model.ContactUserViewModel;
 import com.tomash.androidcontacts.contactgetter.entity.ContactData;
 import com.tomash.androidcontacts.contactgetter.main.contactsGetter.ContactsGetterBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class FriendFromContactFragment extends Fragment {
 
@@ -38,6 +51,7 @@ public class FriendFromContactFragment extends Fragment {
     public static final int CONTACT_PERMISSION_CODE = 1;
     private FriendFromContactAdapter adapter;
     private ContactUserViewModel viewModel;
+    private List<ContactUser> contactUsers;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,8 +70,12 @@ public class FriendFromContactFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        contactUsers = new ArrayList<>();
+
         init();
         backToPrevPage();
+        addActionForNotFriendTab();
+        addActionForFriendTab();
         addActionForBtnSyncFromContact();
     }
 
@@ -71,7 +89,8 @@ public class FriendFromContactFragment extends Fragment {
             @Override
             public void onChanged(List<ContactUser> contactUserList) {
                 if (contactUserList == null) return;
-
+                contactUsers.clear();
+                contactUsers.addAll(contactUserList);
                 adapter.setContactUsers(contactUserList);
             }
         });
@@ -112,7 +131,6 @@ public class FriendFromContactFragment extends Fragment {
     }
 
     public void getContacts() {
-        List<ContactUser> contactUsers = new ArrayList<>();
         List<ContactData> contactDataList = new ContactsGetterBuilder(mainActivity)
                 .allFields()
                 .buildList();
@@ -120,10 +138,51 @@ public class FriendFromContactFragment extends Fragment {
         for (ContactData contactData : contactDataList)
             if (contactData.getPhoneList().size() != 0) {
                 String phoneNumber = contactData.getPhoneList().get(0).getMainData().replaceAll("[^0-9]", "");
-                contactUsers.add(new ContactUser(contactData.getPhoneList().get(0).getMainData(), contactData.getCompositeName(),
-                        phoneNumber));
-            }
 
-        viewModel.insertAll(contactUsers);
+                JsonObject object = new JsonObject();
+                object.addProperty("phoneNumber", phoneNumber);
+                RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+                ApiService.apiService.findFriendByPhoneNumber(body).enqueue(new Callback<User>() {
+                    @Override
+                    public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                        if (response.isSuccessful() && response.code() == 200) {
+                            User user = response.body();
+                            if (user != null) {
+                                viewModel.insertOrUpdate(
+                                        new ContactUser(user.getId(), contactData.getCompositeName(), user.getUsername(), phoneNumber, "", "", true, false)
+                                );
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                        Log.e(FriendFromContactAdapter.class.getName(), t.getLocalizedMessage());
+                    }
+                });
+            }
+    }
+
+    private void addActionForNotFriendTab() {
+        mBinding.tvNotFriends.setOnClickListener(view -> {
+            switchClickState(mBinding.tvNotFriends, mBinding.tvAllFriends);
+            List<ContactUser> temp = new ArrayList<>(contactUsers);
+            adapter.setContactUsers(temp.stream().filter(contactUser -> !contactUser.isFriend()).collect(Collectors.toList()));
+        });
+    }
+
+    private void addActionForFriendTab() {
+        mBinding.tvAllFriends.setOnClickListener(view -> {
+            switchClickState(mBinding.tvAllFriends, mBinding.tvNotFriends);
+            adapter.setContactUsers(contactUsers);
+        });
+    }
+
+    private void switchClickState(TextView active, TextView inActive) {
+        inActive.setBackground(ContextCompat.getDrawable(mainActivity, R.drawable.btn_outline_rounded));
+        inActive.setTextColor(ContextCompat.getColor(mainActivity, R.color.gray));
+
+        active.setBackground(ContextCompat.getDrawable(mainActivity, R.drawable.btn_solid_rounded));
+        active.setTextColor(ContextCompat.getColor(mainActivity, R.color.black));
     }
 }

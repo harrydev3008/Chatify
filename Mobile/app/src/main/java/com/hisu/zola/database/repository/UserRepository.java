@@ -23,13 +23,14 @@ public class UserRepository {
     public void insert(User user) {
         Database.dbExecutor.execute(() -> {
 //            if(userDAO.getUser(user.getId()) == null)
-                userDAO.insert(user);
+            userDAO.insert(user);
         });
     }
 
     public void update(User user) {
-        Database.dbExecutor.execute(() -> {
-            userDAO.update(user);
-        });
+        if (user != null)
+            Database.dbExecutor.execute(() -> {
+                userDAO.update(user);
+            });
     }
 }

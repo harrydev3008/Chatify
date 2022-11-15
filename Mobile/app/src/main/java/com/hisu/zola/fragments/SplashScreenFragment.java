@@ -19,8 +19,9 @@ import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentSplashScreenBinding;
 import com.hisu.zola.fragments.conversation.ConversationListFragment;
-import com.hisu.zola.util.ApiService;
-import com.hisu.zola.util.NetworkUtil;
+import com.hisu.zola.util.network.ApiService;
+import com.hisu.zola.util.network.Constraints;
+import com.hisu.zola.util.network.NetworkUtil;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import okhttp3.MediaType;
@@ -78,7 +79,7 @@ public class SplashScreenFragment extends Fragment {
     private void updateUserInfo() {
         JsonObject object = new JsonObject();
         object.addProperty("phoneNumber", LocalDataManager.getCurrentUserInfo().getPhoneNumber());
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
         ApiService.apiService.findFriendByPhoneNumber(body).enqueue(new Callback<User>() {
             @Override
             public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {

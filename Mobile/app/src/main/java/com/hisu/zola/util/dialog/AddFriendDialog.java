@@ -1,6 +1,5 @@
 package com.hisu.zola.util.dialog;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
@@ -20,7 +19,7 @@ import com.google.gson.JsonObject;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.LayoutAddFriendBinding;
-import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import okhttp3.MediaType;

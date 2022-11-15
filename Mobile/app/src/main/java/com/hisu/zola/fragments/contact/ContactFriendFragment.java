@@ -21,7 +21,7 @@ import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.FragmentContactFriendBinding;
 import com.hisu.zola.fragments.conversation.ConversationFragment;
-import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.view_model.ConversationListViewModel;
 

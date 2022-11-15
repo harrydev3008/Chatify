@@ -22,8 +22,9 @@ import com.hisu.zola.adapters.AddGroupMemberAdapter;
 import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.FragmentAddNewGroupBinding;
-import com.hisu.zola.util.ApiService;
-import com.hisu.zola.util.NetworkUtil;
+import com.hisu.zola.util.network.ApiService;
+import com.hisu.zola.util.network.Constraints;
+import com.hisu.zola.util.network.NetworkUtil;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
@@ -157,7 +158,7 @@ public class AddNewGroupFragment extends Fragment {
         object.add("member", gson.toJsonTree(members));
         object.add("createdBy", gson.toJsonTree(currentUser));
 
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
 
         ApiService.apiService.createConversation(body).enqueue(new Callback<Conversation>() {
             @Override
