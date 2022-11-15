@@ -32,11 +32,12 @@ import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentEditProfileBinding;
-import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.RealPathUtil;
 import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
+import com.hisu.zola.util.network.Constraints;
 
 import java.io.File;
 import java.text.ParseException;
@@ -261,7 +262,7 @@ public class EditProfileFragment extends Fragment {
 
         if (newAvatarUri != null) {
             File file = new File(RealPathUtil.getRealPath(mainActivity, newAvatarUri));
-            RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+            RequestBody requestBody = RequestBody.create(MediaType.parse(Constraints.MULTIPART_FORM_DATA_TYPE), file);
             String fileName = file.getName();
             MultipartBody.Part part = MultipartBody.Part.createFormData("media", fileName, requestBody);
 
@@ -314,7 +315,7 @@ public class EditProfileFragment extends Fragment {
         userJson.addProperty("gender", user.isGender());
         userJson.addProperty("dob", user.getDob());
 
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), userJson.toString());
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), userJson.toString());
         ApiService.apiService.updateUser(body).enqueue(new Callback<Object>() {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.makeramen.roundedimageview.RoundedImageView
+        android:id="@+id/imv_sent_file_img"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxHeight="200dp"
+        app:riv_corner_radius="4dp"
+        android:src="@drawable/bg_profile"
+        android:adjustViewBounds="true"/>
+
+</RelativeLayout>

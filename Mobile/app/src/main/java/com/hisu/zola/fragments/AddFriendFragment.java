@@ -22,8 +22,9 @@ import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.FragmentAddFriendBinding;
 import com.hisu.zola.fragments.contact.FriendFromContactFragment;
 import com.hisu.zola.fragments.contact.FriendRequestFragment;
-import com.hisu.zola.util.ApiService;
-import com.hisu.zola.util.NetworkUtil;
+import com.hisu.zola.util.network.ApiService;
+import com.hisu.zola.util.network.Constraints;
+import com.hisu.zola.util.network.NetworkUtil;
 import com.hisu.zola.util.dialog.AddFriendDialog;
 
 import java.util.regex.Pattern;
@@ -134,7 +135,7 @@ public class AddFriendFragment extends Fragment {
     private void findFriend() {
         JsonObject object = new JsonObject();
         object.addProperty("phoneNumber", mBinding.edtPhoneNumber.getText().toString());
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
 
         ApiService.apiService.findFriendByPhoneNumber(body).enqueue(new Callback<User>() {
             @Override

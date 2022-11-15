@@ -2,7 +2,6 @@ package com.hisu.zola;
 
 import android.os.Bundle;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +22,8 @@ import com.hisu.zola.fragments.profile.ProfileFragment;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
 
+import io.socket.client.Socket;
+
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding mainBinding;
@@ -35,13 +36,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getWindow().setFlags(
-                WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN
-        );
-
         mainBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mainBinding.getRoot());
+
+        Socket mSocketIO = SocketIOHandler.getInstance().getSocketConnection();
+        mSocketIO.on(Socket.EVENT_DISCONNECT, args -> SocketIOHandler.getInstance().establishSocketConnection());
 
         initProgressBar();
 

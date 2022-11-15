@@ -17,7 +17,6 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.gdacciaro.iOSDialog.iOSDialogBuilder;
-import com.google.android.gms.common.api.Api;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
@@ -25,9 +24,10 @@ import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentResetPasswordBinding;
-import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.EditTextUtil;
-import com.hisu.zola.util.NetworkUtil;
+import com.hisu.zola.util.network.Constraints;
+import com.hisu.zola.util.network.NetworkUtil;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.regex.Pattern;
@@ -159,7 +159,7 @@ public class ResetPasswordFragment extends Fragment {
 
         JsonObject object = new JsonObject();
         object.addProperty("password", newPwd);
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
         ApiService.apiService.changePassword(body).enqueue(new Callback<Object>() {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {

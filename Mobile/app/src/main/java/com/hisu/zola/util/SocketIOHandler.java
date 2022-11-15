@@ -1,13 +1,13 @@
 package com.hisu.zola.util;
 
-import io.socket.client.IO;
-import io.socket.client.Socket;
-
 import com.hisu.zola.BuildConfig;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.net.URI;
+
+import io.socket.client.IO;
+import io.socket.client.Socket;
 
 public class SocketIOHandler {
 
@@ -17,7 +17,8 @@ public class SocketIOHandler {
     private SocketIOHandler() {
         IO.Options mOptions = new IO.Options();
         User user = LocalDataManager.getCurrentUserInfo();
-        mOptions.query = "_id=" + user.getId();
+        if (user != null)
+            mOptions.query = "_id=" + user.getId();
         mSocketIO = IO.socket(getConnectionURI(), mOptions);
     }
 
@@ -44,6 +45,6 @@ public class SocketIOHandler {
     }
 
     private URI getConnectionURI() {
-        return URI.create(BuildConfig.SERVER_URL + ":" + BuildConfig.SERVER_PORT);
+        return URI.create(BuildConfig.SERVER_URL);
     }
 }

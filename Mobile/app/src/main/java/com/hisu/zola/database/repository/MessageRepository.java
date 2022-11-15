@@ -27,6 +27,10 @@ public class MessageRepository {
         return messageDAO.getMessages(conversation);
     }
 
+    public LiveData<List<Message>> getImageMessage(String conversation, String type) {
+        return messageDAO.getMessagesImage(conversation, type);
+    }
+
     public void insertOrUpdate(Message message) {
         Database.dbExecutor.execute(() -> {
             if(messageDAO.getMessageById(message.getId()) == null)

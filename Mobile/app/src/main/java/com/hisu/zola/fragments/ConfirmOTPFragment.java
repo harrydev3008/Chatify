@@ -34,7 +34,7 @@ import com.hisu.zola.databinding.FragmentConfirmOtpBinding;
 import com.hisu.zola.fragments.authenticate.RegisterFragment;
 import com.hisu.zola.fragments.authenticate.RegisterUserInfoFragment;
 import com.hisu.zola.fragments.authenticate.ResetPasswordFragment;
-import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
@@ -108,7 +108,7 @@ public class ConfirmOTPFragment extends Fragment {
         backToPrevPage();
         initOTPInput();
         addActionForBtnVerifyOTP();
-//        handleSendOTP();
+        handleSendOTP();
     }
 
     private void backToPrevPage() {
@@ -242,10 +242,9 @@ public class ConfirmOTPFragment extends Fragment {
     private void addActionForBtnVerifyOTP() {
         mBinding.btnVerifyOtp.setOnClickListener(view -> {
             if (verifyOTP(getOtpInput())) {
-                switchToNextPage();
-//                loadingDialog.showDialog();
-//                PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationID, getOtpInput());
-//                signInWithPhoneAuthCredential(credential);
+                loadingDialog.showDialog();
+                PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationID, getOtpInput());
+                signInWithPhoneAuthCredential(credential);
             }
         });
     }

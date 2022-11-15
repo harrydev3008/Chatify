@@ -18,11 +18,13 @@ import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
+import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentConversationDetailBinding;
-import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.local.LocalDataManager;
+import com.hisu.zola.util.network.Constraints;
 
 import java.util.List;
 
@@ -35,14 +37,17 @@ import retrofit2.Response;
 public class ConversationDetailFragment extends Fragment {
 
     public static final String USER_ARGS = "USER_DETAIL";
+    public static final String CONVERSATION_ARGS = "CONVERSATION_ARGS";
     private FragmentConversationDetailBinding mBinding;
     private MainActivity mainActivity;
     private User user;
+    private Conversation conversation;
     private UserRepository userRepository;
 
-    public static ConversationDetailFragment newInstance(User user) {
+    public static ConversationDetailFragment newInstance(User user, Conversation conversation) {
         Bundle args = new Bundle();
         args.putSerializable(USER_ARGS, user);
+        args.putSerializable(CONVERSATION_ARGS, conversation);
         ConversationDetailFragment fragment = new ConversationDetailFragment();
         fragment.setArguments(args);
         return fragment;
@@ -56,6 +61,7 @@ public class ConversationDetailFragment extends Fragment {
 
         if (getArguments() != null) {
             user = (User) getArguments().getSerializable(USER_ARGS);
+            conversation = (Conversation) getArguments().getSerializable(CONVERSATION_ARGS);
         }
     }
 
@@ -103,9 +109,8 @@ public class ConversationDetailFragment extends Fragment {
     }
 
     private void addActionForEventViewSentFiles() {
-        //Todo: allow user view all files sent
         mBinding.tvSentFile.setOnClickListener(view -> {
-            Toast.makeText(mainActivity, "ViewSentFiles", Toast.LENGTH_SHORT).show();
+            mainActivity.addFragmentToBackStack(SentFilesFragment.newInstance(conversation));
         });
     }
 
@@ -139,7 +144,7 @@ public class ConversationDetailFragment extends Fragment {
     private void addFriend(String friendID) {
         JsonObject object = new JsonObject();
         object.addProperty("userId", friendID);
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
 
         ApiService.apiService.sendFriendRequest(body).enqueue(new Callback<Object>() {
             @Override
@@ -191,7 +196,7 @@ public class ConversationDetailFragment extends Fragment {
     private void unfriend() {
         JsonObject object = new JsonObject();
         object.addProperty("deleteFriendId", user.getId());
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
         ApiService.apiService.unfriend(body).enqueue(new Callback<User>() {
             @Override
             public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {

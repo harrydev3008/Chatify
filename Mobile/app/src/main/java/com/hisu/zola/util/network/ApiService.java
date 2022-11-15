@@ -1,4 +1,4 @@
-package com.hisu.zola.util;
+package com.hisu.zola.util.network;
 
 import com.hisu.zola.BuildConfig;
 import com.hisu.zola.database.entity.Conversation;
@@ -43,76 +43,76 @@ public interface ApiService {
             .addConverterFactory(GsonConverterFactory.create())
             .build().create(ApiService.class);
 
-    @POST("api/auth/signin")
+    @POST(Constraints.API_LOGIN)
     Call<Object> signIn(@Body User user);
 
-    @POST("api/auth/signup")
+    @POST(Constraints.API_REGISTER)
     Call<Object> signUp(@Body User user);
 
-    @POST("api/user/getAllFriends")
+    @POST(Constraints.API_GET_ALL_FRIENDS)
     Call<List<User>> getAllFriends();
 
-    @POST("api/user/updateProfile")
+    @POST(Constraints.API_UPDATE_PROFILE)
     Call<Object> updateUser(@Body RequestBody userInfo);
 
-    @POST("api/user/requestAddFriend")
+    @POST(Constraints.API_SEND_FRIEND_REQUEST)
     Call<Object> sendFriendRequest(@Body RequestBody friendID);
 
-    @POST("api/user/acceptFriend")
+    @POST(Constraints.API_ACCEPT_FRIEND_REQUEST)
     Call<User> acceptFriendRequest(@Body RequestBody friendID);
 
-    @POST("api/user/deniedFriend")
+    @POST(Constraints.API_DENY_FRIEND_REQUEST)
     Call<User> denyFriendRequest(@Body RequestBody friendID);
 
-    @POST("api/user/deleteFriend")
+    @POST(Constraints.API_UNFRIEND_REQUEST)
     Call<User> unfriend(@Body RequestBody friendID);
 
-    @POST("api/auth/updatePassword")
+    @POST(Constraints.API_CHANGE_PASSWORD)
     Call<Object> changePassword(@Body RequestBody newPassword);
 
-    @POST("api/auth/updatePhonenumber")
+    @POST(Constraints.API_CHANGE_PHONE_NUMBER)
     Call<Object> changePhoneNumber(@Body RequestBody newPhoneNumber);
 
-    @POST("api/auth/checkPhonenumber")
+    @POST(Constraints.API_CHECK_USER_BY_PHONE_NUMBER)
     Call<Object> checkUserExistByPhoneNumber(@Body RequestBody phoneNumber);
 
-    @POST("api/user/getUserByPhonenumber")
+    @POST(Constraints.API_GET_USER_BY_PHONE_NUMBER)
     Call<User> findFriendByPhoneNumber(@Body RequestBody phoneNumber);
 
-    @POST("api/message/getAllMessage")
+    @POST(Constraints.API_GET_ALL_MESSAGE)
     Call<Object> getConversationMessages(@Body RequestBody conversation);
 
-    @POST("api/message/sendMessage")
+    @POST(Constraints.API_SEND_MESSAGE)
     Call<Object> sendMessage(@Body RequestBody message);
 
-    @POST("api/message/deleteMessage")
+    @POST(Constraints.API_DELETE_MESSAGE)
     Call<Object> unsentMessage(@Body RequestBody message);
 
     @Multipart
-    @POST("api/message/uploadFile")
+    @POST(Constraints.API_UPLOAD_FILE)
     Call<Object> postImage(@Part MultipartBody.Part image);
 
-    @POST("api/conversation/createConversation")
+    @POST(Constraints.API_CREATE_CONVERSATION)
     Call<Conversation> createConversation(@Body RequestBody conversation);
 
-    @POST("api/conversation/getAllConversations")
+    @POST(Constraints.API_GET_ALL_CONVERSATION_OF_USER)
     Call<List<Conversation>> getConversations();
 
-    @POST("api/conversation/changeLabel")
+    @POST(Constraints.API_CHANGE_GROUP_NAME)
     Call<Object> changeGroupName(@Body RequestBody conversation);
 
-    @POST("api/conversation/updateCreator")
+    @POST(Constraints.API_CHANGE_GROUP_ADMIN)
     Call<Object> changeGroupAdmin(@Body RequestBody conversation);
 
-    @POST("api/conversation/addMemberGroup")
+    @POST(Constraints.API_ADD_GROUP_MEMBER)
     Call<Object> addMemberToGroup(@Body RequestBody conversation);
 
-    @POST("api/conversation/deleteMember")
+    @POST(Constraints.API_REMOVE_GROUP_MEMBER)
     Call<Object> removeMemberFromGroup(@Body RequestBody conversationID);
 
-    @POST("api/conversation/deleteGroup")
+    @POST(Constraints.API_DISBAND_GROUP)
     Call<Object> disbandGroup(@Body RequestBody conversationID);
 
-    @POST("api/conversation/outGroup")
+    @POST(Constraints.API_OUT_GROUP)
     Call<Object> outGroup(@Body RequestBody conversationID);
 }

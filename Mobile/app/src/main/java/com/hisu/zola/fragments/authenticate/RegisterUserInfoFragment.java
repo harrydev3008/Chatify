@@ -10,7 +10,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -28,8 +27,9 @@ import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentRegisterUserInfoBinding;
 import com.hisu.zola.fragments.greet_new_user.WelcomeOnBoardingFragment;
-import com.hisu.zola.util.ApiService;
-import com.hisu.zola.util.NetworkUtil;
+import com.hisu.zola.util.network.ApiService;
+import com.hisu.zola.util.network.Constraints;
+import com.hisu.zola.util.network.NetworkUtil;
 import com.hisu.zola.util.RealPathUtil;
 import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.converter.ObjectConvertUtil;
@@ -146,7 +146,7 @@ public class RegisterUserInfoFragment extends Fragment {
             if (avatarUri != null) {
 
                 File file = new File(RealPathUtil.getRealPath(mainActivity, avatarUri));
-                RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+                RequestBody requestBody = RequestBody.create(MediaType.parse(Constraints.MULTIPART_FORM_DATA_TYPE), file);
                 String fileName = file.getName();
                 MultipartBody.Part part = MultipartBody.Part.createFormData("media", fileName, requestBody);
 

@@ -8,18 +8,24 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.github.ybq.android.spinkit.sprite.Sprite;
+import com.github.ybq.android.spinkit.style.Circle;
+import com.github.ybq.android.spinkit.style.FadingCircle;
+import com.github.ybq.android.spinkit.style.WanderingCubes;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -37,9 +43,10 @@ import com.hisu.zola.database.repository.MessageRepository;
 import com.hisu.zola.databinding.FragmentConversationListBinding;
 import com.hisu.zola.databinding.LayoutPopupBinding;
 import com.hisu.zola.fragments.AddFriendFragment;
-import com.hisu.zola.util.ApiService;
+import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.EditTextUtil;
-import com.hisu.zola.util.NetworkUtil;
+import com.hisu.zola.util.network.Constraints;
+import com.hisu.zola.util.network.NetworkUtil;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.view_model.ConversationListViewModel;
@@ -104,6 +111,7 @@ public class ConversationListFragment extends Fragment {
         mSocket.on("deleteGroup-receive", onDisbandGroup);
         mSocket.on("msg-receive", onMessageReceive);
         mSocket.on("delete-receive", onMessageDeleteReceive);
+
         initConversationListRecyclerView();
         filter();
         initPopupMenu();
@@ -119,13 +127,13 @@ public class ConversationListFragment extends Fragment {
 
     private void initConversationListRecyclerView() {
         adapter = new ConversationAdapter(mMainActivity);
-
         viewModel = new ViewModelProvider(mMainActivity).get(ConversationListViewModel.class);
         viewModel.getData().observe(mMainActivity, new Observer<List<Conversation>>() {
             @Override
             public void onChanged(List<Conversation> conversations) {
 
                 if (conversations == null) return;
+
                 conversationList.clear();
                 conversationList.addAll(conversations);
 
@@ -235,7 +243,7 @@ public class ConversationListFragment extends Fragment {
         JsonObject object = new JsonObject();
         object.addProperty("conversation", conversationID);
 
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
 
         ApiService.apiService.getConversationMessages(body).enqueue(new Callback<Object>() {
             @Override
