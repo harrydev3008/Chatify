@@ -92,6 +92,25 @@
         android:scrollbarStyle="outsideOverlay" />
 
     <LinearLayout
+        android:id="@+id/group_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/white"
+        android:visibility="gone">
+        <TextView
+            android:id="@+id/group_status_desc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/group_status_kick"
+            android:textColor="@color/black"
+            android:drawableLeft="@drawable/ic_information_circle"
+            android:drawablePadding="10dp"
+            android:padding="8dp"
+            android:textSize="16sp"/>
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/chat_container"
         android:layout_width="match_parent"
         android:layout_height="50dp"

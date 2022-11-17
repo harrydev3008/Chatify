@@ -1,11 +1,13 @@
 package com.hisu.zola.database.entity;
 
 import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
+import com.google.gson.annotations.SerializedName;
 import com.hisu.zola.database.type_converter.ListUserConverter;
 import com.hisu.zola.database.type_converter.MessageConverter;
 import com.hisu.zola.database.type_converter.UserConverter;
@@ -27,18 +29,41 @@ public class Conversation implements Serializable {
     @TypeConverters(MessageConverter.class)
     private Message lastMessage;
 
+    @ColumnInfo(name = "disband", defaultValue = "false")
+    private String disband;
+    @SerializedName("isGroup")
+    private Boolean isGroup;
+
     private String updatedAt;
 
     @Ignore
     public Conversation() {
     }
 
-    public Conversation(@NonNull String _id, List<User> member, User createdBy, String label, String updatedAt) {
+    public Conversation(@NonNull String _id, List<User> member, User createdBy, String label, String updatedAt, String disband, boolean isGroup) {
         this._id = _id;
         this.member = member;
         this.createdBy = createdBy;
         this.label = label;
         this.updatedAt = updatedAt;
+        this.disband = disband;
+        this.isGroup = isGroup;
+    }
+
+    public Boolean getGroup() {
+        return isGroup;
+    }
+
+    public void setGroup(Boolean group) {
+        isGroup = group;
+    }
+
+    public String getDisband() {
+        return disband;
+    }
+
+    public void setDisband(String disband) {
+        this.disband = disband;
     }
 
     public String getId() {
@@ -97,6 +122,8 @@ public class Conversation implements Serializable {
                 ", createdBy=" + createdBy +
                 ", label='" + label + '\'' +
                 ", lastMessage=" + lastMessage +
+                ", disband='" + disband + '\'' +
+                ", isGroup=" + isGroup +
                 ", updatedAt='" + updatedAt + '\'' +
                 '}';
     }

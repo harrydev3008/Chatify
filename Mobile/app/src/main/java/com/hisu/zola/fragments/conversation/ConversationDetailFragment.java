@@ -1,5 +1,7 @@
 package com.hisu.zola.fragments.conversation;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -115,9 +117,10 @@ public class ConversationDetailFragment extends Fragment {
     }
 
     private void addActionForEventDeleteConversation() {
-        //Todo: allow user remove conversation
         mBinding.tvDeleteConversation.setOnClickListener(view -> {
-            Toast.makeText(mainActivity, "DeleteConversation", Toast.LENGTH_SHORT).show();
+            String url = "https://docs.google.com/gview?embedded=true&url=https://d2w6fysp0et4n5.cloudfront.net/77db10637eb598a5fadc120e034824f2.pdf";
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            startActivity(browserIntent);
         });
     }
 

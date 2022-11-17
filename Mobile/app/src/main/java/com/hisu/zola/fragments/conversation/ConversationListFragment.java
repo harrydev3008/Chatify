@@ -137,15 +137,7 @@ public class ConversationListFragment extends Fragment {
                 conversationList.clear();
                 conversationList.addAll(conversations);
 
-                List<Conversation> curConversations = new ArrayList<>();
-                conversations.forEach(conversation -> {
-                    conversation.getMember().forEach(member -> {
-                        if (member.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId()))
-                            curConversations.add(conversation);
-                    });
-                });
-
-                adapter.setConversations(curConversations);
+                adapter.setConversations(conversations);
                 mBinding.rvConversationList.setAdapter(adapter);
             }
         });
@@ -217,6 +209,9 @@ public class ConversationListFragment extends Fragment {
             public void onResponse(@NonNull Call<List<Conversation>> call, @NonNull Response<List<Conversation>> response) {
                 if (response.isSuccessful() && response.code() == 200) {
                     List<Conversation> conversations = response.body();
+                    for (Conversation conversationT : conversations) {
+                        Log.e("formserver", conversationT.toString());
+                    }
                     if (conversations != null && conversations.size() != 0) {
                         viewModel.insertAll(conversations);
                         loadMessageList(conversations);
@@ -328,21 +323,32 @@ public class ConversationListFragment extends Fragment {
     private final Emitter.Listener onReceiveRemoveMember = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            mMainActivity.runOnUiThread(() -> {
-                JSONObject data = (JSONObject) args[0];
-                if (data != null) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+                try {
+                    boolean isKicked = true;
+                    Gson gson = new Gson();
 
-                    try {
-                        Gson gson = new Gson();
+                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
 
-                        Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
-                        viewModel.insertOrUpdate(conversation);
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    for (User member : conversation.getMember()) {
+                        if(member.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId())) {
+                            isKicked = false;
+                            break;
+                        }
                     }
+
+                    if(isKicked) {
+                        viewModel.disbandGroup(conversation, "kick");
+                        messageRepository.deleteAllMessage(conversation.getId());
+                    } else {
+                        viewModel.insertOrUpdate(conversation);
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            });
+            }
         }
     };
 
@@ -441,7 +447,9 @@ public class ConversationListFragment extends Fragment {
                         Gson gson = new Gson();
 
                         Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
-                        viewModel.delete(conversation);
+
+                        viewModel.disbandGroup(conversation, "disband");
+                        messageRepository.deleteAllMessage(conversation.getId());
 
                     } catch (Exception e) {
                         e.printStackTrace();

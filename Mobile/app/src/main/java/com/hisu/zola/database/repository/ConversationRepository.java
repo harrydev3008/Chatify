@@ -52,6 +52,12 @@ public class ConversationRepository {
         });
     }
 
+    public void setDisbandGroup(Conversation conversation, String disband) {
+        Database.dbExecutor.execute(() -> {
+            conversationDAO.setDisband(conversation.getId(), disband);
+        });
+    }
+
     public void delete(String conversationID) {
         Database.dbExecutor.execute(() -> {
             conversationDAO.delete(conversationID);

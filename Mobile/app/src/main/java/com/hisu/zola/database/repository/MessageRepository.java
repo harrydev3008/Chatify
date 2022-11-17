@@ -1,6 +1,7 @@
 package com.hisu.zola.database.repository;
 
 import android.app.Application;
+import android.provider.ContactsContract;
 
 import androidx.lifecycle.LiveData;
 
@@ -61,6 +62,12 @@ public class MessageRepository {
     public void unsent(Message message) {
         Database.dbExecutor.execute(() -> {
             messageDAO.unsent(message.getId(), message.getDeleted());
+        });
+    }
+
+    public void deleteAllMessage(String conversationID) {
+        Database.dbExecutor.execute(() -> {
+            messageDAO.removeAllMessageOfConversation(conversationID);
         });
     }
 

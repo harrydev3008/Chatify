@@ -34,6 +34,9 @@ public interface ConversationDAO {
     @Update
     void update(Conversation conversation);
 
+    @Query("update conversations set disband = :disband where _id = :id")
+    void setDisband(String id, String disband);
+
     @Query("delete from conversations where _id = :id")
     void delete(String id);
 

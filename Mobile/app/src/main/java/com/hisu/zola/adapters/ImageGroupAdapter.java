@@ -1,6 +1,7 @@
 package com.hisu.zola.adapters;
 
 import android.content.Context;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -18,14 +19,18 @@ public class ImageGroupAdapter extends RecyclerView.Adapter<ImageGroupAdapter.Im
 
     private List<Media> mediaList;
     private final Context context;
+    private int mode;
+    public static final int SEND_MODE = 1;
+    public static final int RECEIVE_MODE = 0;
 
     public ImageGroupAdapter(Context context) {
         this.context = context;
     }
 
-    public ImageGroupAdapter(List<Media> mediaList, Context context) {
+    public ImageGroupAdapter(List<Media> mediaList, Context context, int mode) {
         this.mediaList = mediaList;
         this.context = context;
+        this.mode = mode;
         notifyDataSetChanged();
     }
 
@@ -46,7 +51,26 @@ public class ImageGroupAdapter extends RecyclerView.Adapter<ImageGroupAdapter.Im
     @Override
     public void onBindViewHolder(@NonNull ImageGroupViewHolder holder, int position) {
         Media media = mediaList.get(position);
-        Glide.with(context).load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(holder.binding.rimvImageGroupItem);
+
+        if (mode == SEND_MODE)
+            holder.binding.itemParent.setGravity(Gravity.END);
+        else if (mode == RECEIVE_MODE)
+            holder.binding.itemParent.setGravity(Gravity.START);
+
+        if (mediaList.size() < 2) {
+            holder.binding.rimvImageGroupItem.setMaxWidth(getDp(320));
+            holder.binding.rimvImageGroupItem.setMaxHeight(getDp(200));
+        } else {
+            holder.binding.rimvImageGroupItem.setMaxWidth(getDp(160));
+            holder.binding.rimvImageGroupItem.setMaxHeight(getDp(200));
+        }
+
+        Glide.with(context).load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.binding.rimvImageGroupItem);
+    }
+
+    public int getDp(int dp) {
+        float density = context.getResources().getDisplayMetrics().density;
+        return Math.round((float) dp * density);
     }
 
     @Override

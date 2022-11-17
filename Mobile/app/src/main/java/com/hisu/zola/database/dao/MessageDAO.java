@@ -34,6 +34,9 @@ public interface MessageDAO {
     @Query("update messages set isDeleted = :isDelete where _id = :id")
     void unsent(String id, boolean isDelete);
 
+    @Query("delete from messages where conversation = :conversation")
+    void removeAllMessageOfConversation(String conversation);
+
     @Query("delete from messages")
     void dropMessageTable();
 }
