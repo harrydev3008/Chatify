@@ -38,6 +38,7 @@ import com.hisu.zola.database.entity.Media;
 import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
+import com.hisu.zola.database.repository.MessageRepository;
 import com.hisu.zola.databinding.FragmentConversationBinding;
 import com.hisu.zola.databinding.LayoutChatPopupBinding;
 import com.hisu.zola.fragments.StickerBottomSheetFragment;
@@ -81,6 +82,7 @@ public class ConversationFragment extends Fragment {
     private MessageAdapter messageAdapter;
     private List<Message> currentMessageList;
     private ConversationRepository repository;
+    private MessageRepository messageRepository;
     private StickerBottomSheetFragment sheetFragment;
     private PopupWindow popupMenu;
 
@@ -122,6 +124,7 @@ public class ConversationFragment extends Fragment {
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
 
         repository = new ConversationRepository(mMainActivity.getApplication());
+        messageRepository = new MessageRepository(mMainActivity.getApplication());
 
         mSocket.on("msg-receive", onMessageReceive);
         mSocket.on("delete-receive", onMessageDeleteReceive);
@@ -134,8 +137,6 @@ public class ConversationFragment extends Fragment {
         initProgressBarSending();
         initRecyclerView();
         initStickerBottomDialog();
-
-        mBinding.tvLastActive.setText(getString(R.string.user_active));
 
         loadConversationInfo();
         addActionForBackBtn();
@@ -166,16 +167,16 @@ public class ConversationFragment extends Fragment {
 
     private void openBottomImagePicker() {
         TedImagePicker.with(mMainActivity)
-                .title(getString(R.string.pick_img))
-                .buttonText(getString(R.string.send))
+                .title(mMainActivity.getString(R.string.pick_img))
+                .buttonText(mMainActivity.getString(R.string.send))
                 .startMultiImage(uris -> {
                     if (NetworkUtil.isConnectionAvailable(mMainActivity))
                         uris.forEach(this::uploadFileToServer);
                     else
                         new iOSDialogBuilder(mMainActivity)
-                                .setTitle(getString(R.string.no_network_connection))
-                                .setSubtitle(getString(R.string.no_network_connection_desc))
-                                .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                                .setTitle(mMainActivity.getString(R.string.no_network_connection))
+                                .setSubtitle(mMainActivity.getString(R.string.no_network_connection_desc))
+                                .setPositiveListener(mMainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                 });
     }
 
@@ -242,8 +243,7 @@ public class ConversationFragment extends Fragment {
                 linearLayoutManager
         );
 
-        if (conversation.getLabel() != null)
-            messageAdapter.setGroup(true);
+        messageAdapter.setGroup(conversation.getGroup());
 
         mBinding.rvConversation.setAdapter(messageAdapter);
         messageAdapter.setOnItemTouchListener(new IOnItemTouchListener() {
@@ -280,10 +280,30 @@ public class ConversationFragment extends Fragment {
             @Override
             public void onChanged(Conversation conversation) {
                 if (conversation == null) return;
-                if (conversation.getLabel() != null)
+                if (conversation.getGroup()) {
                     mBinding.tvUsername.setText(conversation.getLabel());
-                else
+                    mBinding.tvLastActive.setText(mMainActivity.getString(R.string.group_active));
+                } else {
                     mBinding.tvUsername.setText(conversationName);
+                    mBinding.tvLastActive.setText(mMainActivity.getString(R.string.user_active));
+                }
+
+                if (conversation.getDisband() != null) {
+                    mBinding.chatContainer.setVisibility(View.GONE);
+                    mBinding.groupStatus.setVisibility(View.VISIBLE);
+                    mBinding.rvConversation.setBackgroundColor(mMainActivity.getColor(R.color.gray_f1));
+
+                    if (conversation.getDisband().equalsIgnoreCase("disband")) {
+                        mBinding.groupStatusDesc.setText(mMainActivity.getText(R.string.group_status_disband));
+                    } else if (conversation.getDisband().equalsIgnoreCase("kick")) {
+                        mBinding.groupStatusDesc.setText(mMainActivity.getText(R.string.group_status_kick));
+                    }
+
+                } else {
+                    mBinding.chatContainer.setVisibility(View.VISIBLE);
+                    mBinding.groupStatus.setVisibility(View.GONE);
+                    mBinding.rvConversation.setBackgroundColor(mMainActivity.getColor(R.color.white));
+                }
             }
         });
     }
@@ -309,7 +329,7 @@ public class ConversationFragment extends Fragment {
 
     private void addActionForSideMenu() {
         mBinding.btnConversationMenu.setOnClickListener(view -> {
-            if (conversation.getLabel() == null) {
+            if (!conversation.getGroup()) {
                 mMainActivity.getSupportFragmentManager().beginTransaction()
                         .setCustomAnimations(
                                 R.anim.slide_in_left, R.anim.slide_out_left,
@@ -348,9 +368,9 @@ public class ConversationFragment extends Fragment {
                 sendMessageViaApi(mBinding.edtChat.getText().toString().trim(), "", "", "text");
             else
                 new iOSDialogBuilder(mMainActivity)
-                        .setTitle(getString(R.string.no_network_connection))
-                        .setSubtitle(getString(R.string.no_network_connection_desc))
-                        .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                        .setTitle(mMainActivity.getString(R.string.no_network_connection))
+                        .setSubtitle(mMainActivity.getString(R.string.no_network_connection_desc))
+                        .setPositiveListener(mMainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
         });
     }
 
@@ -393,9 +413,9 @@ public class ConversationFragment extends Fragment {
                 mMainActivity.runOnUiThread(() -> {
                     mBinding.sending.setVisibility(View.GONE);
                     new iOSDialogBuilder(mMainActivity)
-                            .setTitle(getString(R.string.notification_warning))
-                            .setSubtitle(getString(R.string.notification_warning_msg))
-                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                            .setTitle(mMainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mMainActivity.getString(R.string.notification_warning_msg))
+                            .setPositiveListener(mMainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                 });
                 Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
             }
@@ -496,9 +516,9 @@ public class ConversationFragment extends Fragment {
             public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
                 mMainActivity.runOnUiThread(() -> {
                     new iOSDialogBuilder(mMainActivity)
-                            .setTitle(getString(R.string.notification_warning))
-                            .setSubtitle(getString(R.string.notification_warning_msg))
-                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                            .setTitle(mMainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mMainActivity.getString(R.string.notification_warning_msg))
+                            .setPositiveListener(mMainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                 });
                 Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
             }
@@ -530,24 +550,24 @@ public class ConversationFragment extends Fragment {
         public void call(Object... args) {
             JSONObject data = (JSONObject) args[0];
             if (data != null) {
-                try {
-                    String sender = data.getString("sender") + " " + getString(R.string.typing);
-                    boolean isTyping = data.getBoolean("isTyping");
+                mMainActivity.runOnUiThread(() -> {
+                    try {
+                        String sender = data.getString("sender") + " " + mMainActivity.getString(R.string.typing);
+                        boolean isTyping = data.getBoolean("isTyping");
 
-                    if (isTyping) {
-                        mMainActivity.runOnUiThread(() -> {
+                        if (isTyping) {
+
                             mBinding.typing.setVisibility(View.VISIBLE);
                             mBinding.textView.setText(sender);
-                        });
-                    } else {
-                        mMainActivity.runOnUiThread(() -> {
+
+                        } else {
                             mBinding.typing.setVisibility(View.GONE);
                             mBinding.textView.setText("");
-                        });
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                });
             }
         }
     };
@@ -562,17 +582,18 @@ public class ConversationFragment extends Fragment {
                     String deleteUserId = data.getString("id");
 
                     if (LocalDataManager.getCurrentUserInfo().getId().equalsIgnoreCase(deleteUserId)) {
+
+                        repository.setDisbandGroup(conversation, "kick");
+                        messageRepository.deleteAllMessage(conversation.getId());
+
                         mMainActivity.runOnUiThread(() -> {
-                            new iOSDialogBuilder(mMainActivity)
-                                    .setTitle(getString(R.string.notification_warning))
-                                    .setSubtitle(getString(R.string.use_removed))
-                                    .setCancelable(false)
-                                    .setPositiveListener(getString(R.string.confirm), dialog -> {
-                                        dialog.dismiss();
-                                        repository.delete(conversation.getId());
-                                        mMainActivity.setBottomNavVisibility(View.VISIBLE);
-                                        mMainActivity.getSupportFragmentManager().popBackStackImmediate();
-                                    }).build().show();
+
+                            Toast toast = Toast.makeText(mMainActivity, mMainActivity.getString(R.string.use_removed), Toast.LENGTH_LONG);
+                            toast.setGravity(Gravity.CENTER, 0, 0);
+                            toast.show();
+
+                            mMainActivity.setBottomNavVisibility(View.VISIBLE);
+                            mMainActivity.getSupportFragmentManager().popBackStackImmediate();
                         });
                     }
                 } catch (Exception e) {
@@ -591,17 +612,16 @@ public class ConversationFragment extends Fragment {
                 try {
                     Gson gson = new Gson();
                     Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+                    repository.setDisbandGroup(conversation, "disband");
+                    messageRepository.deleteAllMessage(conversation.getId());
                     mMainActivity.runOnUiThread(() -> {
-                        new iOSDialogBuilder(mMainActivity)
-                                .setTitle(getString(R.string.notification_warning))
-                                .setSubtitle(getString(R.string.group_disbanded))
-                                .setCancelable(false)
-                                .setPositiveListener(getString(R.string.confirm), dialog -> {
-                                    dialog.dismiss();
-                                    repository.delete(conversation.getId());
-                                    mMainActivity.setBottomNavVisibility(View.VISIBLE);
-                                    mMainActivity.getSupportFragmentManager().popBackStackImmediate();
-                                }).build().show();
+
+                        Toast toast = Toast.makeText(mMainActivity, mMainActivity.getString(R.string.group_disbanded), Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();
+
+                        mMainActivity.setBottomNavVisibility(View.VISIBLE);
+                        mMainActivity.getSupportFragmentManager().popBackStackImmediate();
                     });
                 } catch (Exception e) {
                     e.printStackTrace();

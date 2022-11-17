@@ -24,10 +24,10 @@
         android:id="@+id/navigation_menu"
         android:layout_width="match_parent"
         android:layout_height="?android:actionBarSize"
+        android:elevation="4dp"
         android:layout_alignParentBottom="true"
         app:itemIconTint="@color/bottom_nav_item_select_color"
         app:itemTextColor="@color/bottom_nav_item_select_color"
         app:menu="@menu/home_bottom_nav_menu"
-        android:background="@drawable/border_bottom_nav"
         android:visibility="gone"/>
 </RelativeLayout>

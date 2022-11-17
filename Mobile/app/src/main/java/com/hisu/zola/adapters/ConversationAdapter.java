@@ -73,7 +73,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         Conversation conversation = conversations.get(position);
         User conUser = getConversationAvatar(conversation.getMember());
 
-        if (conversation.getLabel() == null) {
+        if (!conversation.getGroup()) {
             Glide.with(mContext).asBitmap().load(conUser.getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                     .into(new SimpleTarget<Bitmap>() {
                         @Override
@@ -101,14 +101,14 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                     }
                 }
             } else {
-                if (conversation.getLabel() != null) {
+                if (conversation.getGroup()) {
+                    String textPlaceHolder = "";
                     if (lastMessage.getDeleted()) {
-                        String textPlaceHolder = lastMessage.getSender().getUsername() + ": Đã thu hồi tin nhắn.";
-                        holder.binding.tvLastMsg.setText(textPlaceHolder);
+                        textPlaceHolder = lastMessage.getSender().getUsername() + ": Đã thu hồi tin nhắn.";
                     } else {
-                        String textPlaceHolder = lastMessage.getSender().getUsername() + ": " + lastMessage.getText();
-                        holder.binding.tvLastMsg.setText(textPlaceHolder);
+                        textPlaceHolder = lastMessage.getSender().getUsername() + ": " + lastMessage.getText();
                     }
+                    holder.binding.tvLastMsg.setText(textPlaceHolder);
                 } else {
                     if (lastMessage.getDeleted()) {
                         String textPlaceHolder = "Đã thu hồi tin nhắn.";
@@ -140,6 +140,13 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         } else {
             holder.binding.tvLastMsg.setText("");
             holder.binding.tvConversationActiveTime.setText("");
+        }
+
+        if(conversation.getDisband() != null) {
+            if(conversation.getDisband().equalsIgnoreCase("kick"))
+                holder.binding.tvLastMsg.setText(R.string.last_msg_kicked);
+            else
+                holder.binding.tvLastMsg.setText(R.string.last_msg_disbaned);
         }
 
         int unreadMsgQuantity = 0;

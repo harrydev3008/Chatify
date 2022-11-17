@@ -35,4 +35,8 @@ public class ConversationListViewModel extends AndroidViewModel {
     public void delete(Conversation conversation) {
         repository.delete(conversation.getId());
     }
+
+    public void disbandGroup(Conversation conversation, String disband) {
+        repository.setDisbandGroup(conversation, disband);
+    }
 }

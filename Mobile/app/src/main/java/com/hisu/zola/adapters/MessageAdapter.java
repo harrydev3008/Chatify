@@ -3,6 +3,7 @@ package com.hisu.zola.adapters;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,13 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.source.ProgressiveMediaSource;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
+import com.google.android.exoplayer2.upstream.cache.CacheDataSource;
+import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor;
+import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.Media;
 import com.hisu.zola.database.entity.Message;
@@ -26,6 +34,7 @@ import com.hisu.zola.databinding.LayoutChatSendBinding;
 import com.hisu.zola.listeners.IOnItemTouchListener;
 import com.hisu.zola.util.local.LocalDataManager;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -177,38 +186,43 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         private void displayMessageContent(Context context, Message message) {
             binding.tvMsgSend.setTypeface(null, Typeface.NORMAL);
             if (message.getDeleted()) {
-                binding.imgMsgSend.setVisibility(View.GONE);
                 binding.tvMsgSend.setVisibility(View.VISIBLE);
+                binding.videoSend.setVisibility(View.GONE);
+                binding.groupImg.setVisibility(View.GONE);
                 binding.tvMsgSend.setTextColor(context.getColor(R.color.gray));
                 binding.tvMsgSend.setBackground(ContextCompat.getDrawable(context, R.drawable.message_removed));
                 binding.tvMsgSend.setText(context.getString(R.string.message_removed));
                 binding.tvMsgSend.setTypeface(null, Typeface.ITALIC);
             } else if (message.getType().equalsIgnoreCase("text")) {
-                binding.imgMsgSend.setVisibility(View.GONE);
                 binding.tvMsgSend.setVisibility(View.VISIBLE);
+                binding.videoSend.setVisibility(View.GONE);
+                binding.groupImg.setVisibility(View.GONE);
                 binding.tvMsgSend.setTextColor(context.getColor(R.color.white));
                 binding.tvMsgSend.setBackground(ContextCompat.getDrawable(context, R.drawable.message_send));
                 binding.tvMsgSend.setText(message.getText());
+            } else if (message.getType().equalsIgnoreCase("video")) {
+                binding.tvMsgSend.setVisibility(View.GONE);
+                binding.groupImg.setVisibility(View.GONE);
+                binding.videoSend.setVisibility(View.VISIBLE);
+
+                Uri uri = Uri.parse(message.getMedia().get(0).getUrl());
+
+                ExoPlayer player = new ExoPlayer.Builder(context).build();
+                binding.videoSend.setPlayer(player);
+                MediaItem mediaItem = MediaItem.fromUri(uri);
+                player.setMediaItem(mediaItem);
+                player.prepare();
             } else {
-                if (message.getMedia().size() == 1) {
-                    binding.tvMsgSend.setVisibility(View.GONE);
-                    binding.imgMsgSend.setVisibility(View.VISIBLE);
-                    binding.groupImg.setVisibility(View.GONE);
-                    Media media = message.getMedia().get(0);
-                    Glide.with(context)
-                            .asBitmap().load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.ALL).into(new SimpleTarget<Bitmap>() {
-                                @Override
-                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                    binding.imgMsgSend.setImageBitmap(resource);
-                                }
-                            });
-                } else {
-                    binding.tvMsgSend.setVisibility(View.GONE);
-                    binding.imgMsgSend.setVisibility(View.GONE);
-                    binding.groupImg.setVisibility(View.VISIBLE);
-                    binding.groupImg.setLayoutManager(new GridLayoutManager(context, 2));
-                    binding.groupImg.setAdapter(new ImageGroupAdapter(message.getMedia(), context));
-                }
+                binding.tvMsgSend.setVisibility(View.GONE);
+                binding.videoSend.setVisibility(View.GONE);
+                binding.groupImg.setVisibility(View.VISIBLE);
+
+                List<Media> media = message.getMedia();
+
+                int spanCount = media.size() < 2 ? 1 : 2;
+
+                binding.groupImg.setLayoutManager(new GridLayoutManager(context, spanCount));
+                binding.groupImg.setAdapter(new ImageGroupAdapter(media, context, ImageGroupAdapter.SEND_MODE));
             }
         }
     }
@@ -224,8 +238,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         private void displayMessageContent(Context context, Message message) {
             if (message.getDeleted()) {
-                binding.imgMsgReceive.setVisibility(View.GONE);
                 binding.msgWrapper.setVisibility(View.VISIBLE);
+                binding.groupImg.setVisibility(View.GONE);
+                binding.videoReceive.setVisibility(View.GONE);
                 binding.tvMsgReceive.setTextColor(context.getColor(R.color.gray));
                 binding.msgWrapper.setBackground(ContextCompat.getDrawable(context, R.drawable.message_removed));
                 binding.tvMsgReceive.setText(context.getString(R.string.message_removed));
@@ -235,33 +250,52 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 binding.tvMsgReceive.setTypeface(null, Typeface.NORMAL);
 
                 if (message.getType().equalsIgnoreCase("text")) {
-                    binding.imgMsgReceive.setVisibility(View.GONE);
-                    binding.tvMsgReceive.setVisibility(View.VISIBLE);
+                    binding.msgWrapper.setVisibility(View.VISIBLE);
+                    binding.groupImg.setVisibility(View.GONE);
+                    binding.videoReceive.setVisibility(View.GONE);
                     binding.tvMsgReceive.setTextColor(context.getColor(R.color.chat_text_color));
                     binding.msgWrapper.setBackground(ContextCompat.getDrawable(context, R.drawable.message_receive));
                     binding.tvMsgReceive.setText(message.getText());
-                } else {
-                    if (message.getMedia().size() <= 1) {
-                        binding.tvMsgReceive.setVisibility(View.GONE);
-                        binding.msgWrapper.setVisibility(View.GONE);
-                        binding.groupImg.setVisibility(View.GONE);
-                        Media media = message.getMedia().get(0);
+                } else if (message.getType().equalsIgnoreCase("video")) { //todo: change later
+                    binding.msgWrapper.setVisibility(View.GONE);
+                    binding.groupImg.setVisibility(View.GONE);
+                    binding.videoReceive.setVisibility(View.VISIBLE);
+                    Uri uri = Uri.parse(message.getMedia().get(0).getUrl());
 
-                        Glide.with(context)
-                                .asBitmap().load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.ALL).into(new SimpleTarget<Bitmap>() {
-                                    @Override
-                                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                        binding.imgMsgReceive.setImageBitmap(resource);
-                                        binding.imgMsgReceive.setVisibility(View.VISIBLE);
-                                    }
-                                });
-                    } else {
-                        binding.msgWrapper.setVisibility(View.GONE);
-                        binding.imgMsgReceive.setVisibility(View.GONE);
-                        binding.groupImg.setVisibility(View.VISIBLE);
-                        binding.groupImg.setLayoutManager(new GridLayoutManager(context, 2));
-                        binding.groupImg.setAdapter(new ImageGroupAdapter(message.getMedia(), context));
-                    }
+                    File cacheFolder = new File(context.getCacheDir(),"media");
+                    LeastRecentlyUsedCacheEvictor cacheEvictor = new LeastRecentlyUsedCacheEvictor(1 * 1024 * 1024);
+                    SimpleCache simpleCache = new SimpleCache(cacheFolder, cacheEvictor);
+//                    CacheDataSource.Factory factory = new CacheDataSource.Factory();
+//                    factory.
+
+                    ProgressiveMediaSource mediaSource = new ProgressiveMediaSource.Factory(
+                            new CacheDataSource.Factory()
+                                    .setCache(simpleCache)
+                                    .setUpstreamDataSourceFactory(new DefaultHttpDataSource.Factory()
+                                            .setUserAgent("ExoplayerDemo"))
+                                    .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+                    ).createMediaSource(MediaItem.fromUri(uri));
+
+//                    playerView.setPlayer(player);
+
+
+                    ExoPlayer player = new ExoPlayer.Builder(context).build();
+                    player.setMediaSource(mediaSource);
+                    binding.videoReceive.setPlayer(player);
+                    MediaItem mediaItem = MediaItem.fromUri(uri);
+                    player.setMediaItem(mediaItem);
+                    player.prepare();
+                } else {
+                    binding.msgWrapper.setVisibility(View.GONE);
+                    binding.groupImg.setVisibility(View.VISIBLE);
+                    binding.videoReceive.setVisibility(View.GONE);
+
+                    List<Media> media = message.getMedia();
+
+                    int spanCount = media.size() < 2 ? 1 : 2;
+
+                    binding.groupImg.setLayoutManager(new GridLayoutManager(context, spanCount));
+                    binding.groupImg.setAdapter(new ImageGroupAdapter(media, context, ImageGroupAdapter.RECEIVE_MODE));
                 }
             }
         }

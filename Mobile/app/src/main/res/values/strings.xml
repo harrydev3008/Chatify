@@ -41,6 +41,7 @@
     <string name="search_hint">Tìm kiếm</string>
     <string name="chat_msg_hint">Tin nhắn</string>
     <string name="user_active">Đang hoạt động</string>
+    <string name="group_active">Nhấn để xem thông tin nhóm</string>
     <string name="logout">Đăng xuất</string>
     <string name="logout_confirm">Bạn có thực sự muốn đăng xuất không?!</string>
     <string name="send_me_otp">Gửi mã OTP đến tôi</string>
@@ -168,7 +169,11 @@
     <string name="change_group_name_success">Đổi tên nhóm</string>
     <string name="confirm_remove_member">Bạn có chắc muốn xoá thành viên này khỏi nhóm?</string>
     <string name="use_removed">Bạn đã bị nhóm trưởng xoá khỏi nhóm!</string>
+    <string name="last_msg_kicked">Bạn đã bị xoá khỏi nhóm</string>
     <string name="group_disbanded">Nhóm đã bị giải tán!</string>
+    <string name="last_msg_disbaned">Nhóm đã giải tán</string>
+    <string name="group_status_disband">Nhóm đã giải tán, bạn không thể gửi tin nhắn vào nhóm được nữa.</string>
+    <string name="group_status_kick">Bạn đã bị xoá khỏi nhóm, bạn không thể gửi tin nhắn vào nhóm được nữa.</string>
     <string name="change_admin_success">Chuyển trưởng nhóm thành công!</string>
     <string name="change_admin_confirm">Chọn người này làm trưởng nhóm mới?</string>
     <string name="pick_new_admin">Chọn trưởng nhóm mới</string>
