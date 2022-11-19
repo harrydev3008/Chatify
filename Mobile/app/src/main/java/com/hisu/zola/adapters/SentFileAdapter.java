@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class SentFileAdapter extends RecyclerView.Adapter<SentFileAdapter.SentFileViewHolder> implements
         StickyRecyclerHeadersAdapter<SentFileAdapter.SentFileHeaderViewHolder> {
@@ -59,33 +60,11 @@ public class SentFileAdapter extends RecyclerView.Adapter<SentFileAdapter.SentFi
     @Override
     public void onBindViewHolder(@NonNull SentFileViewHolder holder, int position) {
         Message message = messages.get(position);
-//        if (!message.getType().equalsIgnoreCase("text"))
-//            Glide.with(context).asBitmap().load(message.getMedia().get(0).getUrl()).diskCacheStrategy(DiskCacheStrategy.ALL)
-//                    .into(new SimpleTarget<Bitmap>() {
-//                        @Override
-//                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-//                            holder.binding.imvSentFileImg.setImageBitmap(resource);
-//                            holder.binding.imvSentFileImg.setVisibility(View.VISIBLE);
-//                        }
-//                    });
-
-
-        List<Integer> urls = new ArrayList<>();
-        urls.add(R.drawable.bg_profile);
-        urls.add(R.drawable.bg_chat);
-        urls.add(R.drawable.bg_welcome);
-
         SentFileItemAdapter adapter = new SentFileItemAdapter(context);
-        adapter.setImageURLs(urls);
+        adapter.setImageURLs(message.getMedia());
 
         holder.binding.rvImages.setAdapter(adapter);
         holder.binding.rvImages.setLayoutManager(new GridLayoutManager(context, 3));
-
-//        SecureRandom random = new SecureRandom();
-//        if (random.nextInt(2) == 1)
-//            holder.binding.imvSentFileImg.setImageResource(R.drawable.bg_profile);
-//        else
-//            holder.binding.imvSentFileImg.setImageResource(R.drawable.bg_chat);
     }
 
     @Override
@@ -109,7 +88,8 @@ public class SentFileAdapter extends RecyclerView.Adapter<SentFileAdapter.SentFi
     @Override
     public void onBindHeaderViewHolder(SentFileHeaderViewHolder sentFileHeaderViewHolder, int i) {
         Date date = TimeConverterUtil.getDateFromString(messages.get(i).getCreatedAt());
-        SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM, yyyy", Locale.ENGLISH);
+        SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM, yyyy", Locale.getDefault());
+        outputFormat.setTimeZone(TimeZone.getTimeZone("GMT+7"));
         String header = outputFormat.format(date).replace("/", " tháng ");
 
         sentFileHeaderViewHolder.binding.tvItemHeader.setText(header);

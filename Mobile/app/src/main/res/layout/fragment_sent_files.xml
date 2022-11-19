@@ -35,6 +35,13 @@
             android:textSize="20sp" />
     </RelativeLayout>
 
+    <ImageView
+        android:id="@+id/imv_no_sent_image"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:visibility="gone"
+        android:src="@drawable/bg_no_sent_file"
+        tools:ignore="ContentDescription" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_sent_files"

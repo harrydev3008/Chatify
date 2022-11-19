@@ -47,6 +47,7 @@
             android:background="@drawable/edit_text_outline"
             android:hint="@string/username"
             android:inputType="phone"
+            android:maxLength="11"
             android:paddingHorizontal="8dp"
             android:paddingVertical="10dp"
             android:textCursorDrawable="@drawable/edt_cursor"

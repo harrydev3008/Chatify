@@ -70,13 +70,13 @@ public class SettingFragment extends Fragment {
     private void addActionForBtnLogout() {
         mBinding.tvLogout.setOnClickListener(view -> {
             new iOSDialogBuilder(mainActivity)
-                    .setTitle(getString(R.string.logout))
-                    .setSubtitle(getString(R.string.logout_confirm))
-                    .setPositiveListener(getString(R.string.logout), dialog -> {
+                    .setTitle(mainActivity.getString(R.string.logout))
+                    .setSubtitle(mainActivity.getString(R.string.logout_confirm))
+                    .setPositiveListener(mainActivity.getString(R.string.logout), dialog -> {
                         dialog.dismiss();
                         mainActivity.logOut();
                     })
-                    .setNegativeListener(getString(R.string.cancel), iOSDialog::dismiss).build().show();
+                    .setNegativeListener(mainActivity.getString(R.string.cancel), iOSDialog::dismiss).build().show();
         });
     }
 

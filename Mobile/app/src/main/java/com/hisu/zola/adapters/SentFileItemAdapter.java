@@ -1,27 +1,34 @@
 package com.hisu.zola.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
+import com.hisu.zola.database.entity.Media;
 import com.hisu.zola.databinding.LayoutSentFileItemChildBinding;
 
 import java.util.List;
 
 public class SentFileItemAdapter extends RecyclerView.Adapter<SentFileItemAdapter.SentFileItemChildViewHolder> {
 
-    private List<Integer> imageURLs;
-    private Context context;
+    private List<Media> imageURLs;
+    private final Context context;
 
     public SentFileItemAdapter(Context context) {
         this.context = context;
     }
 
-    public void setImageURLs(List<Integer> imageURLs) {
+    public void setImageURLs(List<Media> imageURLs) {
         this.imageURLs = imageURLs;
         notifyDataSetChanged();
     }
@@ -38,7 +45,14 @@ public class SentFileItemAdapter extends RecyclerView.Adapter<SentFileItemAdapte
 
     @Override
     public void onBindViewHolder(@NonNull SentFileItemChildViewHolder holder, int position) {
-        holder.binding.imvSentFileImg.setImageResource(imageURLs.get(position));
+        Glide.with(context).asBitmap().thumbnail(0.1f).diskCacheStrategy(DiskCacheStrategy.ALL)
+                .load(imageURLs.get(position).getUrl()).into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        holder.binding.imvSentFileImg.setImageBitmap(resource);
+                        holder.binding.imvSentFileImg.setVisibility(View.VISIBLE);
+                    }
+                });
     }
 
     @Override

@@ -6,9 +6,7 @@ import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
-import com.google.gson.annotations.SerializedName;
 import com.hisu.zola.database.type_converter.ListFriendConverter;
-import com.hisu.zola.database.type_converter.ListUserConverter;
 
 import java.io.Serializable;
 import java.util.List;
@@ -32,6 +30,9 @@ public class User implements Serializable {
 
     @TypeConverters(ListFriendConverter.class)
     private List<User> friendsQueue;
+
+    @TypeConverters(ListFriendConverter.class)
+    private List<User> SendRequestQueue;
 
     @Ignore
     public User() {
@@ -130,6 +131,15 @@ public class User implements Serializable {
         this.friendsQueue = friendsQueue;
     }
 
+    public List<User> getSendRequestQueue() {
+        return SendRequestQueue;
+    }
+
+    public void setSendRequestQueue(List<User> sendRequestQueue) {
+        SendRequestQueue = sendRequestQueue;
+    }
+
+    @NonNull
     @Override
     public String toString() {
         return "User{" +
@@ -143,6 +153,7 @@ public class User implements Serializable {
                 ", gender=" + gender +
                 ", friends=" + friends +
                 ", friendsQueue=" + friendsQueue +
+                ", SendRequestQueue=" + SendRequestQueue +
                 '}';
     }
 }

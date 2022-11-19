@@ -117,9 +117,9 @@ public class FriendRequestReceiveFragment extends Fragment {
 
         } else
             new iOSDialogBuilder(mainActivity)
-                    .setTitle(getString(R.string.no_network_connection))
-                    .setSubtitle(getString(R.string.no_network_connection))
-                    .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                    .setTitle(mainActivity.getString(R.string.no_network_connection))
+                    .setSubtitle(mainActivity.getString(R.string.no_network_connection))
+                    .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
     }
 
     private void denyFriendQuest(User friend) {
@@ -134,9 +134,9 @@ public class FriendRequestReceiveFragment extends Fragment {
 
         } else
             new iOSDialogBuilder(mainActivity)
-                    .setTitle(getString(R.string.no_network_connection))
-                    .setSubtitle(getString(R.string.no_network_connection))
-                    .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                    .setTitle(mainActivity.getString(R.string.no_network_connection))
+                    .setSubtitle(mainActivity.getString(R.string.no_network_connection))
+                    .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
     }
 
     private void accept(RequestBody body, String acceptID) {
@@ -150,9 +150,9 @@ public class FriendRequestReceiveFragment extends Fragment {
                     mainActivity.runOnUiThread(() -> {
                         loadingDialog.dismissDialog();
                         new iOSDialogBuilder(mainActivity)
-                                .setTitle(getString(R.string.notification_warning))
-                                .setSubtitle(getString(R.string.accept_friend_request_success))
-                                .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                                .setTitle(mainActivity.getString(R.string.notification_warning))
+                                .setSubtitle(mainActivity.getString(R.string.accept_friend_request_success))
+                                .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                     });
                 }
             }
@@ -162,9 +162,9 @@ public class FriendRequestReceiveFragment extends Fragment {
                 mainActivity.runOnUiThread(() -> {
                     loadingDialog.dismissDialog();
                     new iOSDialogBuilder(mainActivity)
-                            .setTitle(getString(R.string.notification_warning))
-                            .setSubtitle(getString(R.string.notification_warning_msg))
-                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                            .setTitle(mainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mainActivity.getString(R.string.notification_warning_msg))
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                 });
                 Log.e(FriendRequestReceiveFragment.class.getName(), t.getLocalizedMessage());
             }
@@ -182,9 +182,9 @@ public class FriendRequestReceiveFragment extends Fragment {
                     mainActivity.runOnUiThread(() -> {
                         loadingDialog.dismissDialog();
                         new iOSDialogBuilder(mainActivity)
-                                .setTitle(getString(R.string.notification_warning))
-                                .setSubtitle(getString(R.string.deny_friend_request_success))
-                                .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                                .setTitle(mainActivity.getString(R.string.notification_warning))
+                                .setSubtitle(mainActivity.getString(R.string.deny_friend_request_success))
+                                .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                     });
                 }
             }
@@ -194,9 +194,9 @@ public class FriendRequestReceiveFragment extends Fragment {
                 mainActivity.runOnUiThread(() -> {
                     loadingDialog.dismissDialog();
                     new iOSDialogBuilder(mainActivity)
-                            .setTitle(getString(R.string.notification_warning))
-                            .setSubtitle(getString(R.string.notification_warning_msg))
-                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                            .setTitle(mainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mainActivity.getString(R.string.notification_warning_msg))
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                 });
                 Log.e(FriendRequestReceiveFragment.class.getName(), t.getLocalizedMessage());
             }
@@ -232,9 +232,9 @@ public class FriendRequestReceiveFragment extends Fragment {
                 mainActivity.runOnUiThread(() -> {
                     loadingDialog.dismissDialog();
                     new iOSDialogBuilder(mainActivity)
-                            .setTitle(getString(R.string.notification_warning))
-                            .setSubtitle(getString(R.string.notification_warning_msg))
-                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                            .setTitle(mainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mainActivity.getString(R.string.notification_warning_msg))
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                 });
                 Log.e(AddNewGroupFragment.class.getName(), t.getLocalizedMessage());
             }

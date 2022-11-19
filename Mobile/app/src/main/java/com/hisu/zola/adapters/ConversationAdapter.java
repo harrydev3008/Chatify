@@ -2,7 +2,6 @@ package com.hisu.zola.adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,16 +22,16 @@ import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.LayoutConversationBinding;
 import com.hisu.zola.listeners.IOnConversationItemSelectedListener;
 import com.hisu.zola.util.converter.ImageConvertUtil;
-import com.hisu.zola.util.converter.TimeConverterUtil;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapter.ConversationViewHolder> {
 
@@ -119,31 +118,33 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                 }
             }
 
-            Date date = TimeConverterUtil.getDateFromString(lastMessage.getUpdatedAt());
+            Date date = Date.from(Instant.parse(lastMessage.getCreatedAt()));
+            Date today = Calendar.getInstance(TimeZone.getTimeZone("GMT+7")).getTime();
 
-            if (date != null) {
-                Date today = Calendar.getInstance().getTime();
-                Duration duration = Duration.between(date.toInstant(), today.toInstant());
+            Duration duration = Duration.between(date.toInstant(), today.toInstant());
+            String textPlaceHolder = "";
+            if (duration.toDays() < 1) {
+                if (duration.toHours() > 0 && duration.toHours() < 24)
+                    textPlaceHolder = duration.toHours() + " giờ";
+                else if (duration.toHours() < 1 && (duration.toMinutes() > 0 && duration.toMinutes() < 60))
+                    textPlaceHolder = duration.toMinutes() + " phút";
+                else if (duration.toMinutes() < 1)
+                    textPlaceHolder = mContext.getString(R.string.just_now);
 
-                if (duration.toDays() < 1) {
-                    if (duration.toHours() > 0 && duration.toHours() < 24)
-                        holder.binding.tvConversationActiveTime.setText(duration.toHours() + " giờ");
-                    else if (duration.toHours() < 1 && (duration.toMinutes() > 0 && duration.toMinutes() < 60))
-                        holder.binding.tvConversationActiveTime.setText(duration.toMinutes() + " phút");
-                    else if (duration.toMinutes() < 1)
-                        holder.binding.tvConversationActiveTime.setText(mContext.getString(R.string.just_now));
-                } else {
-                    SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM", Locale.ENGLISH);
-                    holder.binding.tvConversationActiveTime.setText(outputFormat.format(date));
-                }
+                holder.binding.tvConversationActiveTime.setText(textPlaceHolder);
+            } else {
+                SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM", Locale.getDefault());
+                outputFormat.setTimeZone(TimeZone.getTimeZone("GMT+7"));
+                holder.binding.tvConversationActiveTime.setText(outputFormat.format(date));
             }
+
         } else {
             holder.binding.tvLastMsg.setText("");
             holder.binding.tvConversationActiveTime.setText("");
         }
 
-        if(conversation.getDisband() != null) {
-            if(conversation.getDisband().equalsIgnoreCase("kick"))
+        if (conversation.getDisband() != null) {
+            if (conversation.getDisband().equalsIgnoreCase("kick"))
                 holder.binding.tvLastMsg.setText(R.string.last_msg_kicked);
             else
                 holder.binding.tvLastMsg.setText(R.string.last_msg_disbaned);

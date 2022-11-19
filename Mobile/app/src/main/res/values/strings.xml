@@ -1,7 +1,8 @@
 <resources>
 
     <!--App-->
-    <string name="app_name">Zola</string>
+    <string name="app_name">Chatify</string>
+    <string name="app_name_greet">From Chatify team with love</string>
     <string name="slogan">Nhắn gửi yêu thương!</string>
 
     <!--Starter Desc-->
@@ -172,8 +173,8 @@
     <string name="last_msg_kicked">Bạn đã bị xoá khỏi nhóm</string>
     <string name="group_disbanded">Nhóm đã bị giải tán!</string>
     <string name="last_msg_disbaned">Nhóm đã giải tán</string>
-    <string name="group_status_disband">Nhóm đã giải tán, bạn không thể gửi tin nhắn vào nhóm được nữa.</string>
-    <string name="group_status_kick">Bạn đã bị xoá khỏi nhóm, bạn không thể gửi tin nhắn vào nhóm được nữa.</string>
+    <string name="group_status_disband">Nhóm đã giải tán, bạn không thể gửi tin nhắn vào nhóm được nữa.  <font fgcolor='#0978f5'>Xoá cuộc trò chuyện</font></string>
+    <string name="group_status_kick">Bạn đã bị xoá khỏi nhóm, bạn không thể gửi tin nhắn vào nhóm được nữa. <font fgcolor='#0978f5'>Xoá cuộc trò chuyện</font></string>
     <string name="change_admin_success">Chuyển trưởng nhóm thành công!</string>
     <string name="change_admin_confirm">Chọn người này làm trưởng nhóm mới?</string>
     <string name="pick_new_admin">Chọn trưởng nhóm mới</string>
@@ -215,6 +216,8 @@
     <string name="yes">Có</string>
     <string name="no">Không</string>
     <string name="no_network_connection">Không có kết nối mạng!</string>
+    <string name="connection_lost">Không có kết nối mạng</string>
+    <string name="connection_available">Đã có kết nối mạng</string>
     <string name="no_network_connection_desc">Vui lòng kiểm tra lại kết nối mạng của bạn và thử lại sau!</string>
     <string name="no_network_connection_to_sync">Cần có kết nối mạng để thực hiện việc đồng bộ! Vui lòng kiểm tra lại kết nối mạng của bạn và thử lại sau!</string>
 

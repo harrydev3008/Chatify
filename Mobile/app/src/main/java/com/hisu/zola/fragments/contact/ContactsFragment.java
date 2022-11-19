@@ -67,12 +67,12 @@ public class ContactsFragment extends Fragment {
         new TabLayoutMediator(mBinding.tlContact, mBinding.vpContact, (tab, position) -> {
             switch (position) {
                 case 0: {
-                    tab.setText(getString(R.string.tab_contact_friend));
+                    tab.setText(mMainActivity.getString(R.string.tab_contact_friend));
                     break;
                 }
 
                 case 1: {
-                    tab.setText(getString(R.string.tab_contact_group));
+                    tab.setText(mMainActivity.getString(R.string.tab_contact_group));
                     break;
                 }
             }

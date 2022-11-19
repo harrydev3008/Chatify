@@ -147,13 +147,13 @@ public class EditProfileFragment extends Fragment {
                 backToPrevPage();
             } else {
                 new iOSDialogBuilder(mainActivity)
-                        .setTitle(getString(R.string.notification_warning))
-                        .setSubtitle(getString(R.string.changes_not_save))
-                        .setPositiveListener(getString(R.string.yes), dialog -> {
+                        .setTitle(mainActivity.getString(R.string.notification_warning))
+                        .setSubtitle(mainActivity.getString(R.string.changes_not_save))
+                        .setPositiveListener(mainActivity.getString(R.string.yes), dialog -> {
                             dialog.dismiss();
                             backToPrevPage();
                         })
-                        .setNegativeListener(getString(R.string.no), iOSDialog::dismiss).build().show();
+                        .setNegativeListener(mainActivity.getString(R.string.no), iOSDialog::dismiss).build().show();
             }
         });
     }
@@ -215,11 +215,11 @@ public class EditProfileFragment extends Fragment {
                     mCalendar.get(Calendar.DAY_OF_MONTH)
             );
 
-            datePickerDialog.setTitle(getString(R.string.dob));
+            datePickerDialog.setTitle(mainActivity.getString(R.string.dob));
             datePickerDialog.setIcon(R.drawable.ic_calendar);
             datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            datePickerDialog.setButton(DatePickerDialog.BUTTON_NEGATIVE, getString(R.string.cancel), datePickerDialog);
-            datePickerDialog.setButton(DatePickerDialog.BUTTON_POSITIVE, getString(R.string.confirm), datePickerDialog);
+            datePickerDialog.setButton(DatePickerDialog.BUTTON_NEGATIVE, mainActivity.getString(R.string.cancel), datePickerDialog);
+            datePickerDialog.setButton(DatePickerDialog.BUTTON_POSITIVE, mainActivity.getString(R.string.confirm), datePickerDialog);
             datePickerDialog.show();
         });
     }
@@ -239,13 +239,13 @@ public class EditProfileFragment extends Fragment {
 
         if (validateUserUpdateData()) {
             new iOSDialogBuilder(mainActivity)
-                    .setTitle(getString(R.string.confirm_update_profile))
-                    .setSubtitle(getString(R.string.confirm_update_profile_desc))
-                    .setPositiveListener(getString(R.string.confirm), dialog -> {
+                    .setTitle(mainActivity.getString(R.string.confirm_update_profile))
+                    .setSubtitle(mainActivity.getString(R.string.confirm_update_profile_desc))
+                    .setPositiveListener(mainActivity.getString(R.string.confirm), dialog -> {
                         dialog.dismiss();
                         updateProfile();
                     })
-                    .setNegativeListener(getString(R.string.cancel), iOSDialog::dismiss).build().show();
+                    .setNegativeListener(mainActivity.getString(R.string.cancel), iOSDialog::dismiss).build().show();
 
         }
     }
@@ -325,10 +325,10 @@ public class EditProfileFragment extends Fragment {
                     repository.update(user);
 
                     new iOSDialogBuilder(mainActivity)
-                            .setTitle(getString(R.string.notification_warning))
-                            .setSubtitle(getString(R.string.update_self_info_success))
+                            .setTitle(mainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mainActivity.getString(R.string.update_self_info_success))
                             .setCancelable(false)
-                            .setPositiveListener(getString(R.string.confirm), dialog -> {
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), dialog -> {
                                 dialog.dismiss();
                                 currentUser = LocalDataManager.getCurrentUserInfo();
                                 loadUserInfo();
@@ -349,24 +349,24 @@ public class EditProfileFragment extends Fragment {
     private boolean validateUserUpdateData() {
 
         if (TextUtils.isEmpty(mBinding.edtDisplayName.getText().toString().trim())) {
-            mBinding.edtDisplayName.setError(getString(R.string.empty_err_displayname));
+            mBinding.edtDisplayName.setError(mainActivity.getString(R.string.empty_err_displayname));
             mBinding.edtDisplayName.requestFocus();
             return false;
         }
 
         if (TextUtils.isEmpty(mBinding.edtDob.getText().toString().trim())) {
             new iOSDialogBuilder(mainActivity)
-                    .setTitle(getString(R.string.notification_warning))
-                    .setSubtitle(getString(R.string.empty_dob_err))
-                    .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                    .setTitle(mainActivity.getString(R.string.notification_warning))
+                    .setSubtitle(mainActivity.getString(R.string.empty_dob_err))
+                    .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
             return false;
         }
 
         if (calculateAge(mBinding.edtDob.getText().toString()) < 15) {
             new iOSDialogBuilder(mainActivity)
-                    .setTitle(getString(R.string.notification_warning))
-                    .setSubtitle(getString(R.string.err_age))
-                    .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                    .setTitle(mainActivity.getString(R.string.notification_warning))
+                    .setSubtitle(mainActivity.getString(R.string.err_age))
+                    .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
             return false;
         }
 

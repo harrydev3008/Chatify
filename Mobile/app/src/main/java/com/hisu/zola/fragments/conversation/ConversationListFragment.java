@@ -1,6 +1,7 @@
 package com.hisu.zola.fragments.conversation;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -8,24 +9,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.github.ybq.android.spinkit.sprite.Sprite;
-import com.github.ybq.android.spinkit.style.Circle;
-import com.github.ybq.android.spinkit.style.FadingCircle;
-import com.github.ybq.android.spinkit.style.WanderingCubes;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -43,12 +40,13 @@ import com.hisu.zola.database.repository.MessageRepository;
 import com.hisu.zola.databinding.FragmentConversationListBinding;
 import com.hisu.zola.databinding.LayoutPopupBinding;
 import com.hisu.zola.fragments.AddFriendFragment;
-import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.EditTextUtil;
-import com.hisu.zola.util.network.Constraints;
-import com.hisu.zola.util.network.NetworkUtil;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
+import com.hisu.zola.util.network.ApiService;
+import com.hisu.zola.util.network.Constraints;
+import com.hisu.zola.util.network.NetworkConnectionModel;
+import com.hisu.zola.util.network.NetworkUtil;
 import com.hisu.zola.view_model.ConversationListViewModel;
 
 import org.json.JSONException;
@@ -98,19 +96,21 @@ public class ConversationListFragment extends Fragment {
         mMainActivity.setProgressbarVisibility(View.GONE);
         messageRepository = new MessageRepository(mMainActivity.getApplication());
 
+        checkNetWorkConnection();
+
         SocketIOHandler.getInstance();
         SocketIOHandler.getInstance().establishSocketConnection();
 
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
-        mSocket.on("addMemberToGroup-receive", onReceive);
-        mSocket.on("deleteMemberGroup-receive", onReceiveRemoveMember);
-        mSocket.on("changeGroupName-receive", onReceiveChangeGroupName);
-        mSocket.on("outGroup-receive", onReceiveOutGroup);
-        mSocket.on("addConversation-receive", onReceiveNewGroup);
-        mSocket.on("changeCreatorGroup-receive", onReceiveNewAdmin);
-        mSocket.on("deleteGroup-receive", onDisbandGroup);
-        mSocket.on("msg-receive", onMessageReceive);
-        mSocket.on("delete-receive", onMessageDeleteReceive);
+        mSocket.on(Constraints.EVT_ADD_MEMBER_RECEIVE, onReceive);
+        mSocket.on(Constraints.EVT_REMOVE_MEMBER_RECEIVE, onReceiveRemoveMember);
+        mSocket.on(Constraints.EVT_CHANGE_GROUP_NAME_RECEIVE, onReceiveChangeGroupName);
+        mSocket.on(Constraints.EVT_OUT_GROUP_RECEIVE, onReceiveOutGroup);
+        mSocket.on(Constraints.EVT_CREATE_GROUP_RECEIVE, onReceiveNewGroup);
+        mSocket.on(Constraints.EVT_CHANGE_GROUP_ADMIN_RECEIVE, onReceiveNewAdmin);
+        mSocket.on(Constraints.EVT_DELETE_GROUP_RECEIVE, onDisbandGroup);
+        mSocket.on(Constraints.EVT_MESSAGE_RECEIVE, onMessageReceive);
+        mSocket.on(Constraints.EVT_DELETE_MESSAGE_RECEIVE, onMessageDeleteReceive);
 
         initConversationListRecyclerView();
         filter();
@@ -123,6 +123,33 @@ public class ConversationListFragment extends Fragment {
 
         if (NetworkUtil.isConnectionAvailable(mMainActivity))
             loadConversationList();
+    }
+
+    private void checkNetWorkConnection() {
+        NetworkConnectionModel connectionModel = new NetworkConnectionModel(mMainActivity.getApplication());
+        connectionModel.getNetworkInfo().observe(mMainActivity, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean isAvailable) {
+                if (isAvailable) {
+
+                    if (mBinding.tvNetworkConnection.getVisibility() == View.GONE) return;
+
+                    mBinding.tvNetworkConnection.setVisibility(View.VISIBLE);
+                    mBinding.tvNetworkConnection.setText(mMainActivity.getString(R.string.connection_available));
+                    mBinding.tvNetworkConnection.setTextColor(Color.WHITE);
+                    mBinding.tvNetworkConnection.setBackgroundColor(mMainActivity.getColor(R.color.connection));
+
+                    mBinding.tvNetworkConnection.postDelayed(() -> {
+                        mBinding.tvNetworkConnection.setVisibility(View.GONE);
+                    }, 3 * 1000);
+                } else {
+                    mBinding.tvNetworkConnection.setVisibility(View.VISIBLE);
+                    mBinding.tvNetworkConnection.setText(mMainActivity.getString(R.string.connection_lost));
+                    mBinding.tvNetworkConnection.setTextColor(Color.BLACK);
+                    mBinding.tvNetworkConnection.setBackgroundColor(mMainActivity.getColor(R.color.gray_e5));
+                }
+            }
+        });
     }
 
     private void initConversationListRecyclerView() {
@@ -144,16 +171,16 @@ public class ConversationListFragment extends Fragment {
 
         adapter.setOnConversationItemSelectedListener((conversation, conversationName) -> {
             mMainActivity.setBottomNavVisibility(View.GONE);
-            mMainActivity.getSupportFragmentManager().beginTransaction()
-                    .setCustomAnimations(
-                            R.anim.slide_in_left, R.anim.slide_out_left,
-                            R.anim.slide_out_right, R.anim.slide_out_right)
-                    .replace(
-                            mMainActivity.getViewContainerID(),
-                            ConversationFragment.newInstance(conversation, conversationName)
-                    )
-                    .addToBackStack("Single_Conversation")
-                    .commit();
+            FragmentTransaction fragmentTransaction = mMainActivity.getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.setCustomAnimations(
+                    R.anim.slide_in_left, R.anim.slide_out_left,
+                    R.anim.slide_out_right, R.anim.slide_out_right);
+
+            fragmentTransaction.hide(this);
+            fragmentTransaction.add(mMainActivity.getViewContainerID(), ConversationFragment.newInstance(conversation, conversationName));
+            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            fragmentTransaction.commit();
         });
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(
@@ -209,9 +236,6 @@ public class ConversationListFragment extends Fragment {
             public void onResponse(@NonNull Call<List<Conversation>> call, @NonNull Response<List<Conversation>> response) {
                 if (response.isSuccessful() && response.code() == 200) {
                     List<Conversation> conversations = response.body();
-                    for (Conversation conversationT : conversations) {
-                        Log.e("formserver", conversationT.toString());
-                    }
                     if (conversations != null && conversations.size() != 0) {
                         viewModel.insertAll(conversations);
                         loadMessageList(conversations);
@@ -221,7 +245,7 @@ public class ConversationListFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<List<Conversation>> call, @NonNull Throwable t) {
-                Log.e("API_ERR", t.getLocalizedMessage());
+                Log.e(ConversationListFragment.class.getName(), t.getLocalizedMessage());
             }
         });
     }
@@ -302,21 +326,19 @@ public class ConversationListFragment extends Fragment {
     private final Emitter.Listener onReceive = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            mMainActivity.runOnUiThread(() -> {
-                JSONObject data = (JSONObject) args[0];
-                if (data != null) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
 
-                    try {
-                        Gson gson = new Gson();
+                try {
+                    Gson gson = new Gson();
 
-                        Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
-                        viewModel.insertOrUpdate(conversation);
+                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+                    viewModel.insertOrUpdate(conversation);
 
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            });
+            }
         }
     };
 
@@ -332,13 +354,13 @@ public class ConversationListFragment extends Fragment {
                     Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
 
                     for (User member : conversation.getMember()) {
-                        if(member.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId())) {
+                        if (member.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId())) {
                             isKicked = false;
                             break;
                         }
                     }
 
-                    if(isKicked) {
+                    if (isKicked) {
                         viewModel.disbandGroup(conversation, "kick");
                         messageRepository.deleteAllMessage(conversation.getId());
                     } else {
@@ -355,140 +377,125 @@ public class ConversationListFragment extends Fragment {
     private final Emitter.Listener onReceiveChangeGroupName = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            mMainActivity.runOnUiThread(() -> {
-                JSONObject data = (JSONObject) args[0];
-                if (data != null) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+                try {
+                    Gson gson = new Gson();
 
-                    try {
-                        Gson gson = new Gson();
+                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+                    viewModel.insertOrUpdate(conversation);
 
-                        Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
-                        viewModel.insertOrUpdate(conversation);
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            });
+            }
         }
     };
 
     private final Emitter.Listener onReceiveOutGroup = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            mMainActivity.runOnUiThread(() -> {
-                JSONObject data = (JSONObject) args[0];
-                if (data != null) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+                try {
+                    Gson gson = new Gson();
 
-                    try {
-                        Gson gson = new Gson();
+                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+                    viewModel.insertOrUpdate(conversation);
 
-                        Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
-                        viewModel.insertOrUpdate(conversation);
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            });
+            }
         }
     };
 
     private final Emitter.Listener onReceiveNewGroup = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            mMainActivity.runOnUiThread(() -> {
-                JSONObject data = (JSONObject) args[0];
-                if (data != null) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+                try {
+                    Gson gson = new Gson();
 
-                    try {
-                        Gson gson = new Gson();
+                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+                    viewModel.insertOrUpdate(conversation);
 
-                        Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
-                        viewModel.insertOrUpdate(conversation);
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            });
+            }
         }
     };
 
     private final Emitter.Listener onReceiveNewAdmin = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            mMainActivity.runOnUiThread(() -> {
-                JSONObject data = (JSONObject) args[0];
-                if (data != null) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
 
-                    try {
-                        Gson gson = new Gson();
+                try {
+                    Gson gson = new Gson();
 
-                        Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
-                        viewModel.insertOrUpdate(conversation);
+                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+                    viewModel.insertOrUpdate(conversation);
 
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            });
+            }
         }
     };
 
     private final Emitter.Listener onDisbandGroup = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            mMainActivity.runOnUiThread(() -> {
-                JSONObject data = (JSONObject) args[0];
-                if (data != null) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
 
-                    try {
-                        Gson gson = new Gson();
+                try {
+                    Gson gson = new Gson();
 
-                        Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
 
-                        viewModel.disbandGroup(conversation, "disband");
-                        messageRepository.deleteAllMessage(conversation.getId());
+                    viewModel.disbandGroup(conversation, "disband");
+                    messageRepository.deleteAllMessage(conversation.getId());
 
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            });
+            }
         }
     };
 
     private final Emitter.Listener onMessageReceive = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            mMainActivity.runOnUiThread(() -> {
-                JSONObject data = (JSONObject) args[0];
-                if (data != null) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
 
-                    try {
+                try {
 
-                        Gson gson = new Gson();
+                    Gson gson = new Gson();
 
-                        Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
+                    Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
 
-                        User sender = gson.fromJson(data.getString("sender"), User.class);
+                    User sender = gson.fromJson(data.getString("sender"), User.class);
 
-                        List<Media> media = gson.fromJson(data.get("media").toString(), new TypeToken<List<Media>>() {
-                        }.getType());
+                    List<Media> media = gson.fromJson(data.get("media").toString(), new TypeToken<List<Media>>() {
+                    }.getType());
 
-                        Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
-                                data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, false);
+                    Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
+                            data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, false);
 
-                        conversation.setLastMessage(message);
-                        viewModel.insertOrUpdate(conversation);
-                        messageRepository.insertOrUpdate(message);
+                    conversation.setLastMessage(message);
+                    viewModel.insertOrUpdate(conversation);
+                    messageRepository.insertOrUpdate(message);
 
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            });
+            }
         }
     };
 

@@ -2,6 +2,7 @@ package com.hisu.zola.util.dialog;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
@@ -11,16 +12,23 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.gdacciaro.iOSDialog.iOSDialog;
 import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.google.gson.JsonObject;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.LayoutAddFriendBinding;
-import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.local.LocalDataManager;
+import com.hisu.zola.util.network.ApiService;
+import com.hisu.zola.util.network.Constraints;
+
+import java.util.List;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -35,6 +43,7 @@ public class AddFriendDialog {
     private final int gravity;
     private final User findUser;
     private LayoutAddFriendBinding binding;
+    private User currentUser;
 
     public AddFriendDialog(Context context, int gravity, User findUser) {
         this.context = context;
@@ -46,7 +55,7 @@ public class AddFriendDialog {
     private void initDialog() {
 
         binding = LayoutAddFriendBinding.inflate(LayoutInflater.from(context), null, false);
-
+        currentUser = LocalDataManager.getCurrentUserInfo();
         dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(binding.getRoot());
@@ -72,18 +81,33 @@ public class AddFriendDialog {
         binding.tvFriendName.setText(findUser.getUsername());
         binding.tvGender.setText(findUser.isGender() ? context.getString(R.string.gender_m) : context.getString(R.string.gender_f));
         binding.tvDob.setText(findUser.getDob());
-        Glide.with(context).load(findUser.getAvatarURL()).into(binding.cimvFriendPfp);
+        Glide.with(context)
+                .asBitmap().load(findUser.getAvatarURL())
+                .diskCacheStrategy(DiskCacheStrategy.ALL).into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        binding.cimvFriendPfp.setImageBitmap(resource);
+                        binding.cimvFriendPfp.setVisibility(View.VISIBLE);
+                    }
+                });
 
-        User currentUser = LocalDataManager.getCurrentUserInfo();
-
-        for (User friend : currentUser.getFriends())
-            if (findUser.getId().equalsIgnoreCase(friend.getId())) {
-                binding.btnSentRequest.setVisibility(View.GONE);
-                break;
-            }
+        if (isFriendOrCurrentUser())
+            binding.btnSentRequest.setVisibility(View.GONE);
 
         addActionForBtnDismiss();
         addActionForBtnAddFriend();
+    }
+
+    private boolean isFriendOrCurrentUser() {
+        if (findUser.getId().equalsIgnoreCase(currentUser.getId())) return true;
+
+        List<User> friends = currentUser.getFriends();
+
+        for (User friend : friends)
+            if (findUser.getId().equalsIgnoreCase(friend.getId()))
+                return true;
+
+        return false;
     }
 
     private void addActionForBtnDismiss() {
@@ -97,7 +121,7 @@ public class AddFriendDialog {
 
             JsonObject object = new JsonObject();
             object.addProperty("userId", findUser.getId());
-            RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
+            RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
 
             ApiService.apiService.sendFriendRequest(body).enqueue(new Callback<Object>() {
                 @Override

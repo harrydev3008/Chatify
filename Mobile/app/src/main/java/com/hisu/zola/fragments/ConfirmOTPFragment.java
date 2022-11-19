@@ -261,9 +261,9 @@ public class ConfirmOTPFragment extends Fragment {
     private boolean verifyOTP(String otp) {
         if (otp.length() < 6) {
             new iOSDialogBuilder(mainActivity)
-                    .setTitle(getString(R.string.notification_warning))
-                    .setSubtitle(getString(R.string.empty_otp_err))
-                    .setPositiveListener(getString(R.string.confirm), dialog -> {
+                    .setTitle(mainActivity.getString(R.string.notification_warning))
+                    .setSubtitle(mainActivity.getString(R.string.empty_otp_err))
+                    .setPositiveListener(mainActivity.getString(R.string.confirm), dialog -> {
                         clearOTPInput();
                         dialog.dismiss();
                     }).build().show();
@@ -316,10 +316,10 @@ public class ConfirmOTPFragment extends Fragment {
                             @Override
                             public void onVerificationFailed(@NonNull FirebaseException e) {
                                 new iOSDialogBuilder(mainActivity)
-                                        .setTitle(getString(R.string.otp_verification_err))
+                                        .setTitle(mainActivity.getString(R.string.otp_verification_err))
                                         .setSubtitle(e.getLocalizedMessage())
                                         .setCancelable(true)
-                                        .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                                        .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                             }
 
                             @Override
@@ -390,9 +390,9 @@ public class ConfirmOTPFragment extends Fragment {
                             @Override
                             public void onVerificationFailed(@NonNull FirebaseException e) {
                                 new iOSDialogBuilder(mainActivity)
-                                        .setTitle(getString(R.string.otp_verification_err))
+                                        .setTitle(mainActivity.getString(R.string.otp_verification_err))
                                         .setSubtitle(e.getLocalizedMessage())
-                                        .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                                        .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                             }
 
                             @Override
@@ -418,9 +418,9 @@ public class ConfirmOTPFragment extends Fragment {
                         } else {
                             if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
                                 new iOSDialogBuilder(mainActivity)
-                                        .setTitle(getString(R.string.otp_verification_err))
-                                        .setSubtitle(getString(R.string.wrong_otp_err))
-                                        .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                                        .setTitle(mainActivity.getString(R.string.otp_verification_err))
+                                        .setSubtitle(mainActivity.getString(R.string.wrong_otp_err))
+                                        .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                             }
                         }
                     }
@@ -447,9 +447,9 @@ public class ConfirmOTPFragment extends Fragment {
 
                     mainActivity.runOnUiThread(() -> {
                         new iOSDialogBuilder(mainActivity)
-                                .setTitle(getString(R.string.notification_warning))
-                                .setSubtitle(getString(R.string.change_phone_no_success))
-                                .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                .setTitle(mainActivity.getString(R.string.notification_warning))
+                                .setSubtitle(mainActivity.getString(R.string.change_phone_no_success))
+                                .setPositiveListener(mainActivity.getString(R.string.confirm), dialog -> {
                                     dialog.dismiss();
                                     mainActivity.getSupportFragmentManager().popBackStackImmediate();
                                     mainActivity.getSupportFragmentManager().popBackStackImmediate();

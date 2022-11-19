@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,8 +23,8 @@ import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentConversationDetailBinding;
-import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.local.LocalDataManager;
+import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.network.Constraints;
 
 import java.util.List;
@@ -118,20 +117,20 @@ public class ConversationDetailFragment extends Fragment {
 
     private void addActionForEventDeleteConversation() {
         mBinding.tvDeleteConversation.setOnClickListener(view -> {
-            String url = "https://docs.google.com/gview?embedded=true&url=https://d2w6fysp0et4n5.cloudfront.net/77db10637eb598a5fadc120e034824f2.pdf";
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            startActivity(browserIntent);
+//            String url = "https://docs.google.com/gview?embedded=true&url=https://d2w6fysp0et4n5.cloudfront.net/77db10637eb598a5fadc120e034824f2.pdf";
+//            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+//            startActivity(browserIntent);
         });
     }
 
     private void addActionForEventUnfriend() {
         mBinding.tvUnfriend.setOnClickListener(view -> {
             new iOSDialogBuilder(mainActivity)
-                    .setTitle(getString(R.string.confirm))
-                    .setSubtitle(getString(R.string.unfriend_confirm))
+                    .setTitle(mainActivity.getString(R.string.confirm))
+                    .setSubtitle(mainActivity.getString(R.string.unfriend_confirm))
                     .setCancelable(false)
-                    .setNegativeListener(getString(R.string.no), iOSDialog::dismiss)
-                    .setPositiveListener(getString(R.string.yes), dialog -> {
+                    .setNegativeListener(mainActivity.getString(R.string.no), iOSDialog::dismiss)
+                    .setPositiveListener(mainActivity.getString(R.string.yes), dialog -> {
                         dialog.dismiss();
                         unfriend();
                     }).build().show();
@@ -155,10 +154,10 @@ public class ConversationDetailFragment extends Fragment {
                 if (response.isSuccessful() && response.code() == 200) {
                     mainActivity.runOnUiThread(() -> {
                         new iOSDialogBuilder(mainActivity)
-                                .setTitle(getString(R.string.notification_warning))
-                                .setSubtitle(getString(R.string.friend_request_sent_success))
+                                .setTitle(mainActivity.getString(R.string.notification_warning))
+                                .setSubtitle(mainActivity.getString(R.string.friend_request_sent_success))
                                 .setCancelable(false)
-                                .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                .setPositiveListener(mainActivity.getString(R.string.confirm), dialog -> {
                                     dialog.dismiss();
                                     mainActivity.getSupportFragmentManager().popBackStackImmediate();
                                     mainActivity.getSupportFragmentManager().popBackStackImmediate();
@@ -209,10 +208,10 @@ public class ConversationDetailFragment extends Fragment {
 
                     mainActivity.runOnUiThread(() -> {
                         new iOSDialogBuilder(mainActivity)
-                                .setTitle(getString(R.string.notification_warning))
-                                .setSubtitle(getString(R.string.unfriend_success))
+                                .setTitle(mainActivity.getString(R.string.notification_warning))
+                                .setSubtitle(mainActivity.getString(R.string.unfriend_success))
                                 .setCancelable(false)
-                                .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                .setPositiveListener(mainActivity.getString(R.string.confirm), dialog -> {
                                     dialog.dismiss();
                                     mainActivity.getSupportFragmentManager().popBackStackImmediate();
                                     mainActivity.getSupportFragmentManager().popBackStackImmediate();

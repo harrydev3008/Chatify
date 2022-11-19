@@ -97,7 +97,7 @@
         android:layout_marginTop="24dp"
         android:inputType="number"
         android:hint="@string/new_phone"
-        android:maxLength="12"
+        android:maxLength="11"
         android:textSize="20sp"
         android:textCursorDrawable="@drawable/edt_cursor"
         android:paddingVertical="8dp"

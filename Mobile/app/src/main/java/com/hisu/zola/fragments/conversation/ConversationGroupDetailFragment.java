@@ -14,6 +14,7 @@ import androidx.lifecycle.Observer;
 
 import com.gdacciaro.iOSDialog.iOSDialog;
 import com.gdacciaro.iOSDialog.iOSDialogBuilder;
+import com.google.android.exoplayer2.C;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
@@ -181,9 +182,9 @@ public class ConversationGroupDetailFragment extends Fragment {
                 mainActivity.runOnUiThread(() -> {
                     loadingDialog.dismissDialog();
                     new iOSDialogBuilder(mainActivity)
-                            .setTitle(getString(R.string.notification_warning))
-                            .setSubtitle(getString(R.string.notification_warning_msg))
-                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                            .setTitle(mainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mainActivity.getString(R.string.notification_warning_msg))
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                 });
                 Log.e(ConversationGroupDetailFragment.class.getName(), t.getLocalizedMessage());
             }
@@ -193,13 +194,13 @@ public class ConversationGroupDetailFragment extends Fragment {
     private void addActionForBtnDisbandGroup() {
         mBinding.tvDisbandGroup.setOnClickListener(view -> {
             new iOSDialogBuilder(mainActivity)
-                    .setTitle(getString(R.string.confirm))
-                    .setSubtitle(getString(R.string.disband_group_confirm))
-                    .setPositiveListener(getString(R.string.yes), dialog -> {
+                    .setTitle(mainActivity.getString(R.string.confirm))
+                    .setSubtitle(mainActivity.getString(R.string.disband_group_confirm))
+                    .setPositiveListener(mainActivity.getString(R.string.yes), dialog -> {
                         dialog.dismiss();
                         disbandGroup();
                     })
-                    .setNegativeListener(getString(R.string.no), iOSDialog::dismiss).build().show();
+                    .setNegativeListener(mainActivity.getString(R.string.no), iOSDialog::dismiss).build().show();
         });
     }
 
@@ -216,10 +217,10 @@ public class ConversationGroupDetailFragment extends Fragment {
                     mainActivity.runOnUiThread(() -> {
                         loadingDialog.dismissDialog();
                         new iOSDialogBuilder(mainActivity)
-                                .setTitle(getString(R.string.notification_warning))
-                                .setSubtitle(getString(R.string.disband_group_success))
+                                .setTitle(mainActivity.getString(R.string.notification_warning))
+                                .setSubtitle(mainActivity.getString(R.string.disband_group_success))
                                 .setCancelable(false)
-                                .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                .setPositiveListener(mainActivity.getString(R.string.confirm), dialog -> {
                                     dialog.dismiss();
                                     emitDisbandGroup(conversation);
                                 }).build().show();
@@ -232,9 +233,9 @@ public class ConversationGroupDetailFragment extends Fragment {
                 mainActivity.runOnUiThread(() -> {
                     loadingDialog.dismissDialog();
                     new iOSDialogBuilder(mainActivity)
-                            .setTitle(getString(R.string.notification_warning))
-                            .setSubtitle(getString(R.string.notification_warning_msg))
-                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                            .setTitle(mainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mainActivity.getString(R.string.notification_warning_msg))
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                 });
                 Log.e(ConversationGroupDetailFragment.class.getName(), t.getLocalizedMessage());
             }
@@ -272,9 +273,9 @@ public class ConversationGroupDetailFragment extends Fragment {
                         .build().show();
             } else {
                 new iOSDialogBuilder(mainActivity)
-                        .setTitle(getString(R.string.confirm))
-                        .setSubtitle(getString(R.string.confirm_out_group))
-                        .setPositiveListener(getString(R.string.yes), dialog -> {
+                        .setTitle(mainActivity.getString(R.string.confirm))
+                        .setSubtitle(mainActivity.getString(R.string.confirm_out_group))
+                        .setPositiveListener(mainActivity.getString(R.string.yes), dialog -> {
                             dialog.dismiss();
                             List<User> members = conversation.getMember();
                             for (User user : members) {
@@ -286,7 +287,7 @@ public class ConversationGroupDetailFragment extends Fragment {
                             conversation.setMember(members);
                             outGroup(conversation);
                         })
-                        .setNegativeListener(getString(R.string.no), iOSDialog::dismiss).build().show();
+                        .setNegativeListener(mainActivity.getString(R.string.no), iOSDialog::dismiss).build().show();
             }
         });
     }
@@ -315,9 +316,9 @@ public class ConversationGroupDetailFragment extends Fragment {
                 mainActivity.runOnUiThread(() -> {
                     loadingDialog.dismissDialog();
                     new iOSDialogBuilder(mainActivity)
-                            .setTitle(getString(R.string.notification_warning))
-                            .setSubtitle(getString(R.string.notification_warning_msg))
-                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                            .setTitle(mainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mainActivity.getString(R.string.notification_warning_msg))
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                 });
                 Log.e(ConversationGroupDetailFragment.class.getName(), t.getLocalizedMessage());
             }
@@ -337,7 +338,7 @@ public class ConversationGroupDetailFragment extends Fragment {
         emitMsg.add("conversation", gson.toJsonTree(conversation));
         emitMsg.addProperty("userChange", LocalDataManager.getCurrentUserInfo().getId());
 
-        mSocket.emit("changeGroupName", emitMsg);
+        mSocket.emit(Constraints.EVT_CHANGE_GROUP_NAME, emitMsg);
     }
 
     private void emitOutGroup(Conversation conversation) {
@@ -352,7 +353,7 @@ public class ConversationGroupDetailFragment extends Fragment {
         JsonObject emitMsg = new JsonObject();
         emitMsg.add("conversation", gson.toJsonTree(conversation));
 
-        mSocket.emit("outGroup", emitMsg);
+        mSocket.emit(Constraints.EVT_OUT_GROUP, emitMsg);
         repository.delete(conversation.getId());
     }
 
@@ -393,9 +394,9 @@ public class ConversationGroupDetailFragment extends Fragment {
                 mainActivity.runOnUiThread(() -> {
                     loadingDialog.dismissDialog();
                     new iOSDialogBuilder(mainActivity)
-                            .setTitle(getString(R.string.notification_warning))
-                            .setSubtitle(getString(R.string.notification_warning_msg))
-                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                            .setTitle(mainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mainActivity.getString(R.string.notification_warning_msg))
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                 });
                 Log.e(ChangeAdminFragment.class.getName(), t.getLocalizedMessage());
             }
@@ -414,7 +415,7 @@ public class ConversationGroupDetailFragment extends Fragment {
         JsonObject emitMsg = new JsonObject();
         emitMsg.add("conversation", gson.toJsonTree(conversation));
 
-        mSocket.emit("changeCreatorGroup", emitMsg);
+        mSocket.emit(Constraints.EVT_CHANGE_GROUP_ADMIN, emitMsg);
     }
 
     private void emitDisbandGroup(Conversation conversation) {
@@ -429,7 +430,7 @@ public class ConversationGroupDetailFragment extends Fragment {
         JsonObject emitMsg = new JsonObject();
         emitMsg.add("conversation", gson.toJsonTree(conversation));
 
-        mSocket.emit("deleteGroup", emitMsg);
+        mSocket.emit(Constraints.EVT_DELETE_GROUP, emitMsg);
 
         repository.delete(conversation.getId());
         mainActivity.setBottomNavVisibility(View.VISIBLE);

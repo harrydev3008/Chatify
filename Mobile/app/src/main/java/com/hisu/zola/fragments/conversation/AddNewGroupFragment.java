@@ -103,13 +103,13 @@ public class AddNewGroupFragment extends Fragment {
                 backToPrevPage();
             } else {
                 new iOSDialogBuilder(mainActivity)
-                        .setTitle(getString(R.string.notification_warning))
-                        .setSubtitle(getString(R.string.changes_not_save))
-                        .setPositiveListener(getString(R.string.yes), dialog -> {
+                        .setTitle(mainActivity.getString(R.string.notification_warning))
+                        .setSubtitle(mainActivity.getString(R.string.changes_not_save))
+                        .setPositiveListener(mainActivity.getString(R.string.yes), dialog -> {
                             dialog.dismiss();
                             backToPrevPage();
                         })
-                        .setNegativeListener(getString(R.string.no), iOSDialog::dismiss).build().show();
+                        .setNegativeListener(mainActivity.getString(R.string.no), iOSDialog::dismiss).build().show();
             }
         });
     }
@@ -121,9 +121,9 @@ public class AddNewGroupFragment extends Fragment {
                     addNewGroup();
                 else
                     new iOSDialogBuilder(mainActivity)
-                            .setTitle(getString(R.string.no_network_connection))
-                            .setSubtitle(getString(R.string.no_network_connection_desc))
-                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                            .setTitle(mainActivity.getString(R.string.no_network_connection))
+                            .setSubtitle(mainActivity.getString(R.string.no_network_connection_desc))
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
             }
         });
     }
@@ -139,7 +139,7 @@ public class AddNewGroupFragment extends Fragment {
 
     private boolean validateGroupInfo() {
         if (mBinding.edtGroupName.getText().toString().trim().isEmpty()) {
-            mBinding.edtGroupName.setError(getString(R.string.empty_group_name_err));
+            mBinding.edtGroupName.setError(mainActivity.getString(R.string.empty_group_name_err));
             mBinding.edtGroupName.requestFocus();
             return false;
         }
@@ -170,10 +170,10 @@ public class AddNewGroupFragment extends Fragment {
                         loadingDialog.dismissDialog();
 
                         new iOSDialogBuilder(mainActivity)
-                                .setTitle(getString(R.string.notification_warning))
-                                .setSubtitle(getString(R.string.add_new_group_success))
+                                .setTitle(mainActivity.getString(R.string.notification_warning))
+                                .setSubtitle(mainActivity.getString(R.string.add_new_group_success))
                                 .setCancelable(false)
-                                .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                .setPositiveListener(mainActivity.getString(R.string.confirm), dialog -> {
                                     dialog.dismiss();
                                     emitRemoveMember(conversation);
                                     mainActivity.setBottomNavVisibility(View.VISIBLE);
@@ -188,9 +188,9 @@ public class AddNewGroupFragment extends Fragment {
                 mainActivity.runOnUiThread(() -> {
                     loadingDialog.dismissDialog();
                     new iOSDialogBuilder(mainActivity)
-                            .setTitle(getString(R.string.notification_warning))
-                            .setSubtitle(getString(R.string.notification_warning_msg))
-                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                            .setTitle(mainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mainActivity.getString(R.string.notification_warning_msg))
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                 });
                 Log.e(AddNewGroupFragment.class.getName(), t.getLocalizedMessage());
             }
@@ -207,6 +207,6 @@ public class AddNewGroupFragment extends Fragment {
         JsonObject emitMsg = new JsonObject();
         emitMsg.add("conversation", gson.toJsonTree(conversation));
 
-        mSocket.emit("addConversation", emitMsg);
+        mSocket.emit(Constraints.EVT_CREATE_GROUP, emitMsg);
     }
 }

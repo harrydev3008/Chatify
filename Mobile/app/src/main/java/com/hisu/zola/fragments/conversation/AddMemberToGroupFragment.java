@@ -149,13 +149,13 @@ public class AddMemberToGroupFragment extends Fragment {
                 backToPrevPage();
             } else {
                 new iOSDialogBuilder(mainActivity)
-                        .setTitle(getString(R.string.notification_warning))
-                        .setSubtitle(getString(R.string.changes_not_save))
-                        .setPositiveListener(getString(R.string.yes), dialog -> {
+                        .setTitle(mainActivity.getString(R.string.notification_warning))
+                        .setSubtitle(mainActivity.getString(R.string.changes_not_save))
+                        .setPositiveListener(mainActivity.getString(R.string.yes), dialog -> {
                             dialog.dismiss();
                             backToPrevPage();
                         })
-                        .setNegativeListener(getString(R.string.no), iOSDialog::dismiss).build().show();
+                        .setNegativeListener(mainActivity.getString(R.string.no), iOSDialog::dismiss).build().show();
             }
         });
     }
@@ -171,9 +171,9 @@ public class AddMemberToGroupFragment extends Fragment {
                 addMember();
             else
                 new iOSDialogBuilder(mainActivity)
-                        .setTitle(getString(R.string.no_network_connection))
-                        .setSubtitle(getString(R.string.no_network_connection_desc))
-                        .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                        .setTitle(mainActivity.getString(R.string.no_network_connection))
+                        .setSubtitle(mainActivity.getString(R.string.no_network_connection_desc))
+                        .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
         });
     }
 
@@ -208,9 +208,9 @@ public class AddMemberToGroupFragment extends Fragment {
                 mainActivity.runOnUiThread(() -> {
                     loadingDialog.dismissDialog();
                     new iOSDialogBuilder(mainActivity)
-                            .setTitle(getString(R.string.notification_warning))
-                            .setSubtitle(getString(R.string.notification_warning_msg))
-                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                            .setTitle(mainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mainActivity.getString(R.string.notification_warning_msg))
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                 });
 
                 Log.e(AddMemberToGroupFragment.class.getName(), t.getLocalizedMessage());
@@ -229,7 +229,7 @@ public class AddMemberToGroupFragment extends Fragment {
         emitMsg.add("conversation", gson.toJsonTree(conversation));
         emitMsg.addProperty("userChange", LocalDataManager.getCurrentUserInfo().getId());
 
-        mSocket.emit("addMemberToGroup", emitMsg);
+        mSocket.emit(Constraints.EVT_ADD_MEMBER, emitMsg);
     }
 
     private boolean isDataChanged() {

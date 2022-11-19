@@ -2,25 +2,26 @@ package com.hisu.zola.adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.ContactUser;
-import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.LayoutFriendFromContactBinding;
 import com.hisu.zola.util.converter.ImageConvertUtil;
-import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class FriendFromContactAdapter extends
         RecyclerView.Adapter<FriendFromContactAdapter.FriendFromContactViewHolder> {
@@ -52,23 +53,18 @@ public class FriendFromContactAdapter extends
         ContactUser contactUser = contactUsers.get(position);
         holder.setContactData(context, contactUser);
 
-        List<User> friends = LocalDataManager.getCurrentUserInfo().getFriends();
-
-        for (User friend : friends) {
-            if(contactUser.getPhoneNumber().equalsIgnoreCase(friend.getPhoneNumber())) {
-                holder.binding.btnIsFriend.setText(context.getString(R.string.is_a_friend));
-                holder.binding.btnIsFriend.setTextColor(ContextCompat.getColor(context, R.color.gray));
-                holder.binding.btnIsFriend.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.white));
-                String textPlaceHolder = context.getString(R.string.name_in_app) + " " + contactUser.getAppName();
-                holder.binding.tvAppName.setText(textPlaceHolder);
-            } else {
-                holder.binding.btnIsFriend.setText(context.getString(R.string.not_a_friend));
-                holder.binding.btnIsFriend.setTextColor(ContextCompat.getColor(context, R.color.primary_color));
-                holder.binding.btnIsFriend.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.lightBlue));
-                String textPlaceHolder = context.getString(R.string.name_in_app) + " " + contactUser.getAppName();
-                holder.binding.tvAppName.setText(textPlaceHolder);
-            }
-            break;
+        if (contactUser.isFriend()) {
+            holder.binding.btnIsFriend.setText(context.getString(R.string.is_a_friend));
+            holder.binding.btnIsFriend.setTextColor(ContextCompat.getColor(context, R.color.gray));
+            holder.binding.btnIsFriend.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.white));
+            String textPlaceHolder = context.getString(R.string.name_in_app) + " " + contactUser.getAppName();
+            holder.binding.tvAppName.setText(textPlaceHolder);
+        } else {
+            holder.binding.btnIsFriend.setText(context.getString(R.string.not_a_friend));
+            holder.binding.btnIsFriend.setTextColor(ContextCompat.getColor(context, R.color.primary_color));
+            holder.binding.btnIsFriend.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.lightBlue));
+            String textPlaceHolder = context.getString(R.string.name_in_app) + " " + contactUser.getAppName();
+            holder.binding.tvAppName.setText(textPlaceHolder);
         }
     }
 
@@ -96,10 +92,20 @@ public class FriendFromContactAdapter extends
                 Bitmap imageFromText = ImageConvertUtil.createImageFromText(context,
                         150, 150, contactUser.getUsername());
                 binding.imvContactAvatar.setImageBitmap(imageFromText);
+            } else {
+                Glide.with(context).asBitmap()
+                        .load(contactUser.getAvatarURL())
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(new SimpleTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                binding.imvContactAvatar.setImageBitmap(resource);
+                                binding.imvContactAvatar.setVisibility(View.VISIBLE);
+                            }
+                        });
             }
 
             binding.tvContactName.setText(contactUser.getUsername());
-//            binding.tvAppName.setText(contactUser.getPhoneNumber());
         }
     }
 }

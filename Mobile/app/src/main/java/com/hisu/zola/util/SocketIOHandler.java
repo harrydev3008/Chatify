@@ -41,6 +41,7 @@ public class SocketIOHandler {
     }
 
     public static void close() {
+        mSocketIO.off();
         mSocketIO.close();
     }
 

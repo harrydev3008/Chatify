@@ -125,9 +125,9 @@ public class AddFriendFragment extends Fragment {
                     findFriend();
                 else
                     new iOSDialogBuilder(mainActivity)
-                            .setTitle(getString(R.string.no_network_connection))
-                            .setSubtitle(getString(R.string.no_network_connection))
-                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                            .setTitle(mainActivity.getString(R.string.no_network_connection))
+                            .setSubtitle(mainActivity.getString(R.string.no_network_connection))
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
             }
         });
     }
@@ -151,9 +151,9 @@ public class AddFriendFragment extends Fragment {
                     } else {
                         mainActivity.runOnUiThread(() -> {
                             new iOSDialogBuilder(mainActivity)
-                                    .setTitle(getString(R.string.notification_warning))
-                                    .setSubtitle(getString(R.string.user_not_found))
-                                    .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                                    .setTitle(mainActivity.getString(R.string.notification_warning))
+                                    .setSubtitle(mainActivity.getString(R.string.user_not_found))
+                                    .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                         });
                     }
                 }
@@ -177,7 +177,7 @@ public class AddFriendFragment extends Fragment {
                 "059|099)[0-9]{7}$");
 
         if (!patternPhoneNumber.matcher(phoneNumber).matches()) {
-            mBinding.edtPhoneNumber.setError(getString(R.string.invalid_phone_format_err));
+            mBinding.edtPhoneNumber.setError(mainActivity.getString(R.string.invalid_phone_format_err));
             mBinding.edtPhoneNumber.requestFocus();
             return false;
         }

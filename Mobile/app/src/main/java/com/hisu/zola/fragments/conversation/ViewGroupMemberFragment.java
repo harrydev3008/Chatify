@@ -102,13 +102,13 @@ public class ViewGroupMemberFragment extends Fragment {
                 if (LocalDataManager.getCurrentUserInfo().getId().equalsIgnoreCase(conversation.getCreatedBy().getId())) {
                     adapter.setOnRemoveUserListener(user -> {
                         new iOSDialogBuilder(mainActivity)
-                                .setTitle(getString(R.string.confirm))
-                                .setSubtitle(getString(R.string.confirm_remove_member))
-                                .setPositiveListener(getString(R.string.yes), dialog -> {
+                                .setTitle(mainActivity.getString(R.string.confirm))
+                                .setSubtitle(mainActivity.getString(R.string.confirm_remove_member))
+                                .setPositiveListener(mainActivity.getString(R.string.yes), dialog -> {
                                     dialog.dismiss();
                                     removeMember(user.getId());
                                 })
-                                .setNegativeListener(getString(R.string.no), iOSDialog::dismiss).build().show();
+                                .setNegativeListener(mainActivity.getString(R.string.no), iOSDialog::dismiss).build().show();
                     });
 
                     adapter.setAdmin(true);
@@ -154,9 +154,9 @@ public class ViewGroupMemberFragment extends Fragment {
                 mainActivity.runOnUiThread(() -> {
                     loadingDialog.dismissDialog();
                     new iOSDialogBuilder(mainActivity)
-                            .setTitle(getString(R.string.notification_warning))
-                            .setSubtitle(getString(R.string.notification_warning_msg))
-                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                            .setTitle(mainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mainActivity.getString(R.string.notification_warning_msg))
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                 });
                 Log.e(ViewGroupMemberFragment.class.getName(), t.getLocalizedMessage());
             }

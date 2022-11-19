@@ -32,10 +32,13 @@ import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.LayoutChatReceiveBinding;
 import com.hisu.zola.databinding.LayoutChatSendBinding;
 import com.hisu.zola.listeners.IOnItemTouchListener;
+import com.hisu.zola.util.converter.TimeConverterUtil;
 import com.hisu.zola.util.local.LocalDataManager;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -110,6 +113,21 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     return false;
                 });
 
+            if (position == 0) {
+                sendViewHolder.binding.tvSentTime.setVisibility(View.VISIBLE);
+                sendViewHolder.binding.tvSentTime.setText(TimeConverterUtil.getDateAsString(message.getCreatedAt()));
+            } else {
+                Date first = TimeConverterUtil.getDateFromString(message.getCreatedAt());
+                Date second = TimeConverterUtil.getDateFromString(messages.get(position - 1).getCreatedAt());
+
+                Duration duration = Duration.between(second.toInstant(), first.toInstant());
+
+                if (Math.abs(duration.toHours()) >= 1) {
+                    sendViewHolder.binding.tvSentTime.setVisibility(View.VISIBLE);
+                    sendViewHolder.binding.tvSentTime.setText(TimeConverterUtil.getDateAsString(message.getCreatedAt()));
+                }
+            }
+
         } else if (holder.getItemViewType() == MSG_RECEIVE_TYPE) {
 
             final MessageReceiveViewHolder receiveViewHolder = ((MessageReceiveViewHolder) holder);
@@ -150,6 +168,21 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
                 else
                     receiveViewHolder.binding.tvMemberName.setVisibility(View.GONE);
+            }
+
+            if (position == 0) {
+                receiveViewHolder.binding.tvReceiveTime.setVisibility(View.VISIBLE);
+                receiveViewHolder.binding.tvReceiveTime.setText(TimeConverterUtil.getDateAsString(message.getCreatedAt()));
+            } else {
+                Date first = TimeConverterUtil.getDateFromString(message.getCreatedAt());
+                Date second = TimeConverterUtil.getDateFromString(messages.get(position - 1).getCreatedAt());
+
+                Duration duration = Duration.between(second.toInstant(), first.toInstant());
+
+                if (Math.abs(duration.toHours()) >= 1) {
+                    receiveViewHolder.binding.tvReceiveTime.setVisibility(View.VISIBLE);
+                    receiveViewHolder.binding.tvReceiveTime.setText(TimeConverterUtil.getDateAsString(message.getCreatedAt()));
+                }
             }
 
             receiveViewHolder.displayMessageContent(mContext, message);
@@ -262,11 +295,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     binding.videoReceive.setVisibility(View.VISIBLE);
                     Uri uri = Uri.parse(message.getMedia().get(0).getUrl());
 
-                    File cacheFolder = new File(context.getCacheDir(),"media");
+                    File cacheFolder = new File(context.getCacheDir(), "media");
                     LeastRecentlyUsedCacheEvictor cacheEvictor = new LeastRecentlyUsedCacheEvictor(1 * 1024 * 1024);
                     SimpleCache simpleCache = new SimpleCache(cacheFolder, cacheEvictor);
-//                    CacheDataSource.Factory factory = new CacheDataSource.Factory();
-//                    factory.
 
                     ProgressiveMediaSource mediaSource = new ProgressiveMediaSource.Factory(
                             new CacheDataSource.Factory()
@@ -275,9 +306,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                             .setUserAgent("ExoplayerDemo"))
                                     .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
                     ).createMediaSource(MediaItem.fromUri(uri));
-
-//                    playerView.setPlayer(player);
-
 
                     ExoPlayer player = new ExoPlayer.Builder(context).build();
                     player.setMediaSource(mediaSource);

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,11 +25,15 @@ import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.FriendFromContactAdapter;
+import com.hisu.zola.database.Database;
 import com.hisu.zola.database.entity.ContactUser;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.FragmentFriendFromContactBinding;
 import com.hisu.zola.fragments.SplashScreenFragment;
+import com.hisu.zola.util.dialog.LoadingDialog;
+import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.ApiService;
+import com.hisu.zola.util.network.Constraints;
 import com.hisu.zola.util.network.NetworkUtil;
 import com.hisu.zola.view_model.ContactUserViewModel;
 import com.tomash.androidcontacts.contactgetter.entity.ContactData;
@@ -52,6 +57,8 @@ public class FriendFromContactFragment extends Fragment {
     private FriendFromContactAdapter adapter;
     private ContactUserViewModel viewModel;
     private List<ContactUser> contactUsers;
+    private User currentUser;
+    private LoadingDialog loadingDialog;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,6 +78,8 @@ public class FriendFromContactFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         contactUsers = new ArrayList<>();
+        currentUser = LocalDataManager.getCurrentUserInfo();
+        loadingDialog = new LoadingDialog(mainActivity, Gravity.CENTER);
 
         init();
         backToPrevPage();
@@ -112,9 +121,9 @@ public class FriendFromContactFragment extends Fragment {
                     getContacts();
                 else
                     new iOSDialogBuilder(mainActivity)
-                            .setTitle(getString(R.string.no_network_connection))
-                            .setSubtitle(getString(R.string.no_network_connection_to_sync))
-                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                            .setTitle(mainActivity.getString(R.string.no_network_connection))
+                            .setSubtitle(mainActivity.getString(R.string.no_network_connection_to_sync))
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
             } else
                 requestReadContactPermission();
         });
@@ -131,36 +140,61 @@ public class FriendFromContactFragment extends Fragment {
     }
 
     public void getContacts() {
-        List<ContactData> contactDataList = new ContactsGetterBuilder(mainActivity)
-                .allFields()
-                .buildList();
+        Database.dbExecutor.execute(() -> {
 
-        for (ContactData contactData : contactDataList)
-            if (contactData.getPhoneList().size() != 0) {
-                String phoneNumber = contactData.getPhoneList().get(0).getMainData().replaceAll("[^0-9]", "");
+            mainActivity.runOnUiThread(() -> {
+                loadingDialog.showDialog();
+            });
 
-                JsonObject object = new JsonObject();
-                object.addProperty("phoneNumber", phoneNumber);
-                RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
-                ApiService.apiService.findFriendByPhoneNumber(body).enqueue(new Callback<User>() {
-                    @Override
-                    public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
-                        if (response.isSuccessful() && response.code() == 200) {
-                            User user = response.body();
-                            if (user != null) {
-                                viewModel.insertOrUpdate(
-                                        new ContactUser(user.getId(), contactData.getCompositeName(), user.getUsername(), phoneNumber, "", "", true, false)
-                                );
+            List<ContactData> contactDataList = new ContactsGetterBuilder(mainActivity)
+                    .allFields()
+                    .buildList();
+
+            for (ContactData contactData : contactDataList)
+                if (contactData.getPhoneList().size() != 0) {
+                    String phoneNumber = contactData.getPhoneList().get(0).getMainData().replaceAll("[^0-9]", "");
+
+                    JsonObject object = new JsonObject();
+                    object.addProperty("phoneNumber", phoneNumber);
+                    RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
+                    ApiService.apiService.findFriendByPhoneNumber(body).enqueue(new Callback<User>() {
+                        @Override
+                        public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                            if (response.isSuccessful() && response.code() == 200) {
+                                User user = response.body();
+                                if (user != null) {
+                                    boolean isFriend = isFriend(user);
+                                    String avatar = "";
+
+                                    if(isFriend)
+                                        avatar = user.getAvatarURL();
+
+                                    viewModel.insertOrUpdate(
+                                            new ContactUser(user.getId(), contactData.getCompositeName(), user.getUsername(), phoneNumber, avatar, "", true, isFriend)
+                                    );
+                                }
                             }
                         }
-                    }
 
-                    @Override
-                    public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
-                        Log.e(FriendFromContactAdapter.class.getName(), t.getLocalizedMessage());
-                    }
-                });
-            }
+                        @Override
+                        public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                            Log.e(FriendFromContactAdapter.class.getName(), t.getLocalizedMessage());
+                        }
+                    });
+                }
+
+            mainActivity.runOnUiThread(() -> {
+                loadingDialog.dismissDialog();
+            });
+        });
+    }
+
+    private boolean isFriend(User foundUser) {
+        for (User friend : currentUser.getFriends()) {
+            if (friend.getPhoneNumber().equalsIgnoreCase(foundUser.getPhoneNumber()))
+                return true;
+        }
+        return false;
     }
 
     private void addActionForNotFriendTab() {

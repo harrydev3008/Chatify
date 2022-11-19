@@ -1,20 +1,18 @@
 package com.hisu.zola.fragments.conversation;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.hisu.zola.MainActivity;
-import com.hisu.zola.R;
 import com.hisu.zola.adapters.SentFileAdapter;
 import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.Message;
@@ -46,7 +44,7 @@ public class SentFilesFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mainActivity = (MainActivity) getActivity();
-        if(getArguments() != null) {
+        if (getArguments() != null) {
             conversation = (Conversation) getArguments().getSerializable(CONVERSATION_VIEW_FILES_ARGS);
         }
     }
@@ -75,12 +73,19 @@ public class SentFilesFragment extends Fragment {
     private void initRecyclerView() {
         sentFileAdapter = new SentFileAdapter(mainActivity);
 
-        repository.getData(conversation.getId()).observe(mainActivity, new Observer<List<Message>>() {
+        repository.getImageMessage(conversation.getId(), "image").observe(mainActivity, new Observer<List<Message>>() {
             @Override
             public void onChanged(List<Message> messages) {
-                if(messages == null) return;
-                if(messages.isEmpty()) return;
-//                messages.addAll(messages);
+                if (messages == null) return;
+                if (messages.isEmpty()) {
+                    mBinding.imvNoSentImage.setVisibility(View.VISIBLE);
+                    mBinding.rvSentFiles.setVisibility(View.GONE);
+                    return;
+                }
+
+                mBinding.imvNoSentImage.setVisibility(View.GONE);
+                mBinding.rvSentFiles.setVisibility(View.VISIBLE);
+
                 sentFileAdapter.setMessages(messages);
                 mBinding.rvSentFiles.setAdapter(sentFileAdapter);
             }

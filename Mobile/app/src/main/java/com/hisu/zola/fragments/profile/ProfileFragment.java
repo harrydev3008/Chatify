@@ -61,9 +61,9 @@ public class ProfileFragment extends Fragment {
                     mBinding.cimvUserAvatar.setImageBitmap(ImageConvertUtil.createImageFromText(mMainActivity, 150, 150, user.getUsername()));
                 else
                     Glide.with(mMainActivity).load(user.getAvatarURL())
-                            .placeholder(R.drawable.bg_profile).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(mBinding.cimvUserAvatar);
+                            .thumbnail(0.1f).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(mBinding.cimvUserAvatar);
 
-                mBinding.tvGender.setText(user.isGender() ? getString(R.string.gender_m) : getString(R.string.gender_f));
+                mBinding.tvGender.setText(user.isGender() ? mMainActivity.getString(R.string.gender_m) : mMainActivity.getString(R.string.gender_f));
                 mBinding.tvDob.setText(user.getDob());
                 mBinding.tvDisplayName.setText(user.getUsername());
                 mBinding.tvPhoneNumber.setText(user.getPhoneNumber());

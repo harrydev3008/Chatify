@@ -92,7 +92,7 @@ public class ChangePhoneNumberFragment extends Fragment {
     }
 
     private void initDialog() {
-        dialog = new ConfirmSendOTPDialog(mainActivity, Gravity.CENTER, getString(R.string.otp_change_phone_no));
+        dialog = new ConfirmSendOTPDialog(mainActivity, Gravity.CENTER, mainActivity.getString(R.string.otp_change_phone_no));
 
         dialog.addActionForBtnChange(view_change -> {
             dialog.dismissDialog();
@@ -130,7 +130,7 @@ public class ChangePhoneNumberFragment extends Fragment {
                 "059|099)[0-9]{7}$");
 
         if (!patternPhoneNumber.matcher(phoneNumber).matches()) {
-            mBinding.edtNewPhoneNo.setError(getString(R.string.invalid_phone_format_err));
+            mBinding.edtNewPhoneNo.setError(mainActivity.getString(R.string.invalid_phone_format_err));
             mBinding.edtNewPhoneNo.requestFocus();
             return false;
         }

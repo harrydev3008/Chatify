@@ -48,12 +48,12 @@ public class FriendRequestFragment extends Fragment {
         new TabLayoutMediator(mBinding.tlFriendRequest, mBinding.vpContainer, (tab, position) -> {
             switch (position) {
                 case 0: {
-                    tab.setText(getString(R.string.friend_request_receive));
+                    tab.setText(mainActivity.getString(R.string.friend_request_receive));
                     break;
                 }
 
                 case 1: {
-                    tab.setText(getString(R.string.friend_request_send));
+                    tab.setText(mainActivity.getString(R.string.friend_request_send));
                     break;
                 }
             }

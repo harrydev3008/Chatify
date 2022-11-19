@@ -72,7 +72,8 @@
                 android:background="@android:color/transparent"
                 android:hint="@string/phone_no"
                 android:textSize="18sp"
-                tools:ignore="TextFields"
+                android:inputType="phone"
+                android:maxLength="11"
                 android:importantForAutofill="no" />
 
             <com.google.android.material.button.MaterialButton
@@ -144,7 +145,6 @@
             android:id="@+id/ac_friend_request"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/border_bottom"
             android:paddingHorizontal="6dp"
             android:paddingVertical="8dp">
 
@@ -186,6 +186,5 @@
                 android:src="@drawable/ic_navigate_next"
                 tools:ignore="ContentDescription" />
         </RelativeLayout>
-
     </LinearLayout>
 </RelativeLayout>

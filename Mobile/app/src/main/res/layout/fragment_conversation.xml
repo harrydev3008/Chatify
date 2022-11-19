@@ -84,7 +84,7 @@
         android:id="@+id/rv_conversation"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="2dp"
         android:background="@color/white"
         android:clipToPadding="false"
         android:paddingHorizontal="6dp"
@@ -97,7 +97,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@color/white"
-        android:visibility="gone">
+        android:visibility="gone"
+        android:orientation="horizontal">
         <TextView
             android:id="@+id/group_status_desc"
             android:layout_width="match_parent"
@@ -105,9 +106,9 @@
             android:text="@string/group_status_kick"
             android:textColor="@color/black"
             android:drawableLeft="@drawable/ic_information_circle"
-            android:drawablePadding="10dp"
-            android:padding="8dp"
-            android:textSize="16sp"/>
+            android:drawablePadding="8dp"
+            android:paddingVertical="8dp"
+            android:textSize="14sp"/>
     </LinearLayout>
 
     <LinearLayout

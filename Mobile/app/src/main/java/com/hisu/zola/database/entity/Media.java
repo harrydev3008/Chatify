@@ -26,4 +26,12 @@ public class Media implements Serializable {
     public void setType(String type) {
         this.type = type;
     }
+
+    @Override
+    public String toString() {
+        return "Media{" +
+                "url='" + url + '\'' +
+                ", type='" + type + '\'' +
+                '}';
+    }
 }

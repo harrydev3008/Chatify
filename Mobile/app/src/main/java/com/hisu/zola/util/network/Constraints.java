@@ -1,11 +1,11 @@
 package com.hisu.zola.util.network;
 
 public interface Constraints {
-//  CONTENT TYPE
+    //  CONTENT TYPE
     String JSON_TYPE = "application/json";
     String MULTIPART_FORM_DATA_TYPE = "multipart/form-data";
 
-//  API
+    //  API
     String API_LOGIN = "api/auth/signin";
     String API_REGISTER = "api/auth/signup";
     String API_CHANGE_PASSWORD = "api/auth/updatePassword";
@@ -29,10 +29,40 @@ public interface Constraints {
     String API_GET_ALL_CONVERSATION_OF_USER = "api/conversation/getAllConversations";
     String API_CHANGE_GROUP_NAME = "api/conversation/changeLabel";
     String API_CHANGE_GROUP_ADMIN = "api/conversation/updateCreator";
-    String API_ADD_GROUP_MEMBER= "api/conversation/addMemberGroup";
-    String API_REMOVE_GROUP_MEMBER= "api/conversation/deleteMember";
+    String API_ADD_GROUP_MEMBER = "api/conversation/addMemberGroup";
+    String API_REMOVE_GROUP_MEMBER = "api/conversation/deleteMember";
     String API_DISBAND_GROUP = "api/conversation/deleteGroup";
     String API_OUT_GROUP = "api/conversation/outGroup";
 
-//  Todo: SOCKET EVENT
+    //  Socket
+    String EVT_ADD_MEMBER = "addMemberToGroup";
+    String EVT_ADD_MEMBER_RECEIVE = "addMemberToGroup-receive";
+    String EVT_REMOVE_MEMBER_RECEIVE = "deleteMemberGroup-receive";
+    String EVT_REMOVE_MEMBER_MOBILE_RECEIVE = "deleteMemberGroup-receiveMobile";
+    String EVT_CHANGE_GROUP_NAME = "changeGroupName";
+    String EVT_CHANGE_GROUP_NAME_RECEIVE = "changeGroupName-receive";
+    String EVT_OUT_GROUP = "outGroup";
+    String EVT_OUT_GROUP_RECEIVE = "outGroup-receive";
+    String EVT_CREATE_GROUP = "addConversation";
+    String EVT_CREATE_GROUP_RECEIVE = "addConversation-receive";
+    String EVT_CHANGE_GROUP_ADMIN = "changeCreatorGroup";
+    String EVT_CHANGE_GROUP_ADMIN_RECEIVE = "changeCreatorGroup-receive";
+    String EVT_DELETE_GROUP = "deleteGroup";
+    String EVT_DELETE_GROUP_RECEIVE = "deleteGroup-receive";
+
+    String EVT_MESSAGE_SEND = "send-msg";
+    String EVT_MESSAGE_RECEIVE = "msg-receive";
+    String EVT_DELETE_MESSAGE = "delete-msg";
+    String EVT_DELETE_MESSAGE_RECEIVE = "delete-receive";
+    String EVT_ON_TYPING = "onTypingText";
+    String EVT_ON_TYPING_RECEIVE = "onTypingTextToClient";
+    String EVT_OFF_TYPING = "offTypingText";
+    String EVT_OFF_TYPING_RECEIVE = "offTypingTextToClient";
+
+    String EVT_ADD_FRIEND = "requestAddFriend";
+    String EVT_ADD_FRIEND_RECEIVE = "requestAddFriendToClient";
+    String EVT_ACCEPT_FRIEND_REQUEST = "acceptAddFriend";
+    String EVT_ACCEPT_FRIEND_REQUEST_RECEIVE = "acceptAddFriendToClient";
+    String EVT_DELETE_FRIEND = "deleteFriend";
+    String EVT_DELETE_FRIEND_RECEIVE = "deleteFriendToClient";
 }

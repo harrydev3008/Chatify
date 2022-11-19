@@ -71,6 +71,7 @@
             android:paddingVertical="10dp"
             android:paddingHorizontal="8dp"
             android:inputType="phone"
+            android:maxLength="11"
             android:textSize="20sp"
             android:imeOptions="actionNext"
             android:textCursorDrawable="@drawable/edt_cursor"

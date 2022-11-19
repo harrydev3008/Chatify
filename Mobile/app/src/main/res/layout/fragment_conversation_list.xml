@@ -50,6 +50,17 @@
             tools:ignore="ContentDescription" />
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/tv_network_connection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:paddingVertical="6dp"
+        android:visibility="gone"
+        android:background="@color/gray_e5"
+        android:textColor="@color/black"
+        android:textSize="14sp"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_conversation_list"
         android:layout_width="match_parent"

@@ -24,10 +24,10 @@ import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentChangeAdminBinding;
-import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
+import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.network.Constraints;
 
 import java.util.List;
@@ -114,9 +114,9 @@ public class ChangeAdminFragment extends Fragment {
                 if (LocalDataManager.getCurrentUserInfo().getId().equalsIgnoreCase(conversationDB.getCreatedBy().getId())) {
                     adapter.setOnRemoveUserListener(user -> {
                         new iOSDialogBuilder(mainActivity)
-                                .setTitle(getString(R.string.confirm))
-                                .setSubtitle(getString(R.string.change_admin_confirm))
-                                .setPositiveListener(getString(R.string.yes), dialog -> {
+                                .setTitle(mainActivity.getString(R.string.confirm))
+                                .setSubtitle(mainActivity.getString(R.string.change_admin_confirm))
+                                .setPositiveListener(mainActivity.getString(R.string.yes), dialog -> {
                                     dialog.dismiss();
                                     if (option.equalsIgnoreCase(CHANGE_ADMIN_OPTION_CHANGE_ARGS))
                                         changeAdmin(user);
@@ -124,7 +124,7 @@ public class ChangeAdminFragment extends Fragment {
                                         changeAdmin(user);
                                     }
                                 })
-                                .setNegativeListener(getString(R.string.no), iOSDialog::dismiss).build().show();
+                                .setNegativeListener(mainActivity.getString(R.string.no), iOSDialog::dismiss).build().show();
                     });
                 }
 
@@ -158,10 +158,10 @@ public class ChangeAdminFragment extends Fragment {
                     mainActivity.runOnUiThread(() -> {
                         loadingDialog.dismissDialog();
                         new iOSDialogBuilder(mainActivity)
-                                .setTitle(getString(R.string.notification_warning))
-                                .setSubtitle(getString(R.string.change_admin_success))
+                                .setTitle(mainActivity.getString(R.string.notification_warning))
+                                .setSubtitle(mainActivity.getString(R.string.change_admin_success))
                                 .setCancelable(false)
-                                .setPositiveListener(getString(R.string.confirm), dialog -> {
+                                .setPositiveListener(mainActivity.getString(R.string.confirm), dialog -> {
                                     dialog.dismiss();
                                     if (option.equalsIgnoreCase(CHANGE_ADMIN_OPTION_CHANGE_ARGS)) {
                                         emitChangeAdmin(conversation);
@@ -180,9 +180,9 @@ public class ChangeAdminFragment extends Fragment {
                 mainActivity.runOnUiThread(() -> {
                     loadingDialog.dismissDialog();
                     new iOSDialogBuilder(mainActivity)
-                            .setTitle(getString(R.string.notification_warning))
-                            .setSubtitle(getString(R.string.notification_warning_msg))
-                            .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                            .setTitle(mainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mainActivity.getString(R.string.notification_warning_msg))
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
                 });
                 Log.e(ChangeAdminFragment.class.getName(), t.getLocalizedMessage());
             }
@@ -227,7 +227,7 @@ public class ChangeAdminFragment extends Fragment {
 
         JsonObject emitMsg = new JsonObject();
         emitMsg.add("conversation", gson.toJsonTree(conversation));
-        mSocket.emit("outGroup", emitMsg);
+        mSocket.emit(Constraints.EVT_OUT_GROUP, emitMsg);
         repository.delete(conversation.getId());
 
         mainActivity.setBottomNavVisibility(View.VISIBLE);
@@ -246,6 +246,6 @@ public class ChangeAdminFragment extends Fragment {
         JsonObject emitMsg = new JsonObject();
         emitMsg.add("conversation", gson.toJsonTree(conversation));
 
-        mSocket.emit("changeCreatorGroup", emitMsg);
+        mSocket.emit(Constraints.EVT_CHANGE_GROUP_ADMIN, emitMsg);
     }
 }

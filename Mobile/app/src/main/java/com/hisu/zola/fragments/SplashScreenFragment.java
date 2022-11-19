@@ -1,9 +1,13 @@
 package com.hisu.zola.fragments;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Shader;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextPaint;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,14 +19,15 @@ import androidx.fragment.app.Fragment;
 
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
+import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentSplashScreenBinding;
 import com.hisu.zola.fragments.conversation.ConversationListFragment;
+import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.network.Constraints;
 import com.hisu.zola.util.network.NetworkUtil;
-import com.hisu.zola.util.local.LocalDataManager;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -56,6 +61,20 @@ public class SplashScreenFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         userRepository = new UserRepository(mMainActivity.getApplication());
+
+        TextPaint paint = mBinding.tvSloganDesc.getPaint();
+        mBinding.tvSlogan.setTextColor(Color.rgb(96, 120, 234));
+        mBinding.tvSloganDesc.setTextColor(Color.rgb(23, 234, 217));
+
+        float width = paint.measureText(mMainActivity.getString(R.string.app_name_greet));
+        Shader textShader = new LinearGradient(0, 0, width, mBinding.tvSloganDesc.getTextSize(),
+                new int[]{
+                        Color.rgb(23, 234, 217),
+                        Color.rgb(96, 120, 234),
+                }, null, Shader.TileMode.MIRROR);
+
+        mBinding.tvSloganDesc.getPaint().setShader(textShader);
+
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
 
             mMainActivity.setBottomNavVisibility(View.GONE);

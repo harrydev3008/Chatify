@@ -126,12 +126,12 @@ public class ConversationFragment extends Fragment {
         repository = new ConversationRepository(mMainActivity.getApplication());
         messageRepository = new MessageRepository(mMainActivity.getApplication());
 
-        mSocket.on("msg-receive", onMessageReceive);
-        mSocket.on("delete-receive", onMessageDeleteReceive);
-        mSocket.on("deleteMemberGroup-receiveMobile", onGroupDeleteMember);
-        mSocket.on("deleteGroup-receive", onDisbandGroup);
-        mSocket.on("onTypingTextToClient", onTypingReceive);
-        mSocket.on("offTypingTextToClient", onTypingReceive);
+        mSocket.on(Constraints.EVT_MESSAGE_RECEIVE, onMessageReceive);
+        mSocket.on(Constraints.EVT_DELETE_MESSAGE_RECEIVE, onMessageDeleteReceive);
+        mSocket.on(Constraints.EVT_REMOVE_MEMBER_MOBILE_RECEIVE, onGroupDeleteMember);
+        mSocket.on(Constraints.EVT_DELETE_GROUP_RECEIVE, onDisbandGroup);
+        mSocket.on(Constraints.EVT_ON_TYPING_RECEIVE, onTypingReceive);
+        mSocket.on(Constraints.EVT_OFF_TYPING_RECEIVE, onTypingReceive);
 
         initProgressBar();
         initProgressBarSending();
@@ -289,22 +289,41 @@ public class ConversationFragment extends Fragment {
                 }
 
                 if (conversation.getDisband() != null) {
+                    mBinding.btnAudioCall.setVisibility(View.GONE);
+                    mBinding.btnVideoCall.setVisibility(View.GONE);
+                    mBinding.btnConversationMenu.setVisibility(View.GONE);
                     mBinding.chatContainer.setVisibility(View.GONE);
                     mBinding.groupStatus.setVisibility(View.VISIBLE);
                     mBinding.rvConversation.setBackgroundColor(mMainActivity.getColor(R.color.gray_f1));
 
+                    addActionForBtnRemoveConversation();
+
                     if (conversation.getDisband().equalsIgnoreCase("disband")) {
                         mBinding.groupStatusDesc.setText(mMainActivity.getText(R.string.group_status_disband));
+                        mBinding.tvLastActive.setText(mMainActivity.getString(R.string.last_msg_disbaned));
                     } else if (conversation.getDisband().equalsIgnoreCase("kick")) {
                         mBinding.groupStatusDesc.setText(mMainActivity.getText(R.string.group_status_kick));
+                        mBinding.tvLastActive.setText(mMainActivity.getString(R.string.last_msg_kicked));
                     }
 
                 } else {
+                    mBinding.btnAudioCall.setVisibility(View.VISIBLE);
+                    mBinding.btnVideoCall.setVisibility(View.VISIBLE);
+                    mBinding.btnConversationMenu.setVisibility(View.VISIBLE);
                     mBinding.chatContainer.setVisibility(View.VISIBLE);
                     mBinding.groupStatus.setVisibility(View.GONE);
                     mBinding.rvConversation.setBackgroundColor(mMainActivity.getColor(R.color.white));
                 }
             }
+        });
+    }
+
+    private void addActionForBtnRemoveConversation() {
+        mBinding.groupStatusDesc.setOnClickListener(view -> {
+//            repository.delete(conversation.getId());
+            Toast.makeText(mMainActivity, "delete", Toast.LENGTH_SHORT).show();
+            mMainActivity.setBottomNavVisibility(View.VISIBLE);
+            mMainActivity.getSupportFragmentManager().popBackStackImmediate();
         });
     }
 
@@ -445,7 +464,7 @@ public class ConversationFragment extends Fragment {
         emitMsg.addProperty("createdAt", message.getCreatedAt());
         emitMsg.addProperty("updatedAt", message.getUpdatedAt());
 
-        mSocket.emit("send-msg", emitMsg);
+        mSocket.emit(Constraints.EVT_MESSAGE_SEND, emitMsg);
     }
 
     private void delete(Message message) {
@@ -464,7 +483,7 @@ public class ConversationFragment extends Fragment {
         emitMsg.add("media", gson.toJsonTree(message.getMedia()));
         emitMsg.add("isDelete", gson.toJsonTree(message.getDeleted()));
 
-        mSocket.emit("delete-msg", emitMsg);
+        mSocket.emit(Constraints.EVT_DELETE_MESSAGE, emitMsg);
 
         mBinding.edtChat.setText("");
         mBinding.edtChat.requestFocus();
@@ -487,11 +506,11 @@ public class ConversationFragment extends Fragment {
                 int textLength = editable.toString().trim().length();
 
                 if (textLength > 0) {
-                    emitTyping("onTypingText", true);
+                    emitTyping(Constraints.EVT_ON_TYPING, true);
                     mBinding.btnSend.setVisibility(View.VISIBLE);
                     mBinding.btnSendImg.setVisibility(View.GONE);
                 } else {
-                    emitTyping("offTypingText", false);
+                    emitTyping(Constraints.EVT_OFF_TYPING, false);
                     mBinding.btnSend.setVisibility(View.GONE);
                     mBinding.btnSendImg.setVisibility(View.VISIBLE);
                 }
