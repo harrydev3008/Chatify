@@ -1,5 +1,6 @@
 package com.hisu.zola.fragments.profile;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,8 @@ import androidx.lifecycle.Observer;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
@@ -55,13 +58,20 @@ public class ProfileFragment extends Fragment {
         repository.getUser(currentUser.getId()).observe(mMainActivity, new Observer<User>() {
             @Override
             public void onChanged(User user) {
-                if(user == null) return;
+                if (user == null) return;
 
-                if(user.getAvatarURL() == null || user.getAvatarURL().isEmpty())
+                if (user.getAvatarURL() == null || user.getAvatarURL().isEmpty())
                     mBinding.cimvUserAvatar.setImageBitmap(ImageConvertUtil.createImageFromText(mMainActivity, 150, 150, user.getUsername()));
                 else
-                    Glide.with(mMainActivity).load(user.getAvatarURL())
-                            .thumbnail(0.1f).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(mBinding.cimvUserAvatar);
+                    Glide.with(mMainActivity).asBitmap().load(user.getAvatarURL())
+                            .thumbnail(0.1f).diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .into(new SimpleTarget<Bitmap>() {
+                                @Override
+                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                    mBinding.cimvUserAvatar.setImageBitmap(resource);
+                                    mBinding.cimvUserAvatar.setVisibility(View.VISIBLE);
+                                }
+                            });
 
                 mBinding.tvGender.setText(user.isGender() ? mMainActivity.getString(R.string.gender_m) : mMainActivity.getString(R.string.gender_f));
                 mBinding.tvDob.setText(user.getDob());
@@ -74,7 +84,7 @@ public class ProfileFragment extends Fragment {
     private void addActionForBtnEditProfile() {
         mBinding.btnEditProfile.setOnClickListener(view -> {
             mMainActivity.getSupportFragmentManager().beginTransaction()
-                    .add(mMainActivity.getViewContainerID(),new EditProfileFragment())
+                    .add(mMainActivity.getViewContainerID(), new EditProfileFragment())
                     .addToBackStack(null)
                     .commit();
         });

@@ -47,11 +47,11 @@
             android:fontFamily="@font/be_vietnam"
             android:text="@string/friend_request_cancel"
             android:textAllCaps="false"
-            android:textColor="@color/darkBlue"
-            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:textSize="14sp"
             android:textStyle="bold"
             app:cornerRadius="20dp"
-            android:gravity="end"
+            android:stateListAnimator="@null"
             app:strokeColor="@color/gray"
             app:strokeWidth="1dp" />
     </LinearLayout>

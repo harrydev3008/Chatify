@@ -1,9 +1,18 @@
 package com.hisu.zola.util.network;
 
 public interface Constraints {
+    //Permission Code
+    int STORAGE_PERMISSION_CODE = 100;
+    int CONTACT_PERMISSION_CODE = 1;
+
+
     //  CONTENT TYPE
     String JSON_TYPE = "application/json";
     String MULTIPART_FORM_DATA_TYPE = "multipart/form-data";
+    String FILE_TYPE_GENERAL = "application/";
+    String TEXT_TYPE_GENERAL = "text";
+    String VIDEO_TYPE_GENERAL = "media/";
+    String GOOGLE_DOCS_URL = "https://docs.google.com/gview?embedded=true&url=";
 
     //  API
     String API_LOGIN = "api/auth/signin";

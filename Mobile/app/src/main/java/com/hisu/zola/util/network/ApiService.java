@@ -56,7 +56,7 @@ public interface ApiService {
     Call<Object> updateUser(@Body RequestBody userInfo);
 
     @POST(Constraints.API_SEND_FRIEND_REQUEST)
-    Call<Object> sendFriendRequest(@Body RequestBody friendID);
+    Call<User> sendFriendRequest(@Body RequestBody friendID);
 
     @POST(Constraints.API_ACCEPT_FRIEND_REQUEST)
     Call<User> acceptFriendRequest(@Body RequestBody friendID);

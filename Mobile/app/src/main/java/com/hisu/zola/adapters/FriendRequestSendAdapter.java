@@ -1,12 +1,21 @@
 package com.hisu.zola.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
+import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.LayoutFriendRequestSendBinding;
 
 import java.util.List;
@@ -14,20 +23,24 @@ import java.util.List;
 public class FriendRequestSendAdapter extends
         RecyclerView.Adapter<FriendRequestSendAdapter.RequestSendViewHolder> {
 
-    private List<String> requestList;
+    private List<User> requestList;
     private Context context;
 
-    public FriendRequestSendAdapter(List<String> requestList, Context context) {
+    public FriendRequestSendAdapter(List<User> requestList, Context context) {
         this.requestList = requestList;
         this.context = context;
         notifyDataSetChanged();
     }
 
-    public List<String> getRequestList() {
+    public FriendRequestSendAdapter(Context context) {
+        this.context = context;
+    }
+
+    public List<User> getRequestList() {
         return requestList;
     }
 
-    public void setRequestList(List<String> requestList) {
+    public void setRequestList(List<User> requestList) {
         this.requestList = requestList;
         notifyDataSetChanged();
     }
@@ -44,7 +57,18 @@ public class FriendRequestSendAdapter extends
 
     @Override
     public void onBindViewHolder(@NonNull RequestSendViewHolder holder, int position) {
-        holder.mBinding.tvRequestName.setText(requestList.get(position));
+        User sendReq = requestList.get(position);
+
+        Glide.with(context).asBitmap().load(sendReq.getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        holder.mBinding.cimvRequestAvatar.setImageBitmap(resource);
+                        holder.mBinding.cimvRequestAvatar.setVisibility(View.VISIBLE);
+                    }
+                });
+
+        holder.mBinding.tvRequestName.setText(sendReq.getUsername());
     }
 
     @Override

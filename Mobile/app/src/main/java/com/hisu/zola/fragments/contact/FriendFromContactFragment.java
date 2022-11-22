@@ -29,7 +29,6 @@ import com.hisu.zola.database.Database;
 import com.hisu.zola.database.entity.ContactUser;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.FragmentFriendFromContactBinding;
-import com.hisu.zola.fragments.SplashScreenFragment;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.ApiService;
@@ -166,7 +165,7 @@ public class FriendFromContactFragment extends Fragment {
                                     boolean isFriend = isFriend(user);
                                     String avatar = "";
 
-                                    if(isFriend)
+                                    if (isFriend)
                                         avatar = user.getAvatarURL();
 
                                     viewModel.insertOrUpdate(

@@ -122,11 +122,11 @@
         android:paddingHorizontal="8dp">
 
         <ImageView
-            android:id="@+id/btn_emoji"
+            android:id="@+id/btn_attach_file"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:src="@drawable/ic_sticker"
+            android:src="@drawable/ic_attach_file"
             tools:ignore="ContentDescription" />
 
         <androidx.appcompat.widget.AppCompatEditText

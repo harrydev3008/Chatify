@@ -1,7 +1,5 @@
 package com.hisu.zola.fragments.conversation;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -148,9 +146,9 @@ public class ConversationDetailFragment extends Fragment {
         object.addProperty("userId", friendID);
         RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
 
-        ApiService.apiService.sendFriendRequest(body).enqueue(new Callback<Object>() {
+        ApiService.apiService.sendFriendRequest(body).enqueue(new Callback<User>() {
             @Override
-            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+            public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
                 if (response.isSuccessful() && response.code() == 200) {
                     mainActivity.runOnUiThread(() -> {
                         new iOSDialogBuilder(mainActivity)
@@ -168,7 +166,7 @@ public class ConversationDetailFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
                 Log.e(ConversationDetailFragment.class.getName(), t.getLocalizedMessage());
             }
         });

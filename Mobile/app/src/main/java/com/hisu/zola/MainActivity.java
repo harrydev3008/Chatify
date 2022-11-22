@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        clearFragmentList();
+//        clearFragmentList();
         SocketIOHandler.disconnect();
         SocketIOHandler.close();
     }

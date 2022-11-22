@@ -1,15 +1,22 @@
 package com.hisu.zola.adapters;
 
+import android.Manifest;
+import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,11 +27,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.source.ProgressiveMediaSource;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
-import com.google.android.exoplayer2.upstream.cache.CacheDataSource;
-import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor;
-import com.google.android.exoplayer2.upstream.cache.SimpleCache;
+import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.Media;
 import com.hisu.zola.database.entity.Message;
@@ -34,6 +37,8 @@ import com.hisu.zola.databinding.LayoutChatSendBinding;
 import com.hisu.zola.listeners.IOnItemTouchListener;
 import com.hisu.zola.util.converter.TimeConverterUtil;
 import com.hisu.zola.util.local.LocalDataManager;
+import com.hisu.zola.util.network.Constraints;
+import com.hisu.zola.util.network.NetworkUtil;
 
 import java.io.File;
 import java.time.Duration;
@@ -55,7 +60,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.onItemTouchListener = onItemTouchListener;
     }
 
-    public MessageAdapter(Context mContext) {
+    public MessageAdapter(Context mContext, Application application) {
         setHasStableIds(true);
         this.mContext = mContext;
         messages = new ArrayList<>();
@@ -95,9 +100,36 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         ));
     }
 
+    private boolean isWriteExternalStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            return true;
+        }
+
+        int write = ContextCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int read = ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_EXTERNAL_STORAGE);
+
+        return write == PackageManager.PERMISSION_GRANTED && read == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestWriteExternalStoragePermission() {
+        String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
+        ActivityCompat.requestPermissions((MainActivity) mContext, permissions, Constraints.STORAGE_PERMISSION_CODE);
+
+    }
+
+    private boolean isFileExisted(Message message) {
+        File checkFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                getRealFileName(message));
+        return checkFile.exists();
+    }
+
+    private String getRealFileName(Message message) {
+        String[] fileExtension = message.getText().split("\\.");
+        return fileExtension[0] + "_" + message.getId() + "." + fileExtension[1];
+    }
+
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-
         holder.setIsRecyclable(false);
 
         Message message = messages.get(position);
@@ -106,6 +138,21 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             final MessageSendViewHolder sendViewHolder = ((MessageSendViewHolder) holder);
             sendViewHolder.displayMessageContent(mContext, message);
+
+            if (message.getType().contains(Constraints.FILE_TYPE_GENERAL)) {
+                sendViewHolder.binding.tvMsgSend.setOnClickListener(view -> {
+                    if (isWriteExternalStoragePermission()) {
+                        if (!isFileExisted(message)) {
+                            NetworkUtil.downloadFile(mContext, message, message.getMedia().get(0).getUrl(), sendViewHolder.binding.tvMsgSend);
+                        } else {
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constraints.GOOGLE_DOCS_URL + message.getMedia().get(0).getUrl()));
+                            mContext.startActivity(browserIntent);
+                        }
+                    } else {
+                        requestWriteExternalStoragePermission();
+                    }
+                });
+            }
 
             if (!message.getDeleted())
                 sendViewHolder.binding.msgSendParent.setOnLongClickListener(view -> {
@@ -218,6 +265,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         private void displayMessageContent(Context context, Message message) {
             binding.tvMsgSend.setTypeface(null, Typeface.NORMAL);
+            binding.tvMsgSend.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
             if (message.getDeleted()) {
                 binding.tvMsgSend.setVisibility(View.VISIBLE);
                 binding.videoSend.setVisibility(View.GONE);
@@ -226,14 +274,14 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 binding.tvMsgSend.setBackground(ContextCompat.getDrawable(context, R.drawable.message_removed));
                 binding.tvMsgSend.setText(context.getString(R.string.message_removed));
                 binding.tvMsgSend.setTypeface(null, Typeface.ITALIC);
-            } else if (message.getType().equalsIgnoreCase("text")) {
+            } else if (message.getType().equalsIgnoreCase(Constraints.TEXT_TYPE_GENERAL)) {
                 binding.tvMsgSend.setVisibility(View.VISIBLE);
                 binding.videoSend.setVisibility(View.GONE);
                 binding.groupImg.setVisibility(View.GONE);
                 binding.tvMsgSend.setTextColor(context.getColor(R.color.white));
                 binding.tvMsgSend.setBackground(ContextCompat.getDrawable(context, R.drawable.message_send));
                 binding.tvMsgSend.setText(message.getText());
-            } else if (message.getType().equalsIgnoreCase("video")) {
+            } else if (message.getType().equalsIgnoreCase(Constraints.VIDEO_TYPE_GENERAL)) {
                 binding.tvMsgSend.setVisibility(View.GONE);
                 binding.groupImg.setVisibility(View.GONE);
                 binding.videoSend.setVisibility(View.VISIBLE);
@@ -245,6 +293,15 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 MediaItem mediaItem = MediaItem.fromUri(uri);
                 player.setMediaItem(mediaItem);
                 player.prepare();
+            } else if (message.getType().contains(Constraints.FILE_TYPE_GENERAL)) {
+                binding.tvMsgSend.setVisibility(View.VISIBLE);
+                binding.videoSend.setVisibility(View.GONE);
+                binding.groupImg.setVisibility(View.GONE);
+
+                binding.tvMsgSend.setCompoundDrawablesWithIntrinsicBounds(
+                        ContextCompat.getDrawable(context, R.drawable.ic_file_document), null, null, null);
+
+                binding.tvMsgSend.setText(message.getText());
             } else {
                 binding.tvMsgSend.setVisibility(View.GONE);
                 binding.videoSend.setVisibility(View.GONE);
@@ -282,33 +339,20 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                 binding.tvMsgReceive.setTypeface(null, Typeface.NORMAL);
 
-                if (message.getType().equalsIgnoreCase("text")) {
+                if (message.getType().equalsIgnoreCase(Constraints.TEXT_TYPE_GENERAL)) {
                     binding.msgWrapper.setVisibility(View.VISIBLE);
                     binding.groupImg.setVisibility(View.GONE);
                     binding.videoReceive.setVisibility(View.GONE);
                     binding.tvMsgReceive.setTextColor(context.getColor(R.color.chat_text_color));
                     binding.msgWrapper.setBackground(ContextCompat.getDrawable(context, R.drawable.message_receive));
                     binding.tvMsgReceive.setText(message.getText());
-                } else if (message.getType().equalsIgnoreCase("video")) { //todo: change later
+                } else if (message.getType().equalsIgnoreCase(Constraints.VIDEO_TYPE_GENERAL)) {
                     binding.msgWrapper.setVisibility(View.GONE);
                     binding.groupImg.setVisibility(View.GONE);
                     binding.videoReceive.setVisibility(View.VISIBLE);
                     Uri uri = Uri.parse(message.getMedia().get(0).getUrl());
 
-                    File cacheFolder = new File(context.getCacheDir(), "media");
-                    LeastRecentlyUsedCacheEvictor cacheEvictor = new LeastRecentlyUsedCacheEvictor(1 * 1024 * 1024);
-                    SimpleCache simpleCache = new SimpleCache(cacheFolder, cacheEvictor);
-
-                    ProgressiveMediaSource mediaSource = new ProgressiveMediaSource.Factory(
-                            new CacheDataSource.Factory()
-                                    .setCache(simpleCache)
-                                    .setUpstreamDataSourceFactory(new DefaultHttpDataSource.Factory()
-                                            .setUserAgent("ExoplayerDemo"))
-                                    .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
-                    ).createMediaSource(MediaItem.fromUri(uri));
-
                     ExoPlayer player = new ExoPlayer.Builder(context).build();
-                    player.setMediaSource(mediaSource);
                     binding.videoReceive.setPlayer(player);
                     MediaItem mediaItem = MediaItem.fromUri(uri);
                     player.setMediaItem(mediaItem);

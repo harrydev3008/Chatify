@@ -21,8 +21,10 @@ import com.bumptech.glide.request.transition.Transition;
 import com.gdacciaro.iOSDialog.iOSDialog;
 import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.google.gson.JsonObject;
+import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.LayoutAddFriendBinding;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.ApiService;
@@ -44,11 +46,13 @@ public class AddFriendDialog {
     private final User findUser;
     private LayoutAddFriendBinding binding;
     private User currentUser;
+    private UserRepository userRepository;
 
     public AddFriendDialog(Context context, int gravity, User findUser) {
         this.context = context;
         this.gravity = gravity;
         this.findUser = findUser;
+        userRepository = new UserRepository(((MainActivity)context).getApplication());
         initDialog();
     }
 
@@ -123,21 +127,29 @@ public class AddFriendDialog {
             object.addProperty("userId", findUser.getId());
             RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
 
-            ApiService.apiService.sendFriendRequest(body).enqueue(new Callback<Object>() {
+            ApiService.apiService.sendFriendRequest(body).enqueue(new Callback<User>() {
                 @Override
-                public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
                     if (response.isSuccessful() && response.code() == 200) {
-                        new iOSDialogBuilder(context)
-                                .setTitle(context.getString(R.string.notification_warning))
-                                .setTitle(context.getString(R.string.friend_request_sent_success))
-                                .setCancelable(false)
-                                .setPositiveListener(context.getString(R.string.confirm), iOSDialog::dismiss)
-                                .build().show();
+
+                        User updatedUser = response.body();
+
+                        if(updatedUser != null) {
+
+                            userRepository.update(updatedUser);
+
+                            new iOSDialogBuilder(context)
+                                    .setTitle(context.getString(R.string.notification_warning))
+                                    .setTitle(context.getString(R.string.friend_request_sent_success))
+                                    .setCancelable(false)
+                                    .setPositiveListener(context.getString(R.string.confirm), iOSDialog::dismiss)
+                                    .build().show();
+                        }
                     }
                 }
 
                 @Override
-                public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
                     Log.e(AddFriendDialog.class.getName(), t.getLocalizedMessage());
                 }
             });

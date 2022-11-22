@@ -1,6 +1,8 @@
 package com.hisu.zola.fragments.conversation;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -11,10 +13,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.webkit.MimeTypeMap;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -28,11 +33,13 @@ import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.ThreeBounce;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.MessageAdapter;
+import com.hisu.zola.database.Database;
 import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.Media;
 import com.hisu.zola.database.entity.Message;
@@ -41,7 +48,6 @@ import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.database.repository.MessageRepository;
 import com.hisu.zola.databinding.FragmentConversationBinding;
 import com.hisu.zola.databinding.LayoutChatPopupBinding;
-import com.hisu.zola.fragments.StickerBottomSheetFragment;
 import com.hisu.zola.listeners.IOnItemTouchListener;
 import com.hisu.zola.util.RealPathUtil;
 import com.hisu.zola.util.SocketIOHandler;
@@ -54,7 +60,10 @@ import com.hisu.zola.view_model.ConversationViewModel;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,8 +92,8 @@ public class ConversationFragment extends Fragment {
     private List<Message> currentMessageList;
     private ConversationRepository repository;
     private MessageRepository messageRepository;
-    private StickerBottomSheetFragment sheetFragment;
     private PopupWindow popupMenu;
+    private ActivityResultLauncher<Intent> filePickerLauncher;
 
     public static ConversationFragment newInstance(Conversation conversation, String conversationName) {
         Bundle args = new Bundle();
@@ -136,32 +145,56 @@ public class ConversationFragment extends Fragment {
         initProgressBar();
         initProgressBarSending();
         initRecyclerView();
-        initStickerBottomDialog();
 
         loadConversationInfo();
         addActionForBackBtn();
         addActionForAudioCallBtn();
         addActionForVideoCallBtn();
         addActionForSideMenu();
-        addActionForBtnShowStickerBottomDialog();
+        initPickFileLauncher();
+        addActionForBtnShowAttachFile();
         addActionForSendMessageBtn();
         addToggleShowSendIcon();
 
         mBinding.btnSendImg.setOnClickListener(imgView -> openBottomImagePicker());
     }
 
-    private void initStickerBottomDialog() {
-        sheetFragment = new StickerBottomSheetFragment();
-        sheetFragment.setOnSendStickerListener(url -> {
-            sheetFragment.dismiss();
-            Toast.makeText(mMainActivity, url, Toast.LENGTH_SHORT).show();
-//            sendMessageViaApi("", url, "image/jpeg", "image");
-        });
+    private void initPickFileLauncher() {
+        filePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(), result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        if (result.getData().getData() != null) {
+                            Database.dbExecutor.execute(() -> {
+                                try {
+                                    uploadFileToServer(result.getData().getData());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            });
+                        }
+                    }
+                });
     }
 
-    private void addActionForBtnShowStickerBottomDialog() {
-        mBinding.btnEmoji.setOnClickListener(view -> {
-            sheetFragment.show(mMainActivity.getSupportFragmentManager(), sheetFragment.getTag());
+    public byte[] readBytes(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+
+        int bufferSize = 1024;
+        byte[] buffer = new byte[bufferSize];
+
+        int len = 0;
+        while ((len = inputStream.read(buffer)) != -1) {
+            byteBuffer.write(buffer, 0, len);
+        }
+
+        return byteBuffer.toByteArray();
+    }
+
+    private void addActionForBtnShowAttachFile() {
+        mBinding.btnAttachFile.setOnClickListener(view -> {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("*/*");
+            filePickerLauncher.launch(intent);
         });
     }
 
@@ -171,7 +204,7 @@ public class ConversationFragment extends Fragment {
                 .buttonText(mMainActivity.getString(R.string.send))
                 .startMultiImage(uris -> {
                     if (NetworkUtil.isConnectionAvailable(mMainActivity))
-                        uris.forEach(this::uploadFileToServer);
+                        uris.forEach(this::uploadImageToServer);
                     else
                         new iOSDialogBuilder(mMainActivity)
                                 .setTitle(mMainActivity.getString(R.string.no_network_connection))
@@ -180,7 +213,56 @@ public class ConversationFragment extends Fragment {
                 });
     }
 
-    private void uploadFileToServer(Uri uri) {
+    private void uploadFileToServer(Uri uri) throws Exception {
+        if (uri == null) return;
+        String filePath = RealPathUtil.getFilePath(mMainActivity, uri);
+        if (filePath == null) return;
+
+        byte[] bytes = readBytes(mMainActivity.getContentResolver().openInputStream(uri));
+
+
+        File file = new File(filePath);
+        RequestBody requestBody = RequestBody.create(MediaType.parse(Constraints.MULTIPART_FORM_DATA_TYPE), bytes);
+
+        String fileName = file.getName();
+        MultipartBody.Part part = MultipartBody.Part.createFormData("media", fileName, requestBody);
+
+        ApiService.apiService.postImage(part).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if (response.isSuccessful()) {
+
+                    Gson gson = new Gson();
+
+                    JsonElement json = gson.toJsonTree(response.body());
+                    JsonObject obj = gson.fromJson(json, JsonObject.class);
+
+                    String fileType = getFileType(fileName);
+
+                    sendMessageViaApi(fileName, obj.get("data").toString(), fileType, fileType);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
+            }
+        });
+    }
+
+    private String getFileType(String file) {
+
+        String mimeType = MimeTypeMap.getFileExtensionFromUrl(file);
+
+        if (mimeType.matches("jpg|jpeg|png|JPG|JPEG|PNG"))
+            return "image/" + mimeType;
+        else if (mimeType.matches("mp4|mov|wmv|avi|MP4|MOV|WMV|AVI"))
+            return "media/" + mimeType;
+
+        return "application/" + mimeType;
+    }
+
+    private void uploadImageToServer(Uri uri) {
         File file = new File(RealPathUtil.getRealPath(mMainActivity, uri));
         RequestBody requestBody = RequestBody.create(MediaType.parse(Constraints.MULTIPART_FORM_DATA_TYPE), file);
         String fileName = file.getName();
@@ -193,10 +275,11 @@ public class ConversationFragment extends Fragment {
 
                     Gson gson = new Gson();
 
-                    String json = gson.toJson(response.body());
+                    JsonElement json = gson.toJsonTree(response.body());
                     JsonObject obj = gson.fromJson(json, JsonObject.class);
 
-                    sendMessageViaApi("", obj.get("data").toString().replaceAll("\"", ""), "image/" + fileName.substring(fileName.lastIndexOf('.') + 1), "image");
+                    String fileType = getFileType(fileName);
+                    sendMessageViaApi(fileName, obj.get("data").toString(), fileType, fileType);
                 }
             }
 
@@ -221,7 +304,7 @@ public class ConversationFragment extends Fragment {
 
     private void initRecyclerView() {
         currentMessageList = new ArrayList<>();
-        messageAdapter = new MessageAdapter(mMainActivity);
+        messageAdapter = new MessageAdapter(mMainActivity, mMainActivity.getApplication());
 
         viewModel = new ViewModelProvider(mMainActivity).get(ConversationViewModel.class);
 
@@ -320,8 +403,7 @@ public class ConversationFragment extends Fragment {
 
     private void addActionForBtnRemoveConversation() {
         mBinding.groupStatusDesc.setOnClickListener(view -> {
-//            repository.delete(conversation.getId());
-            Toast.makeText(mMainActivity, "delete", Toast.LENGTH_SHORT).show();
+            repository.delete(conversation.getId());
             mMainActivity.setBottomNavVisibility(View.VISIBLE);
             mMainActivity.getSupportFragmentManager().popBackStackImmediate();
         });
@@ -407,6 +489,7 @@ public class ConversationFragment extends Fragment {
         object.addProperty("type", type);
 
         JsonObject media = new JsonObject();
+        url = url.replaceAll("\"", "");
         media.addProperty("url", url);
         media.addProperty("type", imgType);
 
@@ -449,8 +532,8 @@ public class ConversationFragment extends Fragment {
         mBinding.sending.setVisibility(View.GONE);
         Gson gson = new Gson();
         viewModel.insertOrUpdate(message);
-//        conversation.setLastMessage(message);
-//        repository.insertOrUpdate(conversation);
+        conversation.setLastMessage(message);
+        repository.insertOrUpdate(conversation);
 
         JsonObject emitMsg = new JsonObject();
         emitMsg.add("conversation", gson.toJsonTree(conversation));

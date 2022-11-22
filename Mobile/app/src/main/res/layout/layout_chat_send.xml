@@ -31,6 +31,7 @@
         android:background="@drawable/message_send"
         android:fontFamily="@font/roboto"
         android:maxWidth="300dp"
+        android:drawablePadding="8dp"
         android:paddingHorizontal="10dp"
         android:paddingVertical="6dp"
         android:text="@string/slogan"

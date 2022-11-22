@@ -23,6 +23,7 @@ import com.hisu.zola.databinding.LayoutConversationBinding;
 import com.hisu.zola.listeners.IOnConversationItemSelectedListener;
 import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.local.LocalDataManager;
+import com.hisu.zola.util.network.Constraints;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -92,9 +93,13 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                 if (lastMessage.getDeleted())
                     holder.binding.tvLastMsg.setText(mContext.getString(R.string.user_message_removed));
                 else {
-                    if (lastMessage.getType().equalsIgnoreCase("text")) {
+                    if (lastMessage.getType().contains(Constraints.TEXT_TYPE_GENERAL)) {
                         String textPlaceHolder = "Bạn: " + lastMessage.getText();
-                        holder.binding.tvLastMsg.setText(textPlaceHolder);//I wrote like this to avoid warning :)
+                        holder.binding.tvLastMsg.setText(textPlaceHolder);
+                    } else if (lastMessage.getType().contains(Constraints.FILE_TYPE_GENERAL)) {
+                        holder.binding.tvLastMsg.setText(mContext.getString(R.string.user_message_sent_file));
+                    } else if (lastMessage.getType().contains(Constraints.VIDEO_TYPE_GENERAL)) {
+                        holder.binding.tvLastMsg.setText(mContext.getString(R.string.user_message_sent_video));
                     } else {
                         holder.binding.tvLastMsg.setText(mContext.getString(R.string.user_message_sent_image));
                     }
@@ -105,13 +110,20 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                     if (lastMessage.getDeleted()) {
                         textPlaceHolder = lastMessage.getSender().getUsername() + ": Đã thu hồi tin nhắn.";
                     } else {
-                        textPlaceHolder = lastMessage.getSender().getUsername() + ": " + lastMessage.getText();
+                        if (lastMessage.getType().contains(Constraints.TEXT_TYPE_GENERAL)) {
+                            textPlaceHolder = lastMessage.getSender().getUsername() + ": " + lastMessage.getText();
+                        } else if (lastMessage.getType().contains(Constraints.FILE_TYPE_GENERAL)) {
+                            textPlaceHolder = lastMessage.getSender().getUsername() + ": " + mContext.getString(R.string.user_message_sent_file);
+                        } else if (lastMessage.getType().contains(Constraints.VIDEO_TYPE_GENERAL)) {
+                            textPlaceHolder = lastMessage.getSender().getUsername() + ": " + mContext.getString(R.string.user_message_sent_video);
+                        } else {
+                            textPlaceHolder = lastMessage.getSender().getUsername() + ": " + mContext.getString(R.string.user_message_sent_image);
+                        }
                     }
                     holder.binding.tvLastMsg.setText(textPlaceHolder);
                 } else {
                     if (lastMessage.getDeleted()) {
-                        String textPlaceHolder = "Đã thu hồi tin nhắn.";
-                        holder.binding.tvLastMsg.setText(textPlaceHolder);
+                        holder.binding.tvLastMsg.setText(mContext.getString(R.string.message_removed));
                     } else {
                         holder.binding.tvLastMsg.setText(lastMessage.getText());
                     }

@@ -208,6 +208,8 @@
     <string name="message_removed">Tin nhắn đã thu hồi</string>
     <string name="user_message_removed">Bạn: Tin nhắn đã thu hồi</string>
     <string name="user_message_sent_image">[Hình ảnh]</string>
+    <string name="user_message_sent_file">[Tập tin]</string>
+    <string name="user_message_sent_video">[Video]</string>
     <string name="reset_password_success">Đổi mật khẩu thành công!</string>
     <string name="change_phone_no_success">Đổi số điện thoại mới thành công!</string>
     <string name="add_new_group_success">Thêm nhóm mới thành công!</string>
@@ -220,6 +222,8 @@
     <string name="connection_available">Đã có kết nối mạng</string>
     <string name="no_network_connection_desc">Vui lòng kiểm tra lại kết nối mạng của bạn và thử lại sau!</string>
     <string name="no_network_connection_to_sync">Cần có kết nối mạng để thực hiện việc đồng bộ! Vui lòng kiểm tra lại kết nối mạng của bạn và thử lại sau!</string>
+    <string name="downloading_files">Đang tải xuống file</string>
+    <string name="downloaded">Tải file thành công!</string>
 
     <!--Notification Channels-->
     <string name="system_noty_channel_id">zola notification id</string>
@@ -232,14 +236,4 @@
     <string name="action_remove_msg">Thu hồi</string>
     <string name="action_forward_msg">Chuyển tiếp</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-
-    <string-array name="stickers">
-        <item>https://i.imgur.com/AD3MbBi.jpeg</item>
-        <item>https://i.imgur.com/AD3MbBi.jpeg</item>
-        <item>https://i.imgur.com/AD3MbBi.jpeg</item>
-        <item>https://i.imgur.com/AD3MbBi.jpeg</item>
-        <item>https://i.imgur.com/AD3MbBi.jpeg</item>
-        <item>https://i.imgur.com/AD3MbBi.jpeg</item>
-        <item>https://i.imgur.com/AD3MbBi.jpeg</item>
-    </string-array>
 </resources>
