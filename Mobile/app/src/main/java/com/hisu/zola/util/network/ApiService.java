@@ -58,6 +58,9 @@ public interface ApiService {
     @POST(Constraints.API_SEND_FRIEND_REQUEST)
     Call<User> sendFriendRequest(@Body RequestBody friendID);
 
+    @POST(Constraints.API_UN_SEND_FRIEND_REQUEST)
+    Call<User> unSendFriendRequest(@Body RequestBody friendID);
+
     @POST(Constraints.API_ACCEPT_FRIEND_REQUEST)
     Call<User> acceptFriendRequest(@Body RequestBody friendID);
 
@@ -115,4 +118,7 @@ public interface ApiService {
 
     @POST(Constraints.API_OUT_GROUP)
     Call<Object> outGroup(@Body RequestBody conversationID);
+
+    @POST(Constraints.API_CHECK_GROUP)
+    Call<Object> checkGroupExist(@Body RequestBody conversationID);
 }

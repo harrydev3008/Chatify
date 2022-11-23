@@ -50,11 +50,11 @@ import com.hisu.zola.databinding.FragmentConversationBinding;
 import com.hisu.zola.databinding.LayoutChatPopupBinding;
 import com.hisu.zola.listeners.IOnItemTouchListener;
 import com.hisu.zola.util.RealPathUtil;
-import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.network.Constraints;
 import com.hisu.zola.util.network.NetworkUtil;
+import com.hisu.zola.util.socket.SocketIOHandler;
 import com.hisu.zola.view_model.ConversationViewModel;
 
 import org.json.JSONException;
@@ -159,37 +159,6 @@ public class ConversationFragment extends Fragment {
         mBinding.btnSendImg.setOnClickListener(imgView -> openBottomImagePicker());
     }
 
-    private void initPickFileLauncher() {
-        filePickerLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(), result -> {
-                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                        if (result.getData().getData() != null) {
-                            Database.dbExecutor.execute(() -> {
-                                try {
-                                    uploadFileToServer(result.getData().getData());
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            });
-                        }
-                    }
-                });
-    }
-
-    public byte[] readBytes(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
-
-        int bufferSize = 1024;
-        byte[] buffer = new byte[bufferSize];
-
-        int len = 0;
-        while ((len = inputStream.read(buffer)) != -1) {
-            byteBuffer.write(buffer, 0, len);
-        }
-
-        return byteBuffer.toByteArray();
-    }
-
     private void addActionForBtnShowAttachFile() {
         mBinding.btnAttachFile.setOnClickListener(view -> {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -203,91 +172,30 @@ public class ConversationFragment extends Fragment {
                 .title(mMainActivity.getString(R.string.pick_img))
                 .buttonText(mMainActivity.getString(R.string.send))
                 .startMultiImage(uris -> {
-                    if (NetworkUtil.isConnectionAvailable(mMainActivity))
+                    mMainActivity.runOnUiThread(() -> {
+                        mBinding.sending.setVisibility(View.VISIBLE);
+                    });
+                    if (NetworkUtil.isConnectionAvailable(mMainActivity)) {
                         uris.forEach(this::uploadImageToServer);
-                    else
-                        new iOSDialogBuilder(mMainActivity)
-                                .setTitle(mMainActivity.getString(R.string.no_network_connection))
-                                .setSubtitle(mMainActivity.getString(R.string.no_network_connection_desc))
-                                .setPositiveListener(mMainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                    }
                 });
     }
 
-    private void uploadFileToServer(Uri uri) throws Exception {
-        if (uri == null) return;
-        String filePath = RealPathUtil.getFilePath(mMainActivity, uri);
-        if (filePath == null) return;
-
-        byte[] bytes = readBytes(mMainActivity.getContentResolver().openInputStream(uri));
-
-
-        File file = new File(filePath);
-        RequestBody requestBody = RequestBody.create(MediaType.parse(Constraints.MULTIPART_FORM_DATA_TYPE), bytes);
-
-        String fileName = file.getName();
-        MultipartBody.Part part = MultipartBody.Part.createFormData("media", fileName, requestBody);
-
-        ApiService.apiService.postImage(part).enqueue(new Callback<Object>() {
-            @Override
-            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                if (response.isSuccessful()) {
-
-                    Gson gson = new Gson();
-
-                    JsonElement json = gson.toJsonTree(response.body());
-                    JsonObject obj = gson.fromJson(json, JsonObject.class);
-
-                    String fileType = getFileType(fileName);
-
-                    sendMessageViaApi(fileName, obj.get("data").toString(), fileType, fileType);
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
-            }
-        });
-    }
-
-    private String getFileType(String file) {
-
-        String mimeType = MimeTypeMap.getFileExtensionFromUrl(file);
-
-        if (mimeType.matches("jpg|jpeg|png|JPG|JPEG|PNG"))
-            return "image/" + mimeType;
-        else if (mimeType.matches("mp4|mov|wmv|avi|MP4|MOV|WMV|AVI"))
-            return "media/" + mimeType;
-
-        return "application/" + mimeType;
-    }
-
-    private void uploadImageToServer(Uri uri) {
-        File file = new File(RealPathUtil.getRealPath(mMainActivity, uri));
-        RequestBody requestBody = RequestBody.create(MediaType.parse(Constraints.MULTIPART_FORM_DATA_TYPE), file);
-        String fileName = file.getName();
-        MultipartBody.Part part = MultipartBody.Part.createFormData("media", fileName, requestBody);
-
-        ApiService.apiService.postImage(part).enqueue(new Callback<Object>() {
-            @Override
-            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                if (response.isSuccessful()) {
-
-                    Gson gson = new Gson();
-
-                    JsonElement json = gson.toJsonTree(response.body());
-                    JsonObject obj = gson.fromJson(json, JsonObject.class);
-
-                    String fileType = getFileType(fileName);
-                    sendMessageViaApi(fileName, obj.get("data").toString(), fileType, fileType);
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
-                Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
-            }
-        });
+    private void initPickFileLauncher() {
+        filePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(), result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        if (result.getData().getData() != null) {
+                            Database.dbExecutor.execute(() -> {
+                                try {
+                                    uploadFileToServer(result.getData().getData());
+                                } catch (Exception e) {
+                                    Log.e(ConversationFragment.class.getName(), e.getLocalizedMessage());
+                                }
+                            });
+                        }
+                    }
+                });
     }
 
     private void initProgressBar() {
@@ -311,6 +219,14 @@ public class ConversationFragment extends Fragment {
         viewModel.getData(conversation.getId()).observe(mMainActivity, new Observer<List<Message>>() {
             @Override
             public void onChanged(List<Message> messages) {
+
+                if (messages == null || messages.isEmpty()) {
+                    mBinding.emptyChatContainer.setVisibility(View.VISIBLE);
+                    return;
+                }
+
+                mBinding.emptyChatContainer.setVisibility(View.GONE);
+
                 currentMessageList.clear();
                 currentMessageList.addAll(messages);
                 messageAdapter.setMessages(messages);
@@ -333,6 +249,33 @@ public class ConversationFragment extends Fragment {
             @Override
             public void longPress(Message message, View parent) {
                 showChatPopup(parent, message);
+            }
+        });
+    }
+
+    private void addToggleShowSendIcon() {
+        mBinding.edtChat.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                int textLength = editable.toString().trim().length();
+
+                if (textLength > 0) {
+                    emitTyping(Constraints.EVT_ON_TYPING, true);
+                    mBinding.btnSend.setVisibility(View.VISIBLE);
+                    mBinding.btnSendImg.setVisibility(View.GONE);
+                } else {
+                    emitTyping(Constraints.EVT_OFF_TYPING, false);
+                    mBinding.btnSend.setVisibility(View.GONE);
+                    mBinding.btnSendImg.setVisibility(View.VISIBLE);
+                }
             }
         });
     }
@@ -418,13 +361,19 @@ public class ConversationFragment extends Fragment {
 
     private void addActionForAudioCallBtn() {
         mBinding.btnAudioCall.setOnClickListener(view -> {
-            Toast.makeText(mMainActivity, "Audio call", Toast.LENGTH_SHORT).show();
+            new iOSDialogBuilder(mMainActivity)
+                    .setTitle(mMainActivity.getString(R.string.notification_warning))
+                    .setSubtitle(mMainActivity.getString(R.string.audio_chat_not_available))
+                    .setPositiveListener(mMainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
         });
     }
 
     private void addActionForVideoCallBtn() {
         mBinding.btnVideoCall.setOnClickListener(view -> {
-            Toast.makeText(mMainActivity, "Video call", Toast.LENGTH_SHORT).show();
+            new iOSDialogBuilder(mMainActivity)
+                    .setTitle(mMainActivity.getString(R.string.notification_warning))
+                    .setSubtitle(mMainActivity.getString(R.string.video_chat_not_available))
+                    .setPositiveListener(mMainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
         });
     }
 
@@ -479,7 +428,9 @@ public class ConversationFragment extends Fragment {
         mBinding.edtChat.setText("");
         mBinding.edtChat.requestFocus();
 
-        mBinding.sending.setVisibility(View.VISIBLE);
+        mMainActivity.runOnUiThread(() -> {
+            mBinding.sending.setVisibility(View.VISIBLE);
+        });
 
         JsonObject object = new JsonObject();
         Gson gson = new Gson();
@@ -488,12 +439,16 @@ public class ConversationFragment extends Fragment {
         object.addProperty("text", text);
         object.addProperty("type", type);
 
-        JsonObject media = new JsonObject();
-        url = url.replaceAll("\"", "");
-        media.addProperty("url", url);
-        media.addProperty("type", imgType);
+        if (!type.equalsIgnoreCase("text")) {
+            JsonObject media = new JsonObject();
+            url = url.replaceAll("\"", "");
+            media.addProperty("url", url);
+            media.addProperty("type", imgType);
 
-        object.add("media", gson.toJsonTree(media));
+            object.add("media", gson.toJsonTree(media));
+        } else {
+            object.add("media", gson.toJsonTree(new ArrayList<>()));
+        }
 
         RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
 
@@ -529,7 +484,10 @@ public class ConversationFragment extends Fragment {
             mSocket.connect();
         }
 
-        mBinding.sending.setVisibility(View.GONE);
+        mMainActivity.runOnUiThread(() -> {
+            mBinding.sending.setVisibility(View.GONE);
+        });
+
         Gson gson = new Gson();
         viewModel.insertOrUpdate(message);
         conversation.setLastMessage(message);
@@ -574,29 +532,112 @@ public class ConversationFragment extends Fragment {
         viewModel.unsent(message);
     }
 
-    private void addToggleShowSendIcon() {
-        mBinding.edtChat.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
+    public byte[] readBytes(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
+        int bufferSize = 1024;
+        byte[] buffer = new byte[bufferSize];
 
-            @Override
-            public void afterTextChanged(Editable editable) {
-                int textLength = editable.toString().trim().length();
+        int len = 0;
+        while ((len = inputStream.read(buffer)) != -1) {
+            byteBuffer.write(buffer, 0, len);
+        }
 
-                if (textLength > 0) {
-                    emitTyping(Constraints.EVT_ON_TYPING, true);
-                    mBinding.btnSend.setVisibility(View.VISIBLE);
-                    mBinding.btnSendImg.setVisibility(View.GONE);
-                } else {
-                    emitTyping(Constraints.EVT_OFF_TYPING, false);
-                    mBinding.btnSend.setVisibility(View.GONE);
-                    mBinding.btnSendImg.setVisibility(View.VISIBLE);
+        return byteBuffer.toByteArray();
+    }
+
+    private String getFileType(String file) {
+
+        String mimeType = MimeTypeMap.getFileExtensionFromUrl(file);
+
+        if (mimeType.matches("jpg|jpeg|png|JPG|JPEG|PNG"))
+            return "image/" + mimeType;
+        else if (mimeType.matches("mp4|mov|wmv|avi|MP4|MOV|WMV|AVI"))
+            return "media/" + mimeType;
+
+        return "application/" + mimeType;
+    }
+
+    private void uploadFileToServer(Uri uri) throws Exception {
+        if (uri == null) return;
+        String filePath = RealPathUtil.getFilePath(mMainActivity, uri);
+        if (filePath == null) return;
+
+        byte[] bytes = readBytes(mMainActivity.getContentResolver().openInputStream(uri));
+
+        mMainActivity.runOnUiThread(() -> {
+            mBinding.sending.setVisibility(View.VISIBLE);
+        });
+
+        File file = new File(filePath);
+        RequestBody requestBody = RequestBody.create(MediaType.parse(Constraints.MULTIPART_FORM_DATA_TYPE), bytes);
+
+        String fileName = file.getName();
+        MultipartBody.Part part = MultipartBody.Part.createFormData("media", fileName, requestBody);
+
+        ApiService.apiService.postImage(part).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if (response.isSuccessful()) {
+
+                    Gson gson = new Gson();
+
+                    JsonElement json = gson.toJsonTree(response.body());
+                    JsonObject obj = gson.fromJson(json, JsonObject.class);
+
+                    String fileType = getFileType(fileName);
+
+                    sendMessageViaApi(fileName, obj.get("data").toString(), fileType, fileType);
                 }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                mMainActivity.runOnUiThread(() -> {
+                    mBinding.sending.setVisibility(View.GONE);
+                    new iOSDialogBuilder(mMainActivity)
+                            .setTitle(mMainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mMainActivity.getString(R.string.notification_warning_msg))
+                            .setPositiveListener(mMainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
+                Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
+            }
+        });
+    }
+
+    private void uploadImageToServer(Uri uri) {
+        File file = new File(RealPathUtil.getRealPath(mMainActivity, uri));
+        RequestBody requestBody = RequestBody.create(MediaType.parse(Constraints.MULTIPART_FORM_DATA_TYPE), file);
+        String fileName = file.getName();
+        MultipartBody.Part part = MultipartBody.Part.createFormData("media", fileName, requestBody);
+
+        mBinding.sending.setVisibility(View.VISIBLE);
+
+        ApiService.apiService.postImage(part).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if (response.isSuccessful()) {
+
+                    Gson gson = new Gson();
+
+                    JsonElement json = gson.toJsonTree(response.body());
+                    JsonObject obj = gson.fromJson(json, JsonObject.class);
+
+                    String fileType = getFileType(fileName);
+                    sendMessageViaApi(fileName, obj.get("data").toString(), fileType, fileType);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                mMainActivity.runOnUiThread(() -> {
+                    mBinding.sending.setVisibility(View.GONE);
+                    new iOSDialogBuilder(mMainActivity)
+                            .setTitle(mMainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mMainActivity.getString(R.string.notification_warning_msg))
+                            .setPositiveListener(mMainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
+                Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
             }
         });
     }

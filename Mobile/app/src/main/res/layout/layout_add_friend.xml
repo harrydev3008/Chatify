@@ -79,10 +79,27 @@
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="17sp"
+            android:visibility="visible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.502"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_friend_name" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_un_friend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/gray_f1"
+            android:text="@string/unfriend"
+            android:textAllCaps="false"
+            android:textColor="@color/black"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="gone"
+            app:layout_constraintHorizontal_bias="0.502"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_sent_request" />
 
         <View
             android:id="@+id/view3"
@@ -92,7 +109,7 @@
             android:background="@color/gray_e5"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btn_sent_request" />
+            app:layout_constraintTop_toBottomOf="@+id/btn_un_friend" />
 
         <TextView
             android:id="@+id/textView21"

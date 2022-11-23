@@ -204,9 +204,6 @@ public class ResetPasswordFragment extends Fragment {
         }
     }
 
-    /**
-     * @author Huy
-     */
     private boolean validateNewPassword(String newPwd, String confirmPwd) {
         if (TextUtils.isEmpty(newPwd)) {
             mBinding.edtNewPwd.setError(getString(R.string.empty_pwd_err));

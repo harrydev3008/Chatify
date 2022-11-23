@@ -24,12 +24,13 @@ import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentLoginBinding;
 import com.hisu.zola.fragments.conversation.ConversationListFragment;
-import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.EditTextUtil;
-import com.hisu.zola.util.network.NetworkUtil;
+import com.hisu.zola.util.socket.SocketIOHandler;
 import com.hisu.zola.util.converter.ObjectConvertUtil;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
+import com.hisu.zola.util.network.ApiService;
+import com.hisu.zola.util.network.NetworkUtil;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
@@ -182,6 +183,7 @@ public class LoginFragment extends Fragment {
 
                     LocalDataManager.setUserLoginState(true);
                     LocalDataManager.setCurrentUserInfo(newUser);
+                    SocketIOHandler.reconnect();
 
                     repository.insert(newUser);
 
@@ -217,9 +219,6 @@ public class LoginFragment extends Fragment {
         });
     }
 
-    /**
-     * @author Huy
-     */
     private boolean validateUserAccount(String phoneNumber, String password) {
         if (TextUtils.isEmpty(phoneNumber)) {
             mBinding.edtPhoneNo.setError(getString(R.string.empty_phone_no_err));
@@ -227,11 +226,7 @@ public class LoginFragment extends Fragment {
             return false;
         }
 
-        Pattern patternPhoneNumber = Pattern.compile("^(032|033|034|035|036|037|038|039|086|096|097|098|" +
-                "070|079|077|076|078|089|090|093|" +
-                "083|084|085|081|082|088|091|094|" +
-                "056|058|092|" +
-                "059|099)[0-9]{7}$");
+        Pattern patternPhoneNumber = Pattern.compile("^(032|033|034|035|036|037|038|039|086|096|097|098|070|079|077|076|078|089|090|093|083|084|085|081|082|088|091|094|052|056|058|092|059|099|087)[0-9]{7}$");
 
         Matcher matcher = patternPhoneNumber.matcher(phoneNumber);
         if (!matcher.matches()) {

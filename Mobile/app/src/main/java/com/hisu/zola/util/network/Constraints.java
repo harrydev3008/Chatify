@@ -12,6 +12,8 @@ public interface Constraints {
     String FILE_TYPE_GENERAL = "application/";
     String TEXT_TYPE_GENERAL = "text";
     String VIDEO_TYPE_GENERAL = "media/";
+    String CALL_TYPE_GENERAL = "call";
+    String GROUP_NOTIFICATION_TYPE_GENERAL = "notification";
     String GOOGLE_DOCS_URL = "https://docs.google.com/gview?embedded=true&url=";
 
     //  API
@@ -24,6 +26,7 @@ public interface Constraints {
     String API_GET_ALL_FRIENDS = "api/user/getAllFriends";
     String API_UPDATE_PROFILE = "api/user/updateProfile";
     String API_SEND_FRIEND_REQUEST = "api/user/requestAddFriend";
+    String API_UN_SEND_FRIEND_REQUEST = "api/user/recallFriend";
     String API_ACCEPT_FRIEND_REQUEST = "api/user/acceptFriend";
     String API_DENY_FRIEND_REQUEST = "api/user/deniedFriend";
     String API_UNFRIEND_REQUEST = "api/user/deleteFriend";
@@ -42,6 +45,7 @@ public interface Constraints {
     String API_REMOVE_GROUP_MEMBER = "api/conversation/deleteMember";
     String API_DISBAND_GROUP = "api/conversation/deleteGroup";
     String API_OUT_GROUP = "api/conversation/outGroup";
+    String API_CHECK_GROUP = "api/conversation/checkConversation";
 
     //  Socket
     String EVT_ADD_MEMBER = "addMemberToGroup";
@@ -72,6 +76,8 @@ public interface Constraints {
     String EVT_ADD_FRIEND_RECEIVE = "requestAddFriendToClient";
     String EVT_ACCEPT_FRIEND_REQUEST = "acceptAddFriend";
     String EVT_ACCEPT_FRIEND_REQUEST_RECEIVE = "acceptAddFriendToClient";
+    String EVT_UNSENT_FRIEND_REQUEST = "recallFriend";
+    String EVT_UNSENT_FRIEND_REQUEST_RECEIVE = "recallFriendToClient";
     String EVT_DELETE_FRIEND = "deleteFriend";
     String EVT_DELETE_FRIEND_RECEIVE = "deleteFriendToClient";
 }

@@ -24,12 +24,13 @@ import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentAddMemberToGroupBinding;
+import com.hisu.zola.util.dialog.LoadingDialog;
+import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.network.Constraints;
 import com.hisu.zola.util.network.NetworkUtil;
-import com.hisu.zola.util.SocketIOHandler;
-import com.hisu.zola.util.dialog.LoadingDialog;
-import com.hisu.zola.util.local.LocalDataManager;
+import com.hisu.zola.util.socket.MessageSocketHandler;
+import com.hisu.zola.util.socket.SocketIOHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -199,6 +200,11 @@ public class AddMemberToGroupFragment extends Fragment {
                     conversation.setMember(newGroupMembers);
                     repository.insertOrUpdate(conversation);
                     emitAddMember();
+
+                    for (User newMember : newMembers) {
+                        MessageSocketHandler.sendMessageViaApi(mainActivity, conversation, getTextFromMember(newMember));
+                    }
+
                     mainActivity.getSupportFragmentManager().popBackStackImmediate();
                 }
             }
@@ -216,6 +222,10 @@ public class AddMemberToGroupFragment extends Fragment {
                 Log.e(AddMemberToGroupFragment.class.getName(), t.getLocalizedMessage());
             }
         });
+    }
+
+    private String getTextFromMember(User member) {
+        return LocalDataManager.getCurrentUserInfo().getUsername() + " vừa thêm " + member.getUsername() + " vào nhóm.";
     }
 
     private void emitAddMember() {

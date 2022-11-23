@@ -25,7 +25,7 @@ import com.hisu.zola.databinding.FragmentAddNewGroupBinding;
 import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.network.Constraints;
 import com.hisu.zola.util.network.NetworkUtil;
-import com.hisu.zola.util.SocketIOHandler;
+import com.hisu.zola.util.socket.SocketIOHandler;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 
@@ -157,6 +157,7 @@ public class AddNewGroupFragment extends Fragment {
         members.add(currentUser.getId());
         object.add("member", gson.toJsonTree(members));
         object.add("createdBy", gson.toJsonTree(currentUser));
+        object.addProperty("isGroup", true);
 
         RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
 

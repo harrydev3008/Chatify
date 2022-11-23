@@ -25,7 +25,8 @@ import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentViewGroupMemberBinding;
 import com.hisu.zola.util.network.ApiService;
-import com.hisu.zola.util.SocketIOHandler;
+import com.hisu.zola.util.socket.MessageSocketHandler;
+import com.hisu.zola.util.socket.SocketIOHandler;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.Constraints;
@@ -106,7 +107,7 @@ public class ViewGroupMemberFragment extends Fragment {
                                 .setSubtitle(mainActivity.getString(R.string.confirm_remove_member))
                                 .setPositiveListener(mainActivity.getString(R.string.yes), dialog -> {
                                     dialog.dismiss();
-                                    removeMember(user.getId());
+                                    removeMember(user);
                                 })
                                 .setNegativeListener(mainActivity.getString(R.string.no), iOSDialog::dismiss).build().show();
                     });
@@ -121,12 +122,12 @@ public class ViewGroupMemberFragment extends Fragment {
         mBinding.rvMembers.setLayoutManager(new LinearLayoutManager(mainActivity));
     }
 
-    private void removeMember(String memberID) {
+    private void removeMember(User memberID) {
         loadingDialog.showDialog();
 
         JsonObject object = new JsonObject();
         object.addProperty("conversationId", conversation.getId());
-        object.addProperty("deleteMemberId", memberID);
+        object.addProperty("deleteMemberId", memberID.getId());
 
         RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
 
@@ -136,7 +137,7 @@ public class ViewGroupMemberFragment extends Fragment {
                 if (response.isSuccessful() && response.code() == 200) {
                     List<User> member = conversation.getMember();
                     for (User user : member) {
-                        if (user.getId().equalsIgnoreCase(memberID)) {
+                        if (user.getId().equalsIgnoreCase(memberID.getId())) {
                             member.remove(user);
                             break;
                         }
@@ -145,7 +146,9 @@ public class ViewGroupMemberFragment extends Fragment {
                     conversation.setMember(member);
                     adapter.setMembers(member);
                     repository.insertOrUpdate(conversation);
-                    emitRemoveMember(memberID);
+                    emitRemoveMember(memberID.getId());
+
+                    MessageSocketHandler.sendMessageViaApi(mainActivity, conversation, getTextFromMember(memberID));
                 }
             }
 
@@ -161,6 +164,10 @@ public class ViewGroupMemberFragment extends Fragment {
                 Log.e(ViewGroupMemberFragment.class.getName(), t.getLocalizedMessage());
             }
         });
+    }
+
+    private String getTextFromMember(User member) {
+        return LocalDataManager.getCurrentUserInfo().getUsername() + " vừa xoá " + member.getUsername() + " khỏi nhóm.";
     }
 
     private void emitRemoveMember(String memberID) {

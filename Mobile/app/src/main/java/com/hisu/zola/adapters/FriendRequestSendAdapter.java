@@ -17,6 +17,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.LayoutFriendRequestSendBinding;
+import com.hisu.zola.listeners.IOnUserClickListener;
 
 import java.util.List;
 
@@ -24,7 +25,8 @@ public class FriendRequestSendAdapter extends
         RecyclerView.Adapter<FriendRequestSendAdapter.RequestSendViewHolder> {
 
     private List<User> requestList;
-    private Context context;
+    private final Context context;
+    private IOnUserClickListener onUserClickListener;
 
     public FriendRequestSendAdapter(List<User> requestList, Context context) {
         this.requestList = requestList;
@@ -43,6 +45,10 @@ public class FriendRequestSendAdapter extends
     public void setRequestList(List<User> requestList) {
         this.requestList = requestList;
         notifyDataSetChanged();
+    }
+
+    public void setOnUserClickListener(IOnUserClickListener onUserClickListener) {
+        this.onUserClickListener = onUserClickListener;
     }
 
     @NonNull
@@ -69,6 +75,9 @@ public class FriendRequestSendAdapter extends
                 });
 
         holder.mBinding.tvRequestName.setText(sendReq.getUsername());
+        holder.mBinding.btnCancel.setOnClickListener(view -> {
+            onUserClickListener.onClick(sendReq);
+        });
     }
 
     @Override

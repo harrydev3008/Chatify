@@ -106,6 +106,7 @@
     <string name="friend_request_accept">Chấp nhận</string>
     <string name="friend_request_delete">Xoá</string>
     <string name="friend_request_decline">Từ chối</string>
+    <string name="friend_request_decline_desc">Từ chối lời mời kết bạn</string>
     <string name="friend_request_cancel">Thu hồi</string>
     <string name="friend_request_sent_success">Gửi lời mời kết bạn thành công!</string>
     <string name="friend_request_accept_success">Chúc mừng! Bạn vừa có thêm 1 người bạn mới! Giờ đây các bạn có thể trò chuyện với nhau bất cứ lúc nào!</string>
@@ -183,8 +184,15 @@
     <string name="deny_friend_request_success">Đã từ chối lời mời kết bạn!</string>
     <string name="unfriend_success">Thật tiếc khi các bạn không còn là bạn bè nữa…</string>
     <string name="unfriend_confirm">Bạn có chắc chắn muốn huỷ kết bạn với người này chứ?!</string>
+    <string name="friend_request_unsent_confirm">Bạn có chắc muốn thu hồi lời mời kết bạn không?!</string>
+    <string name="friend_request_unsent">Đã huỷ lời mời kết bạn!</string>
+    <string name="unsent_friend_request">Huỷ lời mời kết bạn</string>
     <string name="unsent_message">Thu hồi</string>
     <string name="forward_message">Chuyển tiếp</string>
+    <string name="incoming_call">Cuộc gọi đến</string>
+    <string name="out_going_call">Cuộc gọi</string>
+    <string name="out_going_call_holder">[Cuộc gọi]</string>
+    <string name="group_notification_holder">[Thông báo]</string>
 
 
     <!--Error Messages-->
@@ -224,6 +232,9 @@
     <string name="no_network_connection_to_sync">Cần có kết nối mạng để thực hiện việc đồng bộ! Vui lòng kiểm tra lại kết nối mạng của bạn và thử lại sau!</string>
     <string name="downloading_files">Đang tải xuống file</string>
     <string name="downloaded">Tải file thành công!</string>
+    <string name="choose_app_to_open_file">Bạn hãy chọn một ứng dụng để mở file:</string>
+    <string name="audio_chat_not_available">Chức năng gọi thoại hiện chỉ hỗ trợ trên Website… Xin lỗi vì sự bất tiện này!</string>
+    <string name="video_chat_not_available">Chức năng gọi Video hiện chỉ hỗ trợ trên Website… Xin lỗi vì sự bất tiện này!</string>
 
     <!--Notification Channels-->
     <string name="system_noty_channel_id">zola notification id</string>

@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.hisu.zola.database.entity.Media;
 import com.hisu.zola.databinding.LayoutImageGroupItemBinding;
+import com.hisu.zola.listeners.IOnItemTouchListener;
 
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class ImageGroupAdapter extends RecyclerView.Adapter<ImageGroupAdapter.Im
     private int mode;
     public static final int SEND_MODE = 1;
     public static final int RECEIVE_MODE = 0;
+    private IOnItemTouchListener onItemTouchListener;
 
     public ImageGroupAdapter(Context context) {
         this.context = context;
@@ -37,6 +39,10 @@ public class ImageGroupAdapter extends RecyclerView.Adapter<ImageGroupAdapter.Im
     public void setMediaList(List<Media> mediaList) {
         this.mediaList = mediaList;
         notifyDataSetChanged();
+    }
+
+    public void setOnItemTouchListener(IOnItemTouchListener onItemTouchListener) {
+        this.onItemTouchListener = onItemTouchListener;
     }
 
     @NonNull
@@ -66,6 +72,11 @@ public class ImageGroupAdapter extends RecyclerView.Adapter<ImageGroupAdapter.Im
         }
 
         Glide.with(context).load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.binding.rimvImageGroupItem);
+
+        holder.binding.rimvImageGroupItem.setOnLongClickListener(view -> {
+            onItemTouchListener.longPress(null, null);
+            return true;
+        });
     }
 
     public int getDp(int dp) {

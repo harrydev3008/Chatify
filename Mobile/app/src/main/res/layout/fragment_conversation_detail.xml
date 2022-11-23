@@ -3,15 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/gray_f1"
     tools:context=".fragments.conversation.ConversationDetailFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@color/white">
+        android:background="@color/white"
+        android:orientation="vertical">
+
         <RelativeLayout
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -53,91 +53,91 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
+            android:fontFamily="@font/be_vietnam"
             android:text="@string/app_name"
             android:textAlignment="center"
-            android:textSize="24sp"
             android:textColor="@color/black"
-            android:fontFamily="@font/be_vietnam"
+            android:textSize="24sp"
             android:textStyle="bold" />
 
         <View
             android:id="@+id/view"
             android:layout_width="match_parent"
             android:layout_height="8dp"
-            android:background="@color/gray_f1"
-            android:layout_marginTop="16dp" />
-
-        <TextView
-            android:id="@+id/tv_change_nick_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_edit_2_outline"
-            android:drawableRight="@drawable/ic_navigate_next"
-            android:fontFamily="@font/be_vietnam"
-            android:background="@drawable/border_bottom"
-            android:paddingHorizontal="6dp"
-            android:textSize="16sp"
-            android:drawablePadding="10dp"
-            android:paddingVertical="10dp"
-            android:text="@string/change_friend_nick_name"
-            android:textColor="@color/black" />
+            android:layout_marginTop="16dp"
+            android:background="@color/gray_f1" />
 
         <TextView
             android:id="@+id/tv_sent_file"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/border_bottom"
             android:drawableLeft="@drawable/ic_images_outline"
             android:drawableRight="@drawable/ic_navigate_next"
+            android:drawablePadding="10dp"
             android:fontFamily="@font/be_vietnam"
             android:paddingHorizontal="6dp"
-            android:background="@drawable/border_bottom"
-            android:drawablePadding="10dp"
             android:paddingVertical="10dp"
-            android:textSize="16sp"
             android:text="@string/sent_file"
-            android:textColor="@color/black" />
+            android:textColor="@color/black"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/tv_unfriend"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/border_bottom"
             android:drawableLeft="@drawable/ic_unfriend"
+            android:drawablePadding="10dp"
             android:fontFamily="@font/be_vietnam"
             android:paddingHorizontal="6dp"
-            android:background="@drawable/border_bottom"
-            android:drawablePadding="10dp"
             android:paddingVertical="10dp"
-            android:textSize="16sp"
             android:text="@string/unfriend"
-            android:textColor="@color/black" />
+            android:textColor="@color/black"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/tv_addFriend"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/border_bottom"
             android:drawableLeft="@drawable/ic_user_add"
+            android:drawablePadding="10dp"
             android:fontFamily="@font/be_vietnam"
             android:paddingHorizontal="6dp"
-            android:background="@drawable/border_bottom"
-            android:drawablePadding="10dp"
             android:paddingVertical="10dp"
-            android:textSize="16sp"
-            android:visibility="gone"
             android:text="@string/add_friend"
-            android:textColor="@color/black"/>
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:visibility="gone" />
 
         <TextView
-            android:id="@+id/tv_delete_conversation"
+            android:id="@+id/tv_unsent_request"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_trash_alt"
+            android:drawableLeft="@drawable/ic_recall_request"
+            android:drawablePadding="10dp"
             android:fontFamily="@font/be_vietnam"
             android:paddingHorizontal="6dp"
-            android:drawablePadding="10dp"
             android:paddingVertical="10dp"
-            android:textSize="16sp"
-            android:text="@string/delete_conversation"
-            android:textColor="@color/danger" />
+            android:text="@string/unsent_friend_request"
+            android:visibility="visible"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tv_deny_request"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_decline_user"
+            android:drawablePadding="10dp"
+            android:fontFamily="@font/be_vietnam"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="10dp"
+            android:text="@string/friend_request_decline_desc"
+            android:visibility="gone"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
     </LinearLayout>
 
 </RelativeLayout>

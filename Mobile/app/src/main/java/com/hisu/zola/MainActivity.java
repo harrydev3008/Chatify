@@ -1,9 +1,11 @@
 package com.hisu.zola;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -13,17 +15,30 @@ import androidx.fragment.app.FragmentTransaction;
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.WanderingCubes;
 import com.google.android.material.badge.BadgeDrawable;
+import com.google.gson.JsonObject;
 import com.hisu.zola.database.Database;
+import com.hisu.zola.database.entity.User;
+import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.ActivityMainBinding;
 import com.hisu.zola.fragments.SplashScreenFragment;
 import com.hisu.zola.fragments.StartScreenFragment;
 import com.hisu.zola.fragments.contact.ContactsFragment;
 import com.hisu.zola.fragments.conversation.ConversationListFragment;
 import com.hisu.zola.fragments.profile.ProfileFragment;
-import com.hisu.zola.util.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
+import com.hisu.zola.util.network.ApiService;
+import com.hisu.zola.util.network.Constraints;
+import com.hisu.zola.util.socket.SocketIOHandler;
+
+import org.json.JSONObject;
 
 import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private long backPressTime;
     private static final int PRESS_TIME_INTERVAL = 2 * 1000; //2 secs
     private Toast mExitToast;
+    private UserRepository userRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,8 +56,16 @@ public class MainActivity extends AppCompatActivity {
         mainBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mainBinding.getRoot());
 
-        Socket mSocketIO = SocketIOHandler.getInstance().getSocketConnection();
-        mSocketIO.on(Socket.EVENT_DISCONNECT, args -> SocketIOHandler.getInstance().establishSocketConnection());
+        if (LocalDataManager.getUserLoginState()) {
+            Socket mSocketIO = SocketIOHandler.getInstance().getSocketConnection();
+            mSocketIO.on(Socket.EVENT_DISCONNECT, args -> SocketIOHandler.getInstance().establishSocketConnection());
+            mSocketIO.on(Constraints.EVT_ADD_FRIEND_RECEIVE, onFriendEventReceive);
+            mSocketIO.on(Constraints.EVT_ACCEPT_FRIEND_REQUEST_RECEIVE, onFriendEventReceive);
+            mSocketIO.on(Constraints.EVT_UNSENT_FRIEND_REQUEST_RECEIVE, onFriendEventReceive);
+            mSocketIO.on(Constraints.EVT_DELETE_FRIEND_RECEIVE, onFriendEventReceive);
+        }
+
+        userRepository = new UserRepository(this.getApplication());
 
         initProgressBar();
 
@@ -172,8 +196,38 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        clearFragmentList();
         SocketIOHandler.disconnect();
         SocketIOHandler.close();
     }
+
+    private void updateUserInfo() {
+        JsonObject object = new JsonObject();
+        object.addProperty("phoneNumber", LocalDataManager.getCurrentUserInfo().getPhoneNumber());
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
+        ApiService.apiService.findFriendByPhoneNumber(body).enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                if (response.isSuccessful() && response.code() == 200) {
+                    User user = response.body();
+                    LocalDataManager.setCurrentUserInfo(user);
+                    userRepository.update(user);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                Log.e(MainActivity.class.getName(), t.getLocalizedMessage());
+            }
+        });
+    }
+
+    private final Emitter.Listener onFriendEventReceive = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+                updateUserInfo();
+            }
+        }
+    };
 }

@@ -25,11 +25,12 @@ import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentFriendRequestReceiveBinding;
 import com.hisu.zola.fragments.conversation.AddNewGroupFragment;
-import com.hisu.zola.util.network.ApiService;
-import com.hisu.zola.util.network.NetworkUtil;
-import com.hisu.zola.util.SocketIOHandler;
+import com.hisu.zola.util.socket.SocketIOHandler;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
+import com.hisu.zola.util.network.ApiService;
+import com.hisu.zola.util.network.Constraints;
+import com.hisu.zola.util.network.NetworkUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -146,13 +147,14 @@ public class FriendRequestReceiveFragment extends Fragment {
                 if (response.isSuccessful() && response.code() == 200) {
                     User updatedUser = response.body();
                     userRepository.update(updatedUser);
-                    addNewGroup(acceptID);
+
                     mainActivity.runOnUiThread(() -> {
                         loadingDialog.dismissDialog();
                         new iOSDialogBuilder(mainActivity)
                                 .setTitle(mainActivity.getString(R.string.notification_warning))
                                 .setSubtitle(mainActivity.getString(R.string.accept_friend_request_success))
                                 .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                        checkConversationExisted(LocalDataManager.getCurrentUserInfo().getId(), acceptID);
                     });
                 }
             }
@@ -203,6 +205,39 @@ public class FriendRequestReceiveFragment extends Fragment {
         });
     }
 
+    private void checkConversationExisted(String currentUserID, String acceptID) {
+        JsonObject object = new JsonObject();
+        List<String> member = List.of(currentUserID, acceptID);
+
+        object.add("member", new Gson().toJsonTree(member));
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
+
+        ApiService.apiService.checkGroupExist(body).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if (response.isSuccessful() && response.code() == 200) {
+                    Gson gson = new Gson();
+
+                    String json = gson.toJson(response.body());
+                    JsonObject obj = gson.fromJson(json, JsonObject.class);
+                    boolean already = obj.get("already").getAsBoolean();
+
+                    if (!already) {
+                        addNewGroup(acceptID);
+                    }
+
+                    emitAcceptRequest(LocalDataManager.getCurrentUserInfo(), acceptID);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                Log.e(FriendRequestReceiveFragment.class.getName(), t.getLocalizedMessage());
+            }
+        });
+
+    }
+
     private void addNewGroup(String acceptID) {
 
         User currentUser = LocalDataManager.getCurrentUserInfo();
@@ -215,6 +250,7 @@ public class FriendRequestReceiveFragment extends Fragment {
 
         object.add("member", gson.toJsonTree(members));
         object.add("createdBy", gson.toJsonTree(currentUser));
+        object.addProperty("isGroup", false);
 
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());
 
@@ -224,6 +260,7 @@ public class FriendRequestReceiveFragment extends Fragment {
                 if (response.isSuccessful() && response.code() == 200) {
                     Conversation conversation = response.body();
                     emitCreateGroup(conversation);
+                    Log.e("test", "here");
                 }
             }
 
@@ -252,5 +289,13 @@ public class FriendRequestReceiveFragment extends Fragment {
         emitMsg.add("conversation", gson.toJsonTree(conversation));
 
         mSocket.emit("addConversation", emitMsg);
+    }
+
+    private void emitAcceptRequest(User sender, String unsentUser) {
+        Gson gson = new Gson();
+        JsonObject object = new JsonObject();
+        object.add("sender", gson.toJsonTree(sender));
+        object.addProperty("recipient", unsentUser);
+        mSocket.emit(Constraints.EVT_ACCEPT_FRIEND_REQUEST, object);
     }
 }

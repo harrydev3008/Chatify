@@ -14,7 +14,6 @@ import androidx.lifecycle.Observer;
 
 import com.gdacciaro.iOSDialog.iOSDialog;
 import com.gdacciaro.iOSDialog.iOSDialogBuilder;
-import com.google.android.exoplayer2.C;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
@@ -24,7 +23,7 @@ import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentConversationGroupDetailBinding;
 import com.hisu.zola.util.network.ApiService;
-import com.hisu.zola.util.SocketIOHandler;
+import com.hisu.zola.util.socket.SocketIOHandler;
 import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.dialog.ChangeGroupNameDialog;
 import com.hisu.zola.util.dialog.HisuIOSDialog;

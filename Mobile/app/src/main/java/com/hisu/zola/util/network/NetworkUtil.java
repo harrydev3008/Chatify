@@ -77,4 +77,18 @@ public class NetworkUtil {
 
         context.registerReceiver(receiver, filter);
     }
+
+    public static void openDocument(Context context, File file) {
+        Intent intent = new Intent(android.content.Intent.ACTION_VIEW);
+        String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
+        String mimetype = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+
+        if (extension.equalsIgnoreCase("") || mimetype == null) {
+            intent.setDataAndType(Uri.fromFile(file), "text/*");
+        } else {
+            intent.setDataAndType(Uri.fromFile(file), mimetype);
+        }
+
+        context.startActivity(Intent.createChooser(intent, context.getString(R.string.choose_app_to_open_file)));
+    }
 }

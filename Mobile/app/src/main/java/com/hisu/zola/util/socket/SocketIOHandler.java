@@ -1,4 +1,4 @@
-package com.hisu.zola.util;
+package com.hisu.zola.util.socket;
 
 import com.hisu.zola.BuildConfig;
 import com.hisu.zola.database.entity.User;
@@ -17,8 +17,16 @@ public class SocketIOHandler {
     private SocketIOHandler() {
         IO.Options mOptions = new IO.Options();
         User user = LocalDataManager.getCurrentUserInfo();
-        if (user != null)
-            mOptions.query = "_id=" + user.getId();
+        if (user != null && user.getId() != null && user.getFriends() != null) {
+            StringBuilder friends = new StringBuilder();
+            for (User friend : user.getFriends())
+                friends.append(",").append(friend.getId());
+
+            if (friends.length() > 0)
+                friends = friends.deleteCharAt(0);
+
+            mOptions.query = "_id=" + user.getId() + "&friends=" + friends;
+        }
         mSocketIO = IO.socket(getConnectionURI(), mOptions);
     }
 
@@ -33,6 +41,7 @@ public class SocketIOHandler {
     }
 
     public void establishSocketConnection() {
+
         mSocketIO.connect();
     }
 
@@ -47,5 +56,9 @@ public class SocketIOHandler {
 
     private URI getConnectionURI() {
         return URI.create(BuildConfig.SERVER_URL);
+    }
+
+    public static void reconnect() {
+        instance = new SocketIOHandler();
     }
 }

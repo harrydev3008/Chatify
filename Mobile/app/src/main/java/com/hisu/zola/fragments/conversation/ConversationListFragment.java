@@ -12,12 +12,10 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -41,7 +39,7 @@ import com.hisu.zola.databinding.FragmentConversationListBinding;
 import com.hisu.zola.databinding.LayoutPopupBinding;
 import com.hisu.zola.fragments.AddFriendFragment;
 import com.hisu.zola.util.EditTextUtil;
-import com.hisu.zola.util.SocketIOHandler;
+import com.hisu.zola.util.socket.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.network.Constraints;
@@ -171,16 +169,26 @@ public class ConversationListFragment extends Fragment {
 
         adapter.setOnConversationItemSelectedListener((conversation, conversationName) -> {
             mMainActivity.setBottomNavVisibility(View.GONE);
-            FragmentTransaction fragmentTransaction = mMainActivity.getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.setCustomAnimations(
-                    R.anim.slide_in_left, R.anim.slide_out_left,
-                    R.anim.slide_out_right, R.anim.slide_out_right);
-
-            fragmentTransaction.hide(this);
-            fragmentTransaction.add(mMainActivity.getViewContainerID(), ConversationFragment.newInstance(conversation, conversationName));
-            fragmentTransaction.addToBackStack(null);
-            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            fragmentTransaction.commit();
+//            FragmentTransaction fragmentTransaction = mMainActivity.getSupportFragmentManager().beginTransaction();
+//            fragmentTransaction.setCustomAnimations(
+//                    R.anim.slide_in_left, R.anim.slide_out_left,
+//                    R.anim.slide_out_right, R.anim.slide_out_right);
+//
+//            fragmentTransaction.hide(this);
+//            fragmentTransaction.add(mMainActivity.getViewContainerID(), ConversationFragment.newInstance(conversation, conversationName));
+//            fragmentTransaction.addToBackStack(null);
+//            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+//            fragmentTransaction.commit();
+            mMainActivity.getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(
+                            R.anim.slide_in_left, R.anim.slide_out_left,
+                            R.anim.slide_out_right, R.anim.slide_out_right)
+                    .replace(
+                            mMainActivity.getViewContainerID(),
+                            ConversationFragment.newInstance(conversation, conversationName)
+                    )
+                    .addToBackStack("Single_Conversation")
+                    .commit();
         });
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(

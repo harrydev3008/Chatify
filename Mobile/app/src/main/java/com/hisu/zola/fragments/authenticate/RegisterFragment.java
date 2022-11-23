@@ -28,12 +28,12 @@ import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.FragmentRegisterBinding;
 import com.hisu.zola.fragments.ConfirmOTPFragment;
-import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.EditTextUtil;
-import com.hisu.zola.util.network.Constraints;
-import com.hisu.zola.util.network.NetworkUtil;
 import com.hisu.zola.util.dialog.ConfirmSendOTPDialog;
 import com.hisu.zola.util.dialog.LoadingDialog;
+import com.hisu.zola.util.network.ApiService;
+import com.hisu.zola.util.network.Constraints;
+import com.hisu.zola.util.network.NetworkUtil;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -170,9 +170,6 @@ public class RegisterFragment extends Fragment {
         });
     }
 
-    /**
-     * @author Huy
-     */
     private boolean validateUserRegisterAccount(String phoneNo, String displayName, String pwd, String confirmPwd) {
         if (TextUtils.isEmpty(phoneNo)) {
             mBinding.edtPhoneNumber.setError(getString(R.string.empty_phone_no_err));
@@ -180,11 +177,7 @@ public class RegisterFragment extends Fragment {
             return false;
         }
 
-        Pattern patternPhoneNumber = Pattern.compile("^(032|033|034|035|036|037|038|039|086|096|097|098|" +
-                "070|079|077|076|078|089|090|093|" +
-                "083|084|085|081|082|088|091|094|" +
-                "056|058|092|" +
-                "059|099)[0-9]{7}$");
+        Pattern patternPhoneNumber = Pattern.compile("^(032|033|034|035|036|037|038|039|086|096|097|098|070|079|077|076|078|089|090|093|083|084|085|081|082|088|091|094|052|056|058|092|059|099|087)[0-9]{7}$");
 
         if (!patternPhoneNumber.matcher(phoneNo).matches()) {
             mBinding.edtPhoneNumber.setError(getString(R.string.invalid_phone_format_err));

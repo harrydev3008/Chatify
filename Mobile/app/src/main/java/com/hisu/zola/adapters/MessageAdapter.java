@@ -137,7 +137,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (holder.getItemViewType() == MSG_SEND_TYPE) {
 
             final MessageSendViewHolder sendViewHolder = ((MessageSendViewHolder) holder);
-            sendViewHolder.displayMessageContent(mContext, message);
+            sendViewHolder.displayMessageContent(mContext, message, onItemTouchListener);
 
             if (message.getType().contains(Constraints.FILE_TYPE_GENERAL)) {
                 sendViewHolder.binding.tvMsgSend.setOnClickListener(view -> {
@@ -145,20 +145,15 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         if (!isFileExisted(message)) {
                             NetworkUtil.downloadFile(mContext, message, message.getMedia().get(0).getUrl(), sendViewHolder.binding.tvMsgSend);
                         } else {
-                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constraints.GOOGLE_DOCS_URL + message.getMedia().get(0).getUrl()));
-                            mContext.startActivity(browserIntent);
+                            File checkFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                                    getRealFileName(message));
+                            NetworkUtil.openDocument(mContext, checkFile);
                         }
                     } else {
                         requestWriteExternalStoragePermission();
                     }
                 });
             }
-
-            if (!message.getDeleted())
-                sendViewHolder.binding.msgSendParent.setOnLongClickListener(view -> {
-                    onItemTouchListener.longPress(message, sendViewHolder.binding.msgSendParent);
-                    return false;
-                });
 
             if (position == 0) {
                 sendViewHolder.binding.tvSentTime.setVisibility(View.VISIBLE);
@@ -175,6 +170,23 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 }
             }
 
+            if (!message.getDeleted()) {
+                sendViewHolder.binding.tvMsgSend.setOnLongClickListener(view -> {
+                    onItemTouchListener.longPress(message, sendViewHolder.binding.tvMsgSend);
+                    return true;
+                });
+
+                sendViewHolder.binding.videoSend.setOnLongClickListener(view -> {
+                    onItemTouchListener.longPress(message, sendViewHolder.binding.videoSend);
+                    return true;
+                });
+
+                sendViewHolder.binding.groupImg.setOnLongClickListener(view -> {
+                    onItemTouchListener.longPress(message, sendViewHolder.binding.groupImg);
+                    return true;
+                });
+            }
+
         } else if (holder.getItemViewType() == MSG_RECEIVE_TYPE) {
 
             final MessageReceiveViewHolder receiveViewHolder = ((MessageReceiveViewHolder) holder);
@@ -186,6 +198,21 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             receiveViewHolder.binding.ivUserPfp.setImageBitmap(resource);
                         }
                     });
+
+            if (message.getType().contains(Constraints.FILE_TYPE_GENERAL)) {
+                receiveViewHolder.binding.tvMsgReceive.setOnClickListener(view -> {
+                    if (isWriteExternalStoragePermission()) {
+                        if (!isFileExisted(message)) {
+                            NetworkUtil.downloadFile(mContext, message, message.getMedia().get(0).getUrl(), receiveViewHolder.binding.tvMsgReceive);
+                        } else {
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constraints.GOOGLE_DOCS_URL + message.getMedia().get(0).getUrl()));
+                            mContext.startActivity(browserIntent);
+                        }
+                    } else {
+                        requestWriteExternalStoragePermission();
+                    }
+                });
+            }
 
             if (position == 0)
                 receiveViewHolder.binding.ivUserPfp.setVisibility(View.VISIBLE);
@@ -263,7 +290,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             this.binding = binding;
         }
 
-        private void displayMessageContent(Context context, Message message) {
+        private void displayMessageContent(Context context, Message message, IOnItemTouchListener onItemTouchListener) {
             binding.tvMsgSend.setTypeface(null, Typeface.NORMAL);
             binding.tvMsgSend.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
             if (message.getDeleted()) {
@@ -302,7 +329,22 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         ContextCompat.getDrawable(context, R.drawable.ic_file_document), null, null, null);
 
                 binding.tvMsgSend.setText(message.getText());
-            } else {
+            } else if (message.getType().contains(Constraints.CALL_TYPE_GENERAL)) {
+                binding.tvMsgSend.setVisibility(View.VISIBLE);
+                binding.videoSend.setVisibility(View.GONE);
+                binding.groupImg.setVisibility(View.GONE);
+                binding.tvMsgSend.setBackground(ContextCompat.getDrawable(context, R.drawable.message_receive));
+                binding.tvMsgSend.setText(context.getString(R.string.out_going_call));
+                binding.tvMsgSend.setTextColor(context.getColor(R.color.black));
+                binding.tvMsgSend.setCompoundDrawablesWithIntrinsicBounds(
+                        ContextCompat.getDrawable(context, R.drawable.ic_incoming_call), null, null, null);
+            }else if (message.getType().contains(Constraints.GROUP_NOTIFICATION_TYPE_GENERAL)) {
+                binding.tvMsgSend.setVisibility(View.GONE);
+                binding.videoSend.setVisibility(View.GONE);
+                binding.groupImg.setVisibility(View.GONE);
+                binding.tvChatNotification.setVisibility(View.VISIBLE);
+                binding.tvChatNotification.setText(message.getText());
+            }  else {
                 binding.tvMsgSend.setVisibility(View.GONE);
                 binding.videoSend.setVisibility(View.GONE);
                 binding.groupImg.setVisibility(View.VISIBLE);
@@ -310,9 +352,14 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 List<Media> media = message.getMedia();
 
                 int spanCount = media.size() < 2 ? 1 : 2;
+                ImageGroupAdapter imageGroupAdapter = new ImageGroupAdapter(media, context, ImageGroupAdapter.SEND_MODE);
+                imageGroupAdapter.setOnItemTouchListener((message1, view) -> {
+                    onItemTouchListener.longPress(message, binding.groupImg);
+                });
+
 
                 binding.groupImg.setLayoutManager(new GridLayoutManager(context, spanCount));
-                binding.groupImg.setAdapter(new ImageGroupAdapter(media, context, ImageGroupAdapter.SEND_MODE));
+                binding.groupImg.setAdapter(imageGroupAdapter);
             }
         }
     }
@@ -357,6 +404,31 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     MediaItem mediaItem = MediaItem.fromUri(uri);
                     player.setMediaItem(mediaItem);
                     player.prepare();
+                } else if (message.getType().contains(Constraints.FILE_TYPE_GENERAL)) {
+                    binding.msgWrapper.setVisibility(View.VISIBLE);
+                    binding.groupImg.setVisibility(View.GONE);
+                    binding.videoReceive.setVisibility(View.GONE);
+
+                    binding.tvMsgReceive.setCompoundDrawablesWithIntrinsicBounds(
+                            ContextCompat.getDrawable(context, R.drawable.ic_file_document_receive), null, null, null);
+
+                    binding.tvMsgReceive.setText(message.getText());
+                } else if (message.getType().contains(Constraints.CALL_TYPE_GENERAL)) {
+                    binding.msgWrapper.setVisibility(View.VISIBLE);
+                    binding.groupImg.setVisibility(View.GONE);
+                    binding.videoReceive.setVisibility(View.GONE);
+                    binding.tvMsgReceive.setTextColor(context.getColor(R.color.chat_text_color));
+                    binding.msgWrapper.setBackground(ContextCompat.getDrawable(context, R.drawable.message_receive));
+
+                    binding.tvMsgReceive.setText(context.getString(R.string.incoming_call));
+                    binding.tvMsgReceive.setCompoundDrawablesWithIntrinsicBounds(
+                            ContextCompat.getDrawable(context, R.drawable.ic_incoming_call), null, null, null);
+                } else if (message.getType().contains(Constraints.GROUP_NOTIFICATION_TYPE_GENERAL)) {
+                    binding.msgWrapper.setVisibility(View.GONE);
+                    binding.groupImg.setVisibility(View.GONE);
+                    binding.videoReceive.setVisibility(View.GONE);
+                    binding.tvChatNotification.setVisibility(View.VISIBLE);
+                    binding.tvChatNotification.setText(message.getText());
                 } else {
                     binding.msgWrapper.setVisibility(View.GONE);
                     binding.groupImg.setVisibility(View.VISIBLE);

@@ -2,6 +2,7 @@ package com.hisu.zola.adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -100,6 +101,10 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                         holder.binding.tvLastMsg.setText(mContext.getString(R.string.user_message_sent_file));
                     } else if (lastMessage.getType().contains(Constraints.VIDEO_TYPE_GENERAL)) {
                         holder.binding.tvLastMsg.setText(mContext.getString(R.string.user_message_sent_video));
+                    } else if (lastMessage.getType().contains(Constraints.CALL_TYPE_GENERAL)) {
+                        holder.binding.tvLastMsg.setText(mContext.getString(R.string.out_going_call_holder));
+                    } else if (lastMessage.getType().contains(Constraints.GROUP_NOTIFICATION_TYPE_GENERAL)) {
+                        holder.binding.tvLastMsg.setText(mContext.getString(R.string.group_notification_holder));
                     } else {
                         holder.binding.tvLastMsg.setText(mContext.getString(R.string.user_message_sent_image));
                     }
