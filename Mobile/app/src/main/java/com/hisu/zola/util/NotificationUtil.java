@@ -47,9 +47,10 @@ public class NotificationUtil {
 
         Notification notification = new NotificationCompat.Builder(context, channelID)
                 .setContentText(msg)
-                .setContentTitle(title)
+                .setContentText(title)
                 .setSmallIcon(R.drawable.ic_notifications_active)
                 .setLargeIcon(bitmap)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
                 .setSound(uri)
@@ -59,19 +60,18 @@ public class NotificationUtil {
         compat.notify(getNotificationID(), notification);
     }
 
-    public static void otpNotification(
-            Context context, String channelID, String title, String msg
-    ) {
+    public static void sendNotification(Context context, String msg) {
 
         Bitmap bitmap = BitmapFactory.decodeResource(
-                context.getResources(), R.mipmap.app_launcher_icon
+                context.getResources(), R.mipmap.chatify_app_logo
         );
 
         Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-        Notification notification = new NotificationCompat.Builder(context, channelID)
+        Notification notification = new NotificationCompat.Builder(context, context.getString(R.string.system_noty_channel_id))
+                .setContentTitle(context.getString(R.string.app_name))
                 .setContentText(msg)
-                .setContentTitle(title)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
                 .setSmallIcon(R.drawable.ic_notifications_active)
                 .setLargeIcon(bitmap)
                 .setAutoCancel(false)

@@ -1,5 +1,6 @@
 package com.hisu.zola.fragments.conversation;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -9,11 +10,14 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.gdacciaro.iOSDialog.iOSDialog;
 import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.google.gson.Gson;
@@ -26,12 +30,13 @@ import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentConversationDetailBinding;
 import com.hisu.zola.fragments.contact.FriendRequestReceiveFragment;
 import com.hisu.zola.fragments.contact.FriendRequestSendFragment;
-import com.hisu.zola.util.socket.SocketIOHandler;
+import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.network.Constraints;
 import com.hisu.zola.util.network.NetworkUtil;
+import com.hisu.zola.util.socket.SocketIOHandler;
 
 import java.util.List;
 
@@ -101,8 +106,21 @@ public class ConversationDetailFragment extends Fragment {
 
     private void loadUserDetail(User user) {
         mBinding.tvFriendName.setText(user.getUsername());
-        Glide.with(mainActivity).load(user.getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                .into(mBinding.imvFriendPfp);
+
+        if (user.getAvatarURL() == null || user.getAvatarURL().isEmpty())
+            mBinding.imvFriendPfp.setImageBitmap(ImageConvertUtil.createImageFromText(mainActivity, 150, 150, user.getUsername()));
+        else
+            Glide.with(mainActivity).asBitmap()
+                    .load(user.getAvatarURL())
+                    .placeholder(AppCompatResources.getDrawable(mainActivity, R.drawable.ic_img_place_holder))
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            mBinding.imvFriendPfp.setImageBitmap(resource);
+                            mBinding.imvFriendPfp.setVisibility(View.VISIBLE);
+                        }
+                    });
 
         userRepository.getUser(LocalDataManager.getCurrentUserInfo().getId()).observe(mainActivity, new Observer<User>() {
             @Override

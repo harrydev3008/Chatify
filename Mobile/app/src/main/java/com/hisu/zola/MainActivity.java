@@ -15,9 +15,16 @@ import androidx.fragment.app.FragmentTransaction;
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.WanderingCubes;
 import com.google.android.material.badge.BadgeDrawable;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.hisu.zola.database.Database;
+import com.hisu.zola.database.entity.Conversation;
+import com.hisu.zola.database.entity.Media;
+import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.database.repository.ConversationRepository;
+import com.hisu.zola.database.repository.MessageRepository;
 import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.ActivityMainBinding;
 import com.hisu.zola.fragments.SplashScreenFragment;
@@ -25,12 +32,16 @@ import com.hisu.zola.fragments.StartScreenFragment;
 import com.hisu.zola.fragments.contact.ContactsFragment;
 import com.hisu.zola.fragments.conversation.ConversationListFragment;
 import com.hisu.zola.fragments.profile.ProfileFragment;
+import com.hisu.zola.util.NotificationUtil;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.network.Constraints;
 import com.hisu.zola.util.socket.SocketIOHandler;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.List;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -48,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int PRESS_TIME_INTERVAL = 2 * 1000; //2 secs
     private Toast mExitToast;
     private UserRepository userRepository;
+    private ConversationRepository conversationRepository;
+    private MessageRepository messageRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,20 +72,34 @@ public class MainActivity extends AppCompatActivity {
         if (LocalDataManager.getUserLoginState()) {
             Socket mSocketIO = SocketIOHandler.getInstance().getSocketConnection();
             mSocketIO.on(Socket.EVENT_DISCONNECT, args -> SocketIOHandler.getInstance().establishSocketConnection());
-            mSocketIO.on(Constraints.EVT_ADD_FRIEND_RECEIVE, onFriendEventReceive);
-            mSocketIO.on(Constraints.EVT_ACCEPT_FRIEND_REQUEST_RECEIVE, onFriendEventReceive);
-            mSocketIO.on(Constraints.EVT_UNSENT_FRIEND_REQUEST_RECEIVE, onFriendEventReceive);
-            mSocketIO.on(Constraints.EVT_DELETE_FRIEND_RECEIVE, onFriendEventReceive);
+            mSocketIO.on(Constraints.EVT_ADD_FRIEND_RECEIVE, onFriendRequestReceive);
+            mSocketIO.on(Constraints.EVT_ACCEPT_FRIEND_REQUEST_RECEIVE, onAcceptFriendRequestReceive);
+            mSocketIO.on(Constraints.EVT_UNSENT_FRIEND_REQUEST_RECEIVE, onRequestReceive);
+            mSocketIO.on(Constraints.EVT_DELETE_FRIEND_RECEIVE, onRequestReceive);
+            mSocketIO.on(Constraints.EVT_ADD_MEMBER_RECEIVE, onAddMemberToGroupReceive);
+            mSocketIO.on(Constraints.EVT_REMOVE_MEMBER_RECEIVE, onReceiveRemoveMember);
+            mSocketIO.on(Constraints.EVT_CHANGE_GROUP_NAME_RECEIVE, onReceiveChangeGroupName);
+            mSocketIO.on(Constraints.EVT_OUT_GROUP_RECEIVE, onReceiveOutGroup);
+            mSocketIO.on(Constraints.EVT_CREATE_GROUP_RECEIVE, onReceiveNewGroup);
+            mSocketIO.on(Constraints.EVT_CHANGE_GROUP_ADMIN_RECEIVE, onReceiveNewAdmin);
+            mSocketIO.on(Constraints.EVT_DELETE_GROUP_RECEIVE, onDisbandGroup);
+            mSocketIO.on(Constraints.EVT_MESSAGE_RECEIVE, onMessageReceive);
+            mSocketIO.on(Constraints.EVT_DELETE_MESSAGE_RECEIVE, onMessageDeleteReceive);
         }
 
-        userRepository = new UserRepository(this.getApplication());
-
+        init();
         initProgressBar();
 
         addSelectedActionForNavItem();
         messageBadge();
 
         setFragment(new SplashScreenFragment());
+    }
+
+    private void init() {
+        userRepository = new UserRepository(this.getApplication());
+        conversationRepository = new ConversationRepository(this.getApplication());
+        messageRepository = new MessageRepository(this.getApplication());
     }
 
     private void initProgressBar() {
@@ -221,12 +248,243 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private final Emitter.Listener onFriendEventReceive = new Emitter.Listener() {
+    private final Emitter.Listener onFriendRequestReceive = args -> {
+        JSONObject data = (JSONObject) args[0];
+        if (data != null) {
+            runOnUiThread(() -> {
+                Toast.makeText(this, "??" + data.toString(), Toast.LENGTH_SHORT).show();
+            });
+            Gson gson = new Gson();
+            User sender = gson.fromJson(data.toString(), User.class);
+            String placeHolder = sender.getUsername() + " " + getString(R.string.friend_request_noty_message);
+            NotificationUtil.sendNotification(MainActivity.this, placeHolder);
+            updateUserInfo();
+        }
+    };
+
+    private final Emitter.Listener onAcceptFriendRequestReceive = args -> {
+        JSONObject data = (JSONObject) args[0];
+        if (data != null) {
+            try {
+                Gson gson = new Gson();
+                User sender = gson.fromJson(data.get("sender").toString(), User.class);
+                String placeHolder = sender.getUsername() + " " + getString(R.string.accept_friend_request_noty_message);
+                NotificationUtil.sendNotification(MainActivity.this, placeHolder);
+                updateUserInfo();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private final Emitter.Listener onRequestReceive = args -> {
+        JSONObject data = (JSONObject) args[0];
+        if (data != null) {
+            updateUserInfo();
+        }
+    };
+
+    private final Emitter.Listener onReceiveRemoveMember = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
             JSONObject data = (JSONObject) args[0];
             if (data != null) {
-                updateUserInfo();
+                try {
+                    boolean isKicked = true;
+                    Gson gson = new Gson();
+
+                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+
+                    for (User member : conversation.getMember()) {
+                        if (member.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId())) {
+                            isKicked = false;
+                            break;
+                        }
+                    }
+
+                    if (isKicked) {
+                        conversationRepository.setDisbandGroup(conversation, "kick");
+                        messageRepository.deleteAllMessage(conversation.getId());
+                    } else {
+                        conversationRepository.insertOrUpdate(conversation);
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
+    private final Emitter.Listener onReceiveOutGroup = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+                try {
+                    Gson gson = new Gson();
+
+                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+                    conversationRepository.insertOrUpdate(conversation);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
+    private final Emitter.Listener onReceiveChangeGroupName = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+                try {
+                    Gson gson = new Gson();
+
+                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+                    conversationRepository.insertOrUpdate(conversation);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
+    private final Emitter.Listener onReceiveNewGroup = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+                try {
+                    Gson gson = new Gson();
+
+                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+                    conversationRepository.insertOrUpdate(conversation);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
+    private final Emitter.Listener onReceiveNewAdmin = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+
+                try {
+                    Gson gson = new Gson();
+
+                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+                    conversationRepository.insertOrUpdate(conversation);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
+    private final Emitter.Listener onDisbandGroup = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+
+                try {
+                    Gson gson = new Gson();
+
+                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+
+                    conversationRepository.setDisbandGroup(conversation, "disband");
+                    messageRepository.deleteAllMessage(conversation.getId());
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
+    private final Emitter.Listener onMessageReceive = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+                try {
+                    Gson gson = new Gson();
+
+                    Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
+
+                    User sender = gson.fromJson(data.getString("sender"), User.class);
+
+                    List<Media> media = gson.fromJson(data.get("media").toString(), new TypeToken<List<Media>>() {
+                    }.getType());
+
+                    Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
+                            data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, false);
+
+                    conversation.setLastMessage(message);
+                    conversationRepository.insertOrUpdate(conversation);
+
+                    messageRepository.insertOrUpdate(message);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
+    private final Emitter.Listener onMessageDeleteReceive = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+                try {
+                    Gson gson = new Gson();
+
+                    Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
+
+                    User sender = gson.fromJson(data.getString("sender"), User.class);
+
+                    List<Media> media = gson.fromJson(data.get("media").toString(), new TypeToken<List<Media>>() {
+                    }.getType());
+
+                    Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
+                            data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, true);
+
+                    conversation.setLastMessage(message);
+                    conversationRepository.insertOrUpdate(conversation);
+                    messageRepository.insertOrUpdate(message);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
+    private final Emitter.Listener onAddMemberToGroupReceive = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+
+                try {
+                    Gson gson = new Gson();
+
+                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+                    conversationRepository.insertOrUpdate(conversation);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     };

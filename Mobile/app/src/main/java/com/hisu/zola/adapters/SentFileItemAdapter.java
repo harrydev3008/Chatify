@@ -8,12 +8,14 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.hisu.zola.R;
 import com.hisu.zola.database.entity.Media;
 import com.hisu.zola.databinding.LayoutSentFileItemChildBinding;
 
@@ -45,8 +47,11 @@ public class SentFileItemAdapter extends RecyclerView.Adapter<SentFileItemAdapte
 
     @Override
     public void onBindViewHolder(@NonNull SentFileItemChildViewHolder holder, int position) {
-        Glide.with(context).asBitmap().thumbnail(0.1f).diskCacheStrategy(DiskCacheStrategy.ALL)
-                .load(imageURLs.get(position).getUrl()).into(new SimpleTarget<Bitmap>() {
+        holder.setIsRecyclable(false);
+        Glide.with(context).asBitmap().load(imageURLs.get(position).getUrl())
+                .placeholder(AppCompatResources.getDrawable(context, R.drawable.ic_img_place_holder))
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(new SimpleTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                         holder.binding.imvSentFileImg.setImageBitmap(resource);

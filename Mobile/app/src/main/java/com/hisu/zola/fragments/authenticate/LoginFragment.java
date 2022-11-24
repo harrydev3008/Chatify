@@ -8,6 +8,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,14 +24,15 @@ import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentLoginBinding;
+import com.hisu.zola.fragments.ConfirmOTPFragment;
 import com.hisu.zola.fragments.conversation.ConversationListFragment;
 import com.hisu.zola.util.EditTextUtil;
-import com.hisu.zola.util.socket.SocketIOHandler;
 import com.hisu.zola.util.converter.ObjectConvertUtil;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.network.NetworkUtil;
+import com.hisu.zola.util.socket.SocketIOHandler;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
@@ -179,17 +181,20 @@ public class LoginFragment extends Fragment {
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
                 if (response.isSuccessful() && response.code() == 200) {
 
+                    loadingDialog.dismissDialog();
+
                     User newUser = ObjectConvertUtil.getResponseUser(response);
 
-                    LocalDataManager.setUserLoginState(true);
-                    LocalDataManager.setCurrentUserInfo(newUser);
-                    SocketIOHandler.reconnect();
-
-                    repository.insert(newUser);
-
-                    loadingDialog.dismissDialog();
-                    mMainActivity.setBottomNavVisibility(View.VISIBLE);
-                    mMainActivity.setFragment(new ConversationListFragment());
+                    if (newUser.isVerifyOTP()) {
+                        mMainActivity.addFragmentToBackStack(ConfirmOTPFragment.newInstance(ConfirmOTPFragment.VERIFY_LOGIN_ARGS, newUser));
+                    } else {
+                        LocalDataManager.setUserLoginState(true);
+                        LocalDataManager.setCurrentUserInfo(newUser);
+                        SocketIOHandler.reconnect();
+                        repository.insert(newUser);
+                        mMainActivity.setBottomNavVisibility(View.VISIBLE);
+                        mMainActivity.setFragment(new ConversationListFragment());
+                    }
                 } else if (response.code() == 400) {
                     try {
                         JsonObject obj = new Gson().fromJson(response.errorBody().string(), JsonObject.class);

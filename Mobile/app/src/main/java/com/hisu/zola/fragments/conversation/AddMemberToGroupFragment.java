@@ -201,9 +201,9 @@ public class AddMemberToGroupFragment extends Fragment {
                     repository.insertOrUpdate(conversation);
                     emitAddMember();
 
-                    for (User newMember : newMembers) {
-                        MessageSocketHandler.sendMessageViaApi(mainActivity, conversation, getTextFromMember(newMember));
-                    }
+//                    for (User newMember : newMembers) {
+//                        MessageSocketHandler.sendMessageViaApi(mainActivity, conversation, getTextFromMember(newMember));
+//                    }
 
                     mainActivity.getSupportFragmentManager().popBackStackImmediate();
                 }

@@ -46,7 +46,7 @@
             android:layout_height="90dp"
             android:layout_gravity="center"
             android:layout_marginTop="16dp"
-            android:src="@drawable/cat" />
+            android:src="@drawable/ic_img_place_holder" />
 
         <TextView
             android:id="@+id/tv_friend_name"

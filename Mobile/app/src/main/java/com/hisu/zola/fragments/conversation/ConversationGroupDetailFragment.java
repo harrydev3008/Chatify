@@ -22,15 +22,16 @@ import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentConversationGroupDetailBinding;
-import com.hisu.zola.util.network.ApiService;
-import com.hisu.zola.util.socket.SocketIOHandler;
 import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.dialog.ChangeGroupNameDialog;
 import com.hisu.zola.util.dialog.HisuIOSDialog;
 import com.hisu.zola.util.dialog.HisuIOSDialogBuilder;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
+import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.network.Constraints;
+import com.hisu.zola.util.socket.MessageSocketHandler;
+import com.hisu.zola.util.socket.SocketIOHandler;
 
 import java.util.List;
 
@@ -261,7 +262,6 @@ public class ConversationGroupDetailFragment extends Fragment {
                                     break;
                                 }
                             }
-                            outGroup(conversation);
                         })
                         .setPositiveListener(dialog -> {
                             dialog.dismiss();
@@ -276,22 +276,15 @@ public class ConversationGroupDetailFragment extends Fragment {
                         .setSubtitle(mainActivity.getString(R.string.confirm_out_group))
                         .setPositiveListener(mainActivity.getString(R.string.yes), dialog -> {
                             dialog.dismiss();
-                            List<User> members = conversation.getMember();
-                            for (User user : members) {
-                                if (user.getId().equalsIgnoreCase(currentUser.getId())) {
-                                    members.remove(user);
-                                    break;
-                                }
-                            }
-                            conversation.setMember(members);
-                            outGroup(conversation);
+                            String holder = currentUser.getUsername() + " vừa rời khỏi nhóm";
+                            outGroup(conversation, holder);
                         })
                         .setNegativeListener(mainActivity.getString(R.string.no), iOSDialog::dismiss).build().show();
             }
         });
     }
 
-    private void outGroup(Conversation conversationEmit) {
+    private void outGroup(Conversation conversationEmit, String msg) {
         loadingDialog.showDialog();
 
         JsonObject object = new JsonObject();
@@ -302,6 +295,16 @@ public class ConversationGroupDetailFragment extends Fragment {
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
                 if (response.isSuccessful() && response.code() == 200) {
 
+                    List<User> members = conversationEmit.getMember();
+                    for (User member : members) {
+                        if (member.getId().equalsIgnoreCase(currentUser.getId())) {
+                            members.remove(member);
+                            break;
+                        }
+                    }
+
+                    conversationEmit.setMember(members);
+//                    MessageSocketHandler.sendMessageViaApi(mainActivity, conversation, msg);
                     emitOutGroup(conversationEmit);
 
                     mainActivity.setBottomNavVisibility(View.VISIBLE);
@@ -371,20 +374,10 @@ public class ConversationGroupDetailFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
                 if (response.isSuccessful() && response.code() == 200) {
-
                     conversation.setCreatedBy(newAdmin);
-
-                    List<User> members = conversation.getMember();
-                    for (User member : members) {
-                        if (member.getId().equalsIgnoreCase(currentUser.getId())) {
-                            members.remove(member);
-                            break;
-                        }
-                    }
-
-                    conversation.setMember(members);
-                    repository.insertOrUpdate(conversation);
                     emitChangeAdmin(conversation);
+                    String holder = currentUser.getUsername() + " vừa rời nhóm và chọn " + newAdmin.getUsername() + " làm trưởng nhóm mới.";
+                    outGroup(conversation, holder);
                 }
             }
 

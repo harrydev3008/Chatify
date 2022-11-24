@@ -1,34 +1,48 @@
 package com.hisu.zola.fragments.authenticate;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
+import com.gdacciaro.iOSDialog.iOSDialog;
+import com.gdacciaro.iOSDialog.iOSDialogBuilder;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.databinding.FragmentForgotPasswordBinding;
 import com.hisu.zola.fragments.ConfirmOTPFragment;
 import com.hisu.zola.util.EditTextUtil;
 import com.hisu.zola.util.dialog.ConfirmSendOTPDialog;
+import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
+import com.hisu.zola.util.network.ApiService;
+import com.hisu.zola.util.network.Constraints;
 
 import java.util.regex.Pattern;
+
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ForgotPasswordFragment extends Fragment {
 
     private FragmentForgotPasswordBinding mBinding;
     private MainActivity mainActivity;
     private ConfirmSendOTPDialog dialog;
+    private LoadingDialog loadingDialog;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,6 +60,7 @@ public class ForgotPasswordFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        loadingDialog = new LoadingDialog(mainActivity, Gravity.CENTER);
         mainActivity.setProgressbarVisibility(View.GONE);
         backToPrevPage();
         EditTextUtil.clearTextOnSearchEditText(mBinding.edtRegisPhoneNumber);
@@ -112,8 +127,54 @@ public class ForgotPasswordFragment extends Fragment {
                 initDialog();
 
             if (verifyPhoneNumber(mBinding.edtRegisPhoneNumber.getText().toString())) {
-                dialog.setNewPhoneNumber(mBinding.edtRegisPhoneNumber.getText().toString());
-                dialog.showDialog();
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.showDialog();
+                });
+
+                JsonObject object = new JsonObject();
+                object.addProperty("phoneNumber", mBinding.edtRegisPhoneNumber.getText().toString());
+                RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
+
+                ApiService.apiService.checkUserExistByPhoneNumber(body).enqueue(new Callback<Object>() {
+                    @Override
+                    public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                        Gson gson = new Gson();
+
+                        mainActivity.runOnUiThread(() -> {
+                            loadingDialog.dismissDialog();
+                        });
+
+                        String json = gson.toJson(response.body());
+                        JsonObject obj = gson.fromJson(json, JsonObject.class);
+
+                        boolean exist = obj.get("isExist").getAsBoolean();
+
+                        if (exist) {
+                            dialog.setNewPhoneNumber(mBinding.edtRegisPhoneNumber.getText().toString());
+                            dialog.showDialog();
+                        } else {
+                            mainActivity.runOnUiThread(() -> {
+                                loadingDialog.dismissDialog();
+                                new iOSDialogBuilder(mainActivity)
+                                        .setTitle(getString(R.string.notification_warning))
+                                        .setSubtitle(getString(R.string.phone_not_regis))
+                                        .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                        mainActivity.runOnUiThread(() -> {
+                            loadingDialog.dismissDialog();
+                            new iOSDialogBuilder(mainActivity)
+                                    .setTitle(getString(R.string.notification_warning))
+                                    .setSubtitle(getString(R.string.notification_warning_msg))
+                                    .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                        });
+                        Log.e(ForgotPasswordFragment.class.getName(), t.getLocalizedMessage());
+                    }
+                });
             }
         });
     }

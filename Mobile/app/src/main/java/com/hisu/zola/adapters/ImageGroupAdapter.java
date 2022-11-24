@@ -1,15 +1,22 @@
 package com.hisu.zola.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
+import com.hisu.zola.R;
 import com.hisu.zola.database.entity.Media;
 import com.hisu.zola.databinding.LayoutImageGroupItemBinding;
 import com.hisu.zola.listeners.IOnItemTouchListener;
@@ -71,7 +78,15 @@ public class ImageGroupAdapter extends RecyclerView.Adapter<ImageGroupAdapter.Im
             holder.binding.rimvImageGroupItem.setMaxHeight(getDp(200));
         }
 
-        Glide.with(context).load(media.getUrl()).diskCacheStrategy(DiskCacheStrategy.ALL).into(holder.binding.rimvImageGroupItem);
+        Glide.with(context).asBitmap().load(media.getUrl())
+                .placeholder(AppCompatResources.getDrawable(context, R.drawable.ic_img_place_holder))
+                .diskCacheStrategy(DiskCacheStrategy.ALL).into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        holder.binding.rimvImageGroupItem.setImageBitmap(resource);
+                        holder.binding.rimvImageGroupItem.setVisibility(View.VISIBLE);
+                    }
+                });
 
         holder.binding.rimvImageGroupItem.setOnLongClickListener(view -> {
             onItemTouchListener.longPress(null, null);

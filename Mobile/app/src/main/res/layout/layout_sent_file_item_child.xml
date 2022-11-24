@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:maxHeight="200dp"
         app:riv_corner_radius="4dp"
-        android:src="@drawable/bg_profile"
+        android:src="@drawable/ic_img_place_holder"
         android:adjustViewBounds="true"/>
 
 </RelativeLayout>

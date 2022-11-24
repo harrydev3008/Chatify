@@ -39,12 +39,12 @@ import com.hisu.zola.databinding.FragmentConversationListBinding;
 import com.hisu.zola.databinding.LayoutPopupBinding;
 import com.hisu.zola.fragments.AddFriendFragment;
 import com.hisu.zola.util.EditTextUtil;
-import com.hisu.zola.util.socket.SocketIOHandler;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.network.Constraints;
 import com.hisu.zola.util.network.NetworkConnectionModel;
 import com.hisu.zola.util.network.NetworkUtil;
+import com.hisu.zola.util.socket.SocketIOHandler;
 import com.hisu.zola.view_model.ConversationListViewModel;
 
 import org.json.JSONException;
@@ -100,15 +100,6 @@ public class ConversationListFragment extends Fragment {
         SocketIOHandler.getInstance().establishSocketConnection();
 
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
-        mSocket.on(Constraints.EVT_ADD_MEMBER_RECEIVE, onReceive);
-        mSocket.on(Constraints.EVT_REMOVE_MEMBER_RECEIVE, onReceiveRemoveMember);
-        mSocket.on(Constraints.EVT_CHANGE_GROUP_NAME_RECEIVE, onReceiveChangeGroupName);
-        mSocket.on(Constraints.EVT_OUT_GROUP_RECEIVE, onReceiveOutGroup);
-        mSocket.on(Constraints.EVT_CREATE_GROUP_RECEIVE, onReceiveNewGroup);
-        mSocket.on(Constraints.EVT_CHANGE_GROUP_ADMIN_RECEIVE, onReceiveNewAdmin);
-        mSocket.on(Constraints.EVT_DELETE_GROUP_RECEIVE, onDisbandGroup);
-        mSocket.on(Constraints.EVT_MESSAGE_RECEIVE, onMessageReceive);
-        mSocket.on(Constraints.EVT_DELETE_MESSAGE_RECEIVE, onMessageDeleteReceive);
 
         initConversationListRecyclerView();
         filter();
@@ -169,16 +160,6 @@ public class ConversationListFragment extends Fragment {
 
         adapter.setOnConversationItemSelectedListener((conversation, conversationName) -> {
             mMainActivity.setBottomNavVisibility(View.GONE);
-//            FragmentTransaction fragmentTransaction = mMainActivity.getSupportFragmentManager().beginTransaction();
-//            fragmentTransaction.setCustomAnimations(
-//                    R.anim.slide_in_left, R.anim.slide_out_left,
-//                    R.anim.slide_out_right, R.anim.slide_out_right);
-//
-//            fragmentTransaction.hide(this);
-//            fragmentTransaction.add(mMainActivity.getViewContainerID(), ConversationFragment.newInstance(conversation, conversationName));
-//            fragmentTransaction.addToBackStack(null);
-//            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//            fragmentTransaction.commit();
             mMainActivity.getSupportFragmentManager().beginTransaction()
                     .setCustomAnimations(
                             R.anim.slide_in_left, R.anim.slide_out_left,
@@ -330,212 +311,4 @@ public class ConversationListFragment extends Fragment {
             mMainActivity.addFragmentToBackStack(new AddFriendFragment());
         });
     }
-
-    private final Emitter.Listener onReceive = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            JSONObject data = (JSONObject) args[0];
-            if (data != null) {
-
-                try {
-                    Gson gson = new Gson();
-
-                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
-                    viewModel.insertOrUpdate(conversation);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
-    private final Emitter.Listener onReceiveRemoveMember = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            JSONObject data = (JSONObject) args[0];
-            if (data != null) {
-                try {
-                    boolean isKicked = true;
-                    Gson gson = new Gson();
-
-                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
-
-                    for (User member : conversation.getMember()) {
-                        if (member.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId())) {
-                            isKicked = false;
-                            break;
-                        }
-                    }
-
-                    if (isKicked) {
-                        viewModel.disbandGroup(conversation, "kick");
-                        messageRepository.deleteAllMessage(conversation.getId());
-                    } else {
-                        viewModel.insertOrUpdate(conversation);
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
-    private final Emitter.Listener onReceiveChangeGroupName = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            JSONObject data = (JSONObject) args[0];
-            if (data != null) {
-                try {
-                    Gson gson = new Gson();
-
-                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
-                    viewModel.insertOrUpdate(conversation);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
-    private final Emitter.Listener onReceiveOutGroup = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            JSONObject data = (JSONObject) args[0];
-            if (data != null) {
-                try {
-                    Gson gson = new Gson();
-
-                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
-                    viewModel.insertOrUpdate(conversation);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
-    private final Emitter.Listener onReceiveNewGroup = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            JSONObject data = (JSONObject) args[0];
-            if (data != null) {
-                try {
-                    Gson gson = new Gson();
-
-                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
-                    viewModel.insertOrUpdate(conversation);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
-    private final Emitter.Listener onReceiveNewAdmin = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            JSONObject data = (JSONObject) args[0];
-            if (data != null) {
-
-                try {
-                    Gson gson = new Gson();
-
-                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
-                    viewModel.insertOrUpdate(conversation);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
-    private final Emitter.Listener onDisbandGroup = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            JSONObject data = (JSONObject) args[0];
-            if (data != null) {
-
-                try {
-                    Gson gson = new Gson();
-
-                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
-
-                    viewModel.disbandGroup(conversation, "disband");
-                    messageRepository.deleteAllMessage(conversation.getId());
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
-    private final Emitter.Listener onMessageReceive = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            JSONObject data = (JSONObject) args[0];
-            if (data != null) {
-
-                try {
-
-                    Gson gson = new Gson();
-
-                    Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
-
-                    User sender = gson.fromJson(data.getString("sender"), User.class);
-
-                    List<Media> media = gson.fromJson(data.get("media").toString(), new TypeToken<List<Media>>() {
-                    }.getType());
-
-                    Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
-                            data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, false);
-
-                    conversation.setLastMessage(message);
-                    viewModel.insertOrUpdate(conversation);
-                    messageRepository.insertOrUpdate(message);
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
-    private final Emitter.Listener onMessageDeleteReceive = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            mMainActivity.runOnUiThread(() -> {
-                JSONObject data = (JSONObject) args[0];
-                if (data != null) {
-                    try {
-                        Gson gson = new Gson();
-
-                        Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
-
-                        User sender = gson.fromJson(data.getString("sender"), User.class);
-                        Log.e("sender", sender.toString());
-
-                        List<Media> media = gson.fromJson(data.get("media").toString(), new TypeToken<List<Media>>() {
-                        }.getType());
-
-                        Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
-                                data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, true);
-
-                        conversation.setLastMessage(message);
-                        viewModel.insertOrUpdate(conversation);
-                        messageRepository.insertOrUpdate(message);
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }
-    };
 }

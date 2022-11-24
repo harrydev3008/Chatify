@@ -8,12 +8,14 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.LayoutFriendRequestReceiveBinding;
 import com.hisu.zola.listeners.IOnUserClickListener;
@@ -63,7 +65,9 @@ public class FriendRequestReceiveAdapter extends
     public void onBindViewHolder(@NonNull RequestReceiveViewHolder holder, int position) {
         User friendRequest = requestList.get(position);
         holder.mBinding.tvRequestName.setText(friendRequest.getUsername());
-        Glide.with(context).asBitmap().load(friendRequest.getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+        Glide.with(context).asBitmap().load(friendRequest.getAvatarURL())
+                .placeholder(AppCompatResources.getDrawable(context, R.drawable.ic_img_place_holder))
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                 .into(new SimpleTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {

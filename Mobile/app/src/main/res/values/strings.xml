@@ -193,6 +193,10 @@
     <string name="out_going_call">Cuộc gọi</string>
     <string name="out_going_call_holder">[Cuộc gọi]</string>
     <string name="group_notification_holder">[Thông báo]</string>
+    <string name="accept_friend_request_noty_message">vừa chấp nhận lời mời kết bạn của bạn! Giờ các bạn có thể trò chuyện với nhau mọi lúc mọi nơi miễn là có Internet!</string>
+    <string name="friend_request_noty_message">vừa gửi lời mời kết bạn đến bạn!</string>
+    <string name="turn_off_otp_verify">Tắt bảo mật 2 lớp?</string>
+    <string name="turn_off_otp_verify_desc">Chatify sẽ ngừng yêu cầu mã xác thực khi bạn đăng nhập.</string>
 
 
     <!--Error Messages-->
@@ -232,6 +236,7 @@
     <string name="no_network_connection_to_sync">Cần có kết nối mạng để thực hiện việc đồng bộ! Vui lòng kiểm tra lại kết nối mạng của bạn và thử lại sau!</string>
     <string name="downloading_files">Đang tải xuống file</string>
     <string name="downloaded">Tải file thành công!</string>
+    <string name="phone_not_regis">Số điện thoại chưa được đăng ký</string>
     <string name="choose_app_to_open_file">Bạn hãy chọn một ứng dụng để mở file:</string>
     <string name="audio_chat_not_available">Chức năng gọi thoại hiện chỉ hỗ trợ trên Website… Xin lỗi vì sự bất tiện này!</string>
     <string name="video_chat_not_available">Chức năng gọi Video hiện chỉ hỗ trợ trên Website… Xin lỗi vì sự bất tiện này!</string>

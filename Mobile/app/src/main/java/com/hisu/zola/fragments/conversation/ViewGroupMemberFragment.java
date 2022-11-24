@@ -148,7 +148,7 @@ public class ViewGroupMemberFragment extends Fragment {
                     repository.insertOrUpdate(conversation);
                     emitRemoveMember(memberID.getId());
 
-                    MessageSocketHandler.sendMessageViaApi(mainActivity, conversation, getTextFromMember(memberID));
+//                    MessageSocketHandler.sendMessageViaApi(mainActivity, conversation, getTextFromMember(memberID));
                 }
             }
 

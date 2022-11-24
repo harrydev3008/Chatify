@@ -18,6 +18,6 @@
         android:maxHeight="200dp"
         app:riv_corner_radius="6dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/bg_profile"
+        android:src="@drawable/ic_img_place_holder"
         tools:ignore="ContentDescription" />
 </LinearLayout>

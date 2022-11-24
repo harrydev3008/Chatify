@@ -6,6 +6,7 @@ import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
+import com.google.gson.annotations.SerializedName;
 import com.hisu.zola.database.type_converter.ListFriendConverter;
 
 import java.io.Serializable;
@@ -21,6 +22,7 @@ public class User implements Serializable {
     private String phoneNumber;
     private String password;
     private String avatarURL;
+    @SerializedName("isVerifyOtp")
     private boolean isVerifyOTP;
     private String dob;
     private boolean gender;//T -> male, false -> female

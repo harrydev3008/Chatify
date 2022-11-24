@@ -2,13 +2,13 @@ package com.hisu.zola.adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -75,13 +75,19 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         User conUser = getConversationAvatar(conversation.getMember());
 
         if (!conversation.getGroup()) {
-            Glide.with(mContext).asBitmap().load(conUser.getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                    .into(new SimpleTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            holder.binding.ivConversationCoverPhoto.setImageBitmap(resource);
-                        }
-                    });
+            if (conUser.getAvatarURL() == null || conUser.getAvatarURL().isEmpty())
+                holder.binding.ivConversationCoverPhoto.setImageBitmap(ImageConvertUtil.createImageFromText(mContext, 150, 150, conUser.getUsername()));
+            else
+                Glide.with(mContext).asBitmap()
+                        .load(conUser.getAvatarURL())
+                        .placeholder(AppCompatResources.getDrawable(mContext, R.drawable.ic_img_place_holder))
+                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                        .into(new SimpleTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                holder.binding.ivConversationCoverPhoto.setImageBitmap(resource);
+                            }
+                        });
             holder.binding.tvConversationName.setText(conUser.getUsername());
         } else {
             holder.binding.ivConversationCoverPhoto.setImageBitmap(ImageConvertUtil.createImageFromText(mContext, 150, 150, conversation.getLabel()));
@@ -121,6 +127,8 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                             textPlaceHolder = lastMessage.getSender().getUsername() + ": " + mContext.getString(R.string.user_message_sent_file);
                         } else if (lastMessage.getType().contains(Constraints.VIDEO_TYPE_GENERAL)) {
                             textPlaceHolder = lastMessage.getSender().getUsername() + ": " + mContext.getString(R.string.user_message_sent_video);
+                        } else if (lastMessage.getType().contains(Constraints.CALL_TYPE_GENERAL)) {
+                            textPlaceHolder = lastMessage.getSender().getUsername() + ": " + mContext.getString(R.string.out_going_call_holder);
                         } else {
                             textPlaceHolder = lastMessage.getSender().getUsername() + ": " + mContext.getString(R.string.user_message_sent_image);
                         }
@@ -130,7 +138,19 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                     if (lastMessage.getDeleted()) {
                         holder.binding.tvLastMsg.setText(mContext.getString(R.string.message_removed));
                     } else {
-                        holder.binding.tvLastMsg.setText(lastMessage.getText());
+//                        holder.binding.tvLastMsg.setText(lastMessage.getText());
+                        if (lastMessage.getType().contains(Constraints.TEXT_TYPE_GENERAL)) {
+                            String textPlaceHolder = lastMessage.getText();
+                            holder.binding.tvLastMsg.setText(textPlaceHolder);
+                        } else if (lastMessage.getType().contains(Constraints.FILE_TYPE_GENERAL)) {
+                            holder.binding.tvLastMsg.setText(mContext.getString(R.string.user_message_sent_file));
+                        } else if (lastMessage.getType().contains(Constraints.VIDEO_TYPE_GENERAL)) {
+                            holder.binding.tvLastMsg.setText(mContext.getString(R.string.user_message_sent_video));
+                        } else if (lastMessage.getType().contains(Constraints.CALL_TYPE_GENERAL)) {
+                            holder.binding.tvLastMsg.setText(mContext.getString(R.string.out_going_call_holder));
+                        } else {
+                            holder.binding.tvLastMsg.setText(mContext.getString(R.string.user_message_sent_image));
+                        }
                     }
                 }
             }
@@ -181,7 +201,7 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
         }
 
         holder.binding.conversationParent.setOnClickListener(view -> {
-            if (conversation.getLabel() != null)
+            if (conversation.getGroup())
                 onConversationItemSelectedListener.openConversation(conversation, conversation.getLabel());
             else
                 onConversationItemSelectedListener.openConversation(conversation, conUser.getUsername());

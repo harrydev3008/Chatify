@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -50,6 +51,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     public static final int MSG_SEND_TYPE = 0;
     public static final int MSG_RECEIVE_TYPE = 1;
+//    public static final int NOTY_RECEIVE_TYPE = 2;
 
     private final List<Message> messages;
     private final Context mContext;
@@ -192,10 +194,13 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             final MessageReceiveViewHolder receiveViewHolder = ((MessageReceiveViewHolder) holder);
 
             Glide.with(mContext)
-                    .asBitmap().load(message.getSender().getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.ALL).into(new SimpleTarget<Bitmap>() {
+                    .asBitmap().load(message.getSender().getAvatarURL())
+                    .placeholder(AppCompatResources.getDrawable(mContext, R.drawable.ic_img_place_holder))
+                    .diskCacheStrategy(DiskCacheStrategy.ALL).into(new SimpleTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                             receiveViewHolder.binding.ivUserPfp.setImageBitmap(resource);
+                            receiveViewHolder.binding.ivUserPfp.setVisibility(View.VISIBLE);
                         }
                     });
 
@@ -229,19 +234,21 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             if (isGroup) {
                 receiveViewHolder.binding.tvMemberName.setVisibility(View.VISIBLE);
+                receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
 
-                if (position == 0)
-                    receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
-                else if (position == messages.size() - 1 && !messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
-                    receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
-                else if (!messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
-                        && messages.get(position + 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
-                    receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
-                else if (!messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
-                        && !messages.get(position + 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
-                    receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
-                else
-                    receiveViewHolder.binding.tvMemberName.setVisibility(View.GONE);
+//                if (position == 0)
+//                    receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
+//                else if (position == messages.size() - 1 && !messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
+//                    receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
+//                else if (!messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
+//                        && messages.get(position + 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
+//                    receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
+//                else if (!messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
+//                        && !messages.get(position + 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
+//                    receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
+//
+//                else
+//                    receiveViewHolder.binding.tvMemberName.setVisibility(View.GONE);
             }
 
             if (position == 0) {
@@ -308,7 +315,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 binding.tvMsgSend.setTextColor(context.getColor(R.color.white));
                 binding.tvMsgSend.setBackground(ContextCompat.getDrawable(context, R.drawable.message_send));
                 binding.tvMsgSend.setText(message.getText());
-            } else if (message.getType().equalsIgnoreCase(Constraints.VIDEO_TYPE_GENERAL)) {
+            } else if (message.getType().contains(Constraints.VIDEO_TYPE_GENERAL)) {
                 binding.tvMsgSend.setVisibility(View.GONE);
                 binding.groupImg.setVisibility(View.GONE);
                 binding.videoSend.setVisibility(View.VISIBLE);
@@ -316,10 +323,10 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 Uri uri = Uri.parse(message.getMedia().get(0).getUrl());
 
                 ExoPlayer player = new ExoPlayer.Builder(context).build();
-                binding.videoSend.setPlayer(player);
                 MediaItem mediaItem = MediaItem.fromUri(uri);
                 player.setMediaItem(mediaItem);
                 player.prepare();
+                binding.videoSend.setPlayer(player);
             } else if (message.getType().contains(Constraints.FILE_TYPE_GENERAL)) {
                 binding.tvMsgSend.setVisibility(View.VISIBLE);
                 binding.videoSend.setVisibility(View.GONE);
@@ -338,13 +345,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 binding.tvMsgSend.setTextColor(context.getColor(R.color.black));
                 binding.tvMsgSend.setCompoundDrawablesWithIntrinsicBounds(
                         ContextCompat.getDrawable(context, R.drawable.ic_incoming_call), null, null, null);
-            }else if (message.getType().contains(Constraints.GROUP_NOTIFICATION_TYPE_GENERAL)) {
-                binding.tvMsgSend.setVisibility(View.GONE);
-                binding.videoSend.setVisibility(View.GONE);
-                binding.groupImg.setVisibility(View.GONE);
-                binding.tvChatNotification.setVisibility(View.VISIBLE);
-                binding.tvChatNotification.setText(message.getText());
-            }  else {
+            } else {
                 binding.tvMsgSend.setVisibility(View.GONE);
                 binding.videoSend.setVisibility(View.GONE);
                 binding.groupImg.setVisibility(View.VISIBLE);
@@ -393,17 +394,17 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     binding.tvMsgReceive.setTextColor(context.getColor(R.color.chat_text_color));
                     binding.msgWrapper.setBackground(ContextCompat.getDrawable(context, R.drawable.message_receive));
                     binding.tvMsgReceive.setText(message.getText());
-                } else if (message.getType().equalsIgnoreCase(Constraints.VIDEO_TYPE_GENERAL)) {
+                } else if (message.getType().contains(Constraints.VIDEO_TYPE_GENERAL)) {
                     binding.msgWrapper.setVisibility(View.GONE);
                     binding.groupImg.setVisibility(View.GONE);
                     binding.videoReceive.setVisibility(View.VISIBLE);
                     Uri uri = Uri.parse(message.getMedia().get(0).getUrl());
 
                     ExoPlayer player = new ExoPlayer.Builder(context).build();
-                    binding.videoReceive.setPlayer(player);
                     MediaItem mediaItem = MediaItem.fromUri(uri);
                     player.setMediaItem(mediaItem);
                     player.prepare();
+                    binding.videoReceive.setPlayer(player);
                 } else if (message.getType().contains(Constraints.FILE_TYPE_GENERAL)) {
                     binding.msgWrapper.setVisibility(View.VISIBLE);
                     binding.groupImg.setVisibility(View.GONE);
@@ -423,12 +424,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     binding.tvMsgReceive.setText(context.getString(R.string.incoming_call));
                     binding.tvMsgReceive.setCompoundDrawablesWithIntrinsicBounds(
                             ContextCompat.getDrawable(context, R.drawable.ic_incoming_call), null, null, null);
-                } else if (message.getType().contains(Constraints.GROUP_NOTIFICATION_TYPE_GENERAL)) {
-                    binding.msgWrapper.setVisibility(View.GONE);
-                    binding.groupImg.setVisibility(View.GONE);
-                    binding.videoReceive.setVisibility(View.GONE);
-                    binding.tvChatNotification.setVisibility(View.VISIBLE);
-                    binding.tvChatNotification.setText(message.getText());
                 } else {
                     binding.msgWrapper.setVisibility(View.GONE);
                     binding.groupImg.setVisibility(View.VISIBLE);

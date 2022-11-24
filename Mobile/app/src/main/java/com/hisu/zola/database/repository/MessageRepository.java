@@ -65,7 +65,7 @@ public class MessageRepository {
 
     public void unsent(Message message) {
         Database.dbExecutor.execute(() -> {
-            messageDAO.unsent(message.getId(), message.getDeleted());
+            messageDAO.unsent(message.getId(), true);
         });
     }
 

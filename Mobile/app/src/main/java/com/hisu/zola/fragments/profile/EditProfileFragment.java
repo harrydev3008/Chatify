@@ -3,6 +3,7 @@ package com.hisu.zola.fragments.profile;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -23,6 +24,8 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.gdacciaro.iOSDialog.iOSDialog;
 import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.google.gson.Gson;
@@ -42,6 +45,7 @@ import com.hisu.zola.util.network.Constraints;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
@@ -104,7 +108,7 @@ public class EditProfileFragment extends Fragment {
                 new ActivityResultContracts.StartActivityForResult(), result -> {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         newAvatarUri = result.getData().getData();
-                        mBinding.imvAvatar.setImageURI(newAvatarUri);
+                        mBinding.imvAvatar.setImageURI(result.getData().getData());
                     }
                 });
     }
@@ -113,20 +117,25 @@ public class EditProfileFragment extends Fragment {
         if (currentUser.getAvatarURL() == null || currentUser.getAvatarURL().isEmpty())
             mBinding.imvAvatar.setImageBitmap(ImageConvertUtil.createImageFromText(mainActivity, 150, 150, currentUser.getUsername()));
         else
-            Glide.with(mainActivity).load(currentUser.getAvatarURL())
-                    .placeholder(R.drawable.bg_profile).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(mBinding.imvAvatar);
+            Glide.with(mainActivity).asBitmap()
+                    .load(currentUser.getAvatarURL())
+                    .placeholder(R.drawable.bg_profile).diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            mBinding.imvAvatar.setImageBitmap(resource);
+                            mBinding.imvAvatar.setVisibility(View.VISIBLE);
+                        }
+                    });
 
         mBinding.edtDisplayName.setText(currentUser.getUsername());
         mBinding.edtDisplayName.setHint(currentUser.getUsername());
 
-        try {
-            Date dateObj = parseDate(currentUser.getDob());
-            if (dateObj != null) {
-                mCalendar.setTime(dateObj);
-                updateDateOfBirthEditText();
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();
+
+        Date date = Date.from(Instant.parse(currentUser.getDob()));
+        if (date != null) {
+            mCalendar.setTime(date);
+            updateDateOfBirthEditText();
         }
 
         if (currentUser.isGender())
@@ -135,10 +144,6 @@ public class EditProfileFragment extends Fragment {
             mBinding.rBtnGenderF.setChecked(true);
 
         isGenderChanged = currentUser.isGender();
-    }
-
-    private Date parseDate(String date) throws ParseException {
-        return new SimpleDateFormat("dd/MM/yyyy", Locale.US).parse(date);
     }
 
     private void addActionForBtnBackToPrevPage() {
@@ -252,8 +257,9 @@ public class EditProfileFragment extends Fragment {
 
 
     private String getDobFormat() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
-        return dateFormat.format(mCalendar.getTime());
+        //2022-11-16
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        return dateFormat.format(mCalendar.getTime()) + "T03:06:25.220Z";
     }
 
     private void updateProfile() {

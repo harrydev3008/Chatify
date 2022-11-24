@@ -11,7 +11,7 @@ public interface Constraints {
     String MULTIPART_FORM_DATA_TYPE = "multipart/form-data";
     String FILE_TYPE_GENERAL = "application/";
     String TEXT_TYPE_GENERAL = "text";
-    String VIDEO_TYPE_GENERAL = "media/";
+    String VIDEO_TYPE_GENERAL = "video/";
     String CALL_TYPE_GENERAL = "call";
     String GROUP_NOTIFICATION_TYPE_GENERAL = "notification";
     String GOOGLE_DOCS_URL = "https://docs.google.com/gview?embedded=true&url=";
@@ -22,6 +22,7 @@ public interface Constraints {
     String API_CHANGE_PASSWORD = "api/auth/updatePassword";
     String API_CHANGE_PHONE_NUMBER = "api/auth/updatePhonenumber";
     String API_CHECK_USER_BY_PHONE_NUMBER = "api/auth/checkPhonenumber";
+    String API_CHANGE_VERIFY_OTP_STATE = "api/auth/changeVerifyOTP";
 
     String API_GET_ALL_FRIENDS = "api/user/getAllFriends";
     String API_UPDATE_PROFILE = "api/user/updateProfile";

@@ -1,33 +1,21 @@
 package com.hisu.zola.adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.transition.Transition;
-import com.hisu.zola.R;
 import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.databinding.LayoutSentFileItemBinding;
 import com.hisu.zola.databinding.LayoutSentFileItemHeaderBinding;
 import com.hisu.zola.util.converter.TimeConverterUtil;
 import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersAdapter;
 
-import java.security.SecureRandom;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -59,6 +47,7 @@ public class SentFileAdapter extends RecyclerView.Adapter<SentFileAdapter.SentFi
 
     @Override
     public void onBindViewHolder(@NonNull SentFileViewHolder holder, int position) {
+        holder.setIsRecyclable(false);
         Message message = messages.get(position);
         SentFileItemAdapter adapter = new SentFileItemAdapter(context);
         adapter.setImageURLs(message.getMedia());

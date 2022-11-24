@@ -34,9 +34,11 @@ import com.hisu.zola.databinding.FragmentConfirmOtpBinding;
 import com.hisu.zola.fragments.authenticate.RegisterFragment;
 import com.hisu.zola.fragments.authenticate.RegisterUserInfoFragment;
 import com.hisu.zola.fragments.authenticate.ResetPasswordFragment;
-import com.hisu.zola.util.network.ApiService;
+import com.hisu.zola.fragments.conversation.ConversationListFragment;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
+import com.hisu.zola.util.network.ApiService;
+import com.hisu.zola.util.socket.SocketIOHandler;
 
 import java.text.DecimalFormat;
 import java.util.Timer;
@@ -57,6 +59,8 @@ public class ConfirmOTPFragment extends Fragment {
     public static final String REGISTER_ARGS = "REGISTER_ARGS";
     public static final String CHANGE_PHONE_NO_ARGS = "CHANGE_PHONE_NO_ARGS";
     public static final String FORGOT_PWD_ARGS = "FORGOT_PWD_ARGS";
+    public static final String VERIFY_LOGIN_ARGS = "VERIFY_LOGIN_ARGS";
+
     private String argument;
     private User user;
     private FirebaseAuth mAuth;
@@ -293,8 +297,17 @@ public class ConfirmOTPFragment extends Fragment {
                 break;
             case FORGOT_PWD_ARGS:
                 mainActivity.setFragment(ResetPasswordFragment.newInstance(ResetPasswordFragment.FORGOT_PWD_ARGS));
-
                 break;
+            case VERIFY_LOGIN_ARGS: {
+                UserRepository repository = new UserRepository(mainActivity.getApplication());
+                LocalDataManager.setUserLoginState(true);
+                LocalDataManager.setCurrentUserInfo(user);
+                SocketIOHandler.reconnect();
+                repository.insert(user);
+                mainActivity.setBottomNavVisibility(View.VISIBLE);
+                mainActivity.setFragment(new ConversationListFragment());
+                break;
+            }
         }
     }
 
@@ -341,7 +354,7 @@ public class ConfirmOTPFragment extends Fragment {
 
         DecimalFormat decimalFormat = new DecimalFormat("00");
         Timer timer = new Timer();
-        AtomicInteger counter = new AtomicInteger(30);
+        AtomicInteger counter = new AtomicInteger(59);
 
         TimerTask timerTask = new TimerTask() {
             @Override
@@ -434,7 +447,7 @@ public class ConfirmOTPFragment extends Fragment {
         ApiService.apiService.changePhoneNumber(body).enqueue(new Callback<Object>() {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                if(response.isSuccessful() && response.code() == 200) {
+                if (response.isSuccessful() && response.code() == 200) {
 
                     Gson gson = new Gson();
 

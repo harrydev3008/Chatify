@@ -522,7 +522,7 @@ public class ConversationFragment extends Fragment {
         emitMsg.addProperty("type", message.getType());
         emitMsg.addProperty("_id", message.getId());
         emitMsg.add("media", gson.toJsonTree(message.getMedia()));
-        emitMsg.add("isDelete", gson.toJsonTree(message.getDeleted()));
+        emitMsg.addProperty("isDelete", true);
 
         mSocket.emit(Constraints.EVT_DELETE_MESSAGE, emitMsg);
 
@@ -816,7 +816,7 @@ public class ConversationFragment extends Fragment {
                     }.getType());
 
                     Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
-                            data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, true);
+                            data.getString("type"), "", "", media, true);
 
                     viewModel.unsent(message);
 

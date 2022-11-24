@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 
@@ -22,6 +23,11 @@ import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentProfileBinding;
 import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.local.LocalDataManager;
+
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Date;
+import java.util.Locale;
 
 public class ProfileFragment extends Fragment {
 
@@ -64,7 +70,8 @@ public class ProfileFragment extends Fragment {
                     mBinding.cimvUserAvatar.setImageBitmap(ImageConvertUtil.createImageFromText(mMainActivity, 150, 150, user.getUsername()));
                 else
                     Glide.with(mMainActivity).asBitmap().load(user.getAvatarURL())
-                            .thumbnail(0.1f).diskCacheStrategy(DiskCacheStrategy.ALL)
+                            .placeholder(AppCompatResources.getDrawable(mMainActivity, R.drawable.ic_img_place_holder))
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
                             .into(new SimpleTarget<Bitmap>() {
                                 @Override
                                 public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
@@ -74,7 +81,9 @@ public class ProfileFragment extends Fragment {
                             });
 
                 mBinding.tvGender.setText(user.isGender() ? mMainActivity.getString(R.string.gender_m) : mMainActivity.getString(R.string.gender_f));
-                mBinding.tvDob.setText(user.getDob());
+                Date date = Date.from(Instant.parse(currentUser.getDob()));
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
+                mBinding.tvDob.setText(dateFormat.format(date));
                 mBinding.tvDisplayName.setText(user.getUsername());
                 mBinding.tvPhoneNumber.setText(user.getPhoneNumber());
             }

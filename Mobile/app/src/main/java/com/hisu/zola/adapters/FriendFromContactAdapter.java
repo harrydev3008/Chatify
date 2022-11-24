@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -95,6 +96,7 @@ public class FriendFromContactAdapter extends
             } else {
                 Glide.with(context).asBitmap()
                         .load(contactUser.getAvatarURL())
+                        .placeholder(AppCompatResources.getDrawable(context, R.drawable.ic_img_place_holder))
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
                         .into(new SimpleTarget<Bitmap>() {
                             @Override

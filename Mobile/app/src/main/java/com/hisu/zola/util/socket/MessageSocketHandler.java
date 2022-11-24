@@ -28,7 +28,7 @@ import retrofit2.Response;
 
 public class MessageSocketHandler {
 
-    public static void sendMessageViaApi(MainActivity mainActivity, Conversation conversation, String text) {
+    private static void sendMessageViaApi(MainActivity mainActivity, Conversation conversation, String text) {
 
         JsonObject object = new JsonObject();
         Gson gson = new Gson();

@@ -79,6 +79,9 @@ public interface ApiService {
     @POST(Constraints.API_CHECK_USER_BY_PHONE_NUMBER)
     Call<Object> checkUserExistByPhoneNumber(@Body RequestBody phoneNumber);
 
+    @POST(Constraints.API_CHANGE_VERIFY_OTP_STATE)
+    Call<User> changeVerifyOtpState(@Body RequestBody phoneNumber);
+
     @POST(Constraints.API_GET_USER_BY_PHONE_NUMBER)
     Call<User> findFriendByPhoneNumber(@Body RequestBody phoneNumber);
 

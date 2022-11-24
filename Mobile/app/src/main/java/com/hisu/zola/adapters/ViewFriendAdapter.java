@@ -1,19 +1,23 @@
 package com.hisu.zola.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.LayoutViewMemberBinding;
-import com.hisu.zola.listeners.IOnItemClickListener;
 import com.hisu.zola.listeners.IOnRemoveUserListener;
 import com.hisu.zola.util.local.LocalDataManager;
 
@@ -63,21 +67,29 @@ public class ViewFriendAdapter extends RecyclerView.Adapter<ViewFriendAdapter.Vi
     public void onBindViewHolder(@NonNull ViewFriendViewHolder holder, int position) {
         User member = members.get(position);
 
-        Glide.with(context).load(member.getAvatarURL()).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(holder.binding.imageView4);
+        Glide.with(context).asBitmap().load(member.getAvatarURL())
+                .placeholder(AppCompatResources.getDrawable(context, R.drawable.ic_img_place_holder))
+                .diskCacheStrategy(DiskCacheStrategy.ALL).into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        holder.binding.imageView4.setImageBitmap(resource);
+                        holder.binding.imageView4.setVisibility(View.VISIBLE);
+                    }
+                });
         holder.binding.tvMemberName.setText(member.getUsername());
 
-        if(isAdmin) {
+        if (isAdmin) {
             holder.binding.iBtnRemove.setVisibility(View.VISIBLE);
             holder.binding.iBtnRemove.setOnClickListener(view -> onRemoveUserListener.removeUser(member));
         } else {
             holder.binding.iBtnRemove.setVisibility(View.GONE);
         }
 
-        if(member.getId().equalsIgnoreCase(admin.getId())) {
+        if (member.getId().equalsIgnoreCase(admin.getId())) {
             holder.binding.tvRole.setVisibility(View.VISIBLE);
             holder.binding.iBtnRemove.setVisibility(View.GONE);
 
-            if(member.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId()))
+            if (member.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId()))
                 holder.binding.tvMemberName.setText(context.getText(R.string.user));
             else
 

@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
         User.class, Message.class, Conversation.class, ContactUser.class
 }, version = 1, exportSchema = false)
 public abstract class Database extends RoomDatabase {
-
+    public static final String DB_NAME = "Zola_Local_DB";
     private static volatile Database INSTANCE;
     /**
      * NUMBER_OF_THREADS is for 4 simple operations: Insert, update, delete & read
@@ -38,7 +38,7 @@ public abstract class Database extends RoomDatabase {
     public static synchronized Database getDatabase(Context context) {
         if (INSTANCE == null)
             INSTANCE = Room.databaseBuilder(
-                    context.getApplicationContext(), Database.class, "Zola_Local_DB"
+                    context.getApplicationContext(), Database.class, DB_NAME
             ).build();
 
         return INSTANCE;
