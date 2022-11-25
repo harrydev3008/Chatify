@@ -91,4 +91,52 @@ public class NetworkUtil {
 
         context.startActivity(Intent.createChooser(intent, context.getString(R.string.choose_app_to_open_file)));
     }
+
+    public static void downloadImage(Context context, String url, String fileName, View view) {
+
+        view.setClickable(false);
+        File checkFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);
+
+        if (checkFile.exists()) {
+            Toast toast = Toast.makeText(context, context.getString(R.string.file_already_existed), Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
+            view.setClickable(true);
+            return;
+        }
+
+        Toast toast = Toast.makeText(context, context.getString(R.string.downloading_files), Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
+
+        DownloadManager.Request dmr = new DownloadManager.Request(Uri.parse(url));
+        dmr.setDescription(fileName);
+        dmr.setTitle(fileName);
+        dmr.setVisibleInDownloadsUi(true);
+        dmr.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        dmr.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
+
+        dmr.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
+        DownloadManager manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+        long enqueue = manager.enqueue(dmr);
+
+        IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                long reference = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+                if (enqueue == reference) {
+                    File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);
+                    if (file.exists()) {
+                        Toast complete = Toast.makeText(context, context.getString(R.string.downloaded), Toast.LENGTH_SHORT);
+                        complete.setGravity(Gravity.CENTER, 0, 0);
+                        complete.show();
+                        view.setClickable(true);
+                    }
+                }
+            }
+        };
+
+        context.registerReceiver(receiver, filter);
+    }
 }

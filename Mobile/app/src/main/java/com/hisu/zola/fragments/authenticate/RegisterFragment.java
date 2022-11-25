@@ -242,7 +242,7 @@ public class RegisterFragment extends Fragment {
 
     private String getDobFormat() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
-        return dateFormat.format(mCalendar.getTime());
+        return dateFormat.format(mCalendar.getTime()) + "T03:06:25.220Z";
     }
 
     private static int calculateAge(String dobStr) {

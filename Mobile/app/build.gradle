@@ -77,6 +77,8 @@ dependencies {
     implementation 'androidx.browser:browser:1.4.0'
     implementation 'com.google.firebase:firebase-auth'
 
+    implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+
     implementation('io.socket:socket.io-client:2.0.1') {
         exclude group: 'org.json', module: 'json'
     }

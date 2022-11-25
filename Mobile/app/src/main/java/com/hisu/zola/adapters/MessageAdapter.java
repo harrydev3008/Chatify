@@ -333,7 +333,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 binding.groupImg.setVisibility(View.GONE);
 
                 binding.tvMsgSend.setCompoundDrawablesWithIntrinsicBounds(
-                        ContextCompat.getDrawable(context, R.drawable.ic_file_document), null, null, null);
+                        ContextCompat.getDrawable(context, R.drawable.ic_attach_file), null, null, null);
+                binding.tvMsgSend.setBackground(null);
+                binding.tvMsgSend.setTextColor(context.getColor(R.color.darkerBlue));
 
                 binding.tvMsgSend.setText(message.getText());
             } else if (message.getType().contains(Constraints.CALL_TYPE_GENERAL)) {

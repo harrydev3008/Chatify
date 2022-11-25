@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,8 +19,12 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.ContactUser;
+import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.LayoutFriendFromContactBinding;
+import com.hisu.zola.listeners.IOnContractUserClickListener;
+import com.hisu.zola.listeners.IOnUserClickListener;
 import com.hisu.zola.util.converter.ImageConvertUtil;
+import com.hisu.zola.util.local.LocalDataManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +34,7 @@ public class FriendFromContactAdapter extends
 
     private List<ContactUser> contactUsers;
     private final Context context;
+    private IOnContractUserClickListener onContractUserClickListener;
 
     public FriendFromContactAdapter(Context context) {
         setHasStableIds(true);
@@ -39,6 +45,10 @@ public class FriendFromContactAdapter extends
     public void setContactUsers(List<ContactUser> contactUsers) {
         this.contactUsers = contactUsers;
         notifyDataSetChanged();
+    }
+
+    public void setOnContractUserClickListener(IOnContractUserClickListener onContractUserClickListener) {
+        this.onContractUserClickListener = onContractUserClickListener;
     }
 
     @NonNull
@@ -66,7 +76,32 @@ public class FriendFromContactAdapter extends
             holder.binding.btnIsFriend.setBackgroundTintList(ContextCompat.getColorStateList(context, R.color.lightBlue));
             String textPlaceHolder = context.getString(R.string.name_in_app) + " " + contactUser.getAppName();
             holder.binding.tvAppName.setText(textPlaceHolder);
+
+            if (!isSentOrReceive(contactUser.get_id()))
+                holder.binding.btnIsFriend.setOnClickListener(view -> {
+                    onContractUserClickListener.onClick(contactUser);
+                });
+            else {
+                holder.binding.btnIsFriend.setOnClickListener(view -> {
+                    Toast.makeText(context, "ok not send", Toast.LENGTH_SHORT).show();
+                });
+            }
         }
+    }
+
+    private boolean isSentOrReceive(String id) {
+        User currentUserInfo = LocalDataManager.getCurrentUserInfo();
+        for (User user : currentUserInfo.getSendRequestQueue()) {
+            if (user.getId().equalsIgnoreCase(id))
+                return true;
+        }
+
+        for (User user : currentUserInfo.getFriendsQueue()) {
+            if (user.getId().equalsIgnoreCase(id))
+                return true;
+        }
+
+        return false;
     }
 
     @Override

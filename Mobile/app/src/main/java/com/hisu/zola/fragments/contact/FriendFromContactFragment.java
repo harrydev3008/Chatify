@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.gdacciaro.iOSDialog.iOSDialog;
 import com.gdacciaro.iOSDialog.iOSDialogBuilder;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
@@ -28,12 +29,16 @@ import com.hisu.zola.adapters.FriendFromContactAdapter;
 import com.hisu.zola.database.Database;
 import com.hisu.zola.database.entity.ContactUser;
 import com.hisu.zola.database.entity.User;
+import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentFriendFromContactBinding;
+import com.hisu.zola.fragments.conversation.ConversationDetailFragment;
+import com.hisu.zola.listeners.IOnContractUserClickListener;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.network.Constraints;
 import com.hisu.zola.util.network.NetworkUtil;
+import com.hisu.zola.util.socket.SocketIOHandler;
 import com.hisu.zola.view_model.ContactUserViewModel;
 import com.tomash.androidcontacts.contactgetter.entity.ContactData;
 import com.tomash.androidcontacts.contactgetter.main.contactsGetter.ContactsGetterBuilder;
@@ -42,6 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.socket.client.Socket;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -52,12 +58,13 @@ public class FriendFromContactFragment extends Fragment {
 
     private FragmentFriendFromContactBinding mBinding;
     private MainActivity mainActivity;
-    public static final int CONTACT_PERMISSION_CODE = 1;
     private FriendFromContactAdapter adapter;
     private ContactUserViewModel viewModel;
     private List<ContactUser> contactUsers;
     private User currentUser;
+    private Socket mSocket;
     private LoadingDialog loadingDialog;
+    private UserRepository userRepository;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -76,6 +83,8 @@ public class FriendFromContactFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        mSocket = SocketIOHandler.getInstance().getSocketConnection();
+        userRepository = new UserRepository(mainActivity.getApplication());
         contactUsers = new ArrayList<>();
         currentUser = LocalDataManager.getCurrentUserInfo();
         loadingDialog = new LoadingDialog(mainActivity, Gravity.CENTER);
@@ -89,6 +98,12 @@ public class FriendFromContactFragment extends Fragment {
 
     private void init() {
         adapter = new FriendFromContactAdapter(mainActivity);
+        adapter.setOnContractUserClickListener(new IOnContractUserClickListener() {
+            @Override
+            public void onClick(ContactUser contactUser) {
+                addActionForEventAddFriend(contactUser);
+            }
+        });
         mBinding.rvFriendsFromContact.setAdapter(adapter);
 
         viewModel = new ViewModelProvider(mainActivity).get(ContactUserViewModel.class);
@@ -123,8 +138,16 @@ public class FriendFromContactFragment extends Fragment {
                             .setTitle(mainActivity.getString(R.string.no_network_connection))
                             .setSubtitle(mainActivity.getString(R.string.no_network_connection_to_sync))
                             .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
-            } else
-                requestReadContactPermission();
+            } else {
+                new iOSDialogBuilder(mainActivity)
+                        .setTitle(mainActivity.getString(R.string.notification_warning))
+                        .setSubtitle(mainActivity.getString(R.string.ask_contact_permission))
+                        .setNegativeListener(mainActivity.getString(R.string.deny), iOSDialog::dismiss)
+                        .setPositiveListener(mainActivity.getString(R.string.allow), dialog -> {
+                            dialog.dismiss();
+                            requestReadContactPermission();
+                        }).build().show();
+            }
         });
     }
 
@@ -135,7 +158,7 @@ public class FriendFromContactFragment extends Fragment {
 
     private void requestReadContactPermission() {
         String[] permissions = {Manifest.permission.READ_CONTACTS};
-        ActivityCompat.requestPermissions(mainActivity, permissions, CONTACT_PERMISSION_CODE);
+        ActivityCompat.requestPermissions(mainActivity, permissions, Constraints.CONTACT_PERMISSION_CODE);
     }
 
     public void getContacts() {
@@ -217,5 +240,56 @@ public class FriendFromContactFragment extends Fragment {
 
         active.setBackground(ContextCompat.getDrawable(mainActivity, R.drawable.btn_solid_rounded));
         active.setTextColor(ContextCompat.getColor(mainActivity, R.color.black));
+    }
+
+    private void addActionForEventAddFriend(ContactUser user) {
+        if (NetworkUtil.isConnectionAvailable(mainActivity))
+            addFriend(user.get_id());
+        else {
+            new iOSDialogBuilder(mainActivity)
+                    .setTitle(getString(R.string.no_network_connection))
+                    .setSubtitle(getString(R.string.no_network_connection_desc))
+                    .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
+        }
+    }
+
+    private void addFriend(String friendID) {
+        JsonObject object = new JsonObject();
+        object.addProperty("userId", friendID);
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
+
+        ApiService.apiService.sendFriendRequest(body).enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(@NonNull Call<User> call, @NonNull Response<User> response) {
+                if (response.isSuccessful() && response.code() == 200) {
+
+                    User addReqUser = response.body();
+                    userRepository.update(addReqUser);
+                    emitAddFriend(addReqUser, friendID);
+
+                    mainActivity.runOnUiThread(() -> {
+                        new iOSDialogBuilder(mainActivity)
+                                .setTitle(mainActivity.getString(R.string.notification_warning))
+                                .setSubtitle(mainActivity.getString(R.string.friend_request_sent_success))
+                                .setCancelable(false)
+                                .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss)
+                                .build().show();
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                Log.e(ConversationDetailFragment.class.getName(), t.getLocalizedMessage());
+            }
+        });
+    }
+
+    private void emitAddFriend(User sender, String unsentUser) {
+        Gson gson = new Gson();
+        JsonObject object = new JsonObject();
+        object.add("sender", gson.toJsonTree(sender));
+        object.addProperty("recipient", unsentUser);
+        mSocket.emit(Constraints.EVT_ADD_FRIEND, object);
     }
 }

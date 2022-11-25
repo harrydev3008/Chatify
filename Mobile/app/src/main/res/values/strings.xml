@@ -88,7 +88,7 @@
     <string name="add_friend">Thêm bạn</string>
     <string name="not_a_friend">Kết bạn</string>
     <string name="is_a_friend">Đã là bạn</string>
-    <string name="name_in_app">Tên Zola: </string>
+    <string name="name_in_app">Tên Chatify: </string>
     <string name="sync_from_contact">Cập nhật từ danh bạ máy</string>
     <string name="find">Tìm</string>
     <string name="add_friend_by_phone_no">Thêm bạn bằng số điện thoại</string>
@@ -235,11 +235,16 @@
     <string name="no_network_connection_desc">Vui lòng kiểm tra lại kết nối mạng của bạn và thử lại sau!</string>
     <string name="no_network_connection_to_sync">Cần có kết nối mạng để thực hiện việc đồng bộ! Vui lòng kiểm tra lại kết nối mạng của bạn và thử lại sau!</string>
     <string name="downloading_files">Đang tải xuống file</string>
+    <string name="file_already_existed">Bạn đã tải ảnh này xuống bộ sưu tập của mình rồi!</string>
     <string name="downloaded">Tải file thành công!</string>
     <string name="phone_not_regis">Số điện thoại chưa được đăng ký</string>
+    <string name="phone_registered">Số điện thoại này đã được dùng để đăng ký tài khoản Chatify! Hãy kiểm tra và thử lại sau!</string>
     <string name="choose_app_to_open_file">Bạn hãy chọn một ứng dụng để mở file:</string>
     <string name="audio_chat_not_available">Chức năng gọi thoại hiện chỉ hỗ trợ trên Website… Xin lỗi vì sự bất tiện này!</string>
     <string name="video_chat_not_available">Chức năng gọi Video hiện chỉ hỗ trợ trên Website… Xin lỗi vì sự bất tiện này!</string>
+    <string name="ask_contact_permission">Bạn cần cho phép Chatify truy cập danh bạn để thực hiện chức năng đồng bộ danh bạ máy! Hãy suy nghĩ và thử lại nhé!</string>
+    <string name="allow">Cho phép</string>
+    <string name="deny">Từ chối</string>
 
     <!--Notification Channels-->
     <string name="system_noty_channel_id">zola notification id</string>

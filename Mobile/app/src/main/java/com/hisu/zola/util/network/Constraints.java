@@ -4,6 +4,7 @@ public interface Constraints {
     //Permission Code
     int STORAGE_PERMISSION_CODE = 100;
     int CONTACT_PERMISSION_CODE = 1;
+    int CAMERA_PERMISSION_CODE = 2;
 
 
     //  CONTENT TYPE

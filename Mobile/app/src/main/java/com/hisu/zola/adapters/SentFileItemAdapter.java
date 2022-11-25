@@ -2,6 +2,7 @@ package com.hisu.zola.adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import com.bumptech.glide.request.transition.Transition;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.Media;
 import com.hisu.zola.databinding.LayoutSentFileItemChildBinding;
+import com.hisu.zola.util.dialog.ViewImageDialog;
 
 import java.util.List;
 
@@ -48,7 +50,10 @@ public class SentFileItemAdapter extends RecyclerView.Adapter<SentFileItemAdapte
     @Override
     public void onBindViewHolder(@NonNull SentFileItemChildViewHolder holder, int position) {
         holder.setIsRecyclable(false);
-        Glide.with(context).asBitmap().load(imageURLs.get(position).getUrl())
+
+        Media media = imageURLs.get(position);
+
+        Glide.with(context).asBitmap().load(media.getUrl())
                 .placeholder(AppCompatResources.getDrawable(context, R.drawable.ic_img_place_holder))
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(new SimpleTarget<Bitmap>() {
@@ -58,6 +63,11 @@ public class SentFileItemAdapter extends RecyclerView.Adapter<SentFileItemAdapte
                         holder.binding.imvSentFileImg.setVisibility(View.VISIBLE);
                     }
                 });
+
+        holder.binding.imvSentFileImg.setOnClickListener(view -> {
+            ViewImageDialog dialog = new ViewImageDialog(context, media.getUrl(), Gravity.CENTER);
+            dialog.showDialog();
+        });
     }
 
     @Override

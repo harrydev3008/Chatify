@@ -28,6 +28,9 @@ public interface ContactUserDAO {
     @Query("select * from contact_users where _id = :id")
     ContactUser getContactUserByID(String id);
 
+    @Query("update contact_users set isFriend = :isFriend where _id = :id")
+    void updateFriendContact(String id, boolean isFriend);
+
     @Update
     void update(ContactUser contactUser);
 
