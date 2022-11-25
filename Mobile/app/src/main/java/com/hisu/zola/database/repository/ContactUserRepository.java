@@ -57,4 +57,10 @@ public class ContactUserRepository {
             contactUserDAO.delete(contactUser.get_id());
         });
     }
+
+    public void updateFriend(String id, boolean isFriend) {
+        Database.dbExecutor.execute(() -> {
+            contactUserDAO.updateFriendContact(id, isFriend);
+        });
+    }
 }

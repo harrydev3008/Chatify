@@ -20,6 +20,7 @@ import com.hisu.zola.R;
 import com.hisu.zola.database.entity.Media;
 import com.hisu.zola.databinding.LayoutImageGroupItemBinding;
 import com.hisu.zola.listeners.IOnItemTouchListener;
+import com.hisu.zola.util.dialog.ViewImageDialog;
 
 import java.util.List;
 
@@ -91,6 +92,11 @@ public class ImageGroupAdapter extends RecyclerView.Adapter<ImageGroupAdapter.Im
         holder.binding.rimvImageGroupItem.setOnLongClickListener(view -> {
             onItemTouchListener.longPress(null, null);
             return true;
+        });
+
+        holder.binding.rimvImageGroupItem.setOnClickListener(view -> {
+            ViewImageDialog dialog = new ViewImageDialog(context, media.getUrl(), Gravity.CENTER);
+            dialog.showDialog();
         });
     }
 

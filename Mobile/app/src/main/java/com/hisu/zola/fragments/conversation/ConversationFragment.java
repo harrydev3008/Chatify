@@ -1,8 +1,10 @@
 package com.hisu.zola.fragments.conversation;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -16,12 +18,12 @@ import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -35,20 +37,16 @@ import com.github.ybq.android.spinkit.style.ThreeBounce;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.MessageAdapter;
 import com.hisu.zola.database.Database;
 import com.hisu.zola.database.entity.Conversation;
-import com.hisu.zola.database.entity.Media;
 import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
-import com.hisu.zola.database.repository.MessageRepository;
 import com.hisu.zola.databinding.FragmentConversationBinding;
 import com.hisu.zola.databinding.LayoutChatPopupBinding;
-import com.hisu.zola.listeners.IOnItemTouchListener;
 import com.hisu.zola.util.RealPathUtil;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.ApiService;
@@ -91,7 +89,6 @@ public class ConversationFragment extends Fragment {
     private MessageAdapter messageAdapter;
     private List<Message> currentMessageList;
     private ConversationRepository repository;
-    private MessageRepository messageRepository;
     private PopupWindow popupMenu;
     private ActivityResultLauncher<Intent> filePickerLauncher;
 
@@ -133,12 +130,7 @@ public class ConversationFragment extends Fragment {
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
 
         repository = new ConversationRepository(mMainActivity.getApplication());
-        messageRepository = new MessageRepository(mMainActivity.getApplication());
 
-        mSocket.on(Constraints.EVT_MESSAGE_RECEIVE, onMessageReceive);
-        mSocket.on(Constraints.EVT_DELETE_MESSAGE_RECEIVE, onMessageDeleteReceive);
-        mSocket.on(Constraints.EVT_REMOVE_MEMBER_MOBILE_RECEIVE, onGroupDeleteMember);
-        mSocket.on(Constraints.EVT_DELETE_GROUP_RECEIVE, onDisbandGroup);
         mSocket.on(Constraints.EVT_ON_TYPING_RECEIVE, onTypingReceive);
         mSocket.on(Constraints.EVT_OFF_TYPING_RECEIVE, onTypingReceive);
 
@@ -168,24 +160,43 @@ public class ConversationFragment extends Fragment {
     }
 
     private void openBottomImagePicker() {
-        TedImagePicker.with(mMainActivity)
-                .title(mMainActivity.getString(R.string.pick_img))
-                .buttonText(mMainActivity.getString(R.string.send))
-                .startMultiImage(uris -> {
-                    mMainActivity.runOnUiThread(() -> {
-                        mBinding.sending.setVisibility(View.VISIBLE);
+        if (isReadContactPermissionGranted()) {
+            TedImagePicker.with(mMainActivity)
+                    .title(mMainActivity.getString(R.string.pick_img))
+                    .buttonText(mMainActivity.getString(R.string.send))
+                    .image()
+                    .start(uri -> {
+                        mMainActivity.runOnUiThread(() -> mBinding.sending.setVisibility(View.VISIBLE));
+                        if (NetworkUtil.isConnectionAvailable(mMainActivity))
+                            uploadImageToServer(uri);
                     });
-                    if (NetworkUtil.isConnectionAvailable(mMainActivity)) {
-                        uris.forEach(this::uploadImageToServer);
-                    }
-                });
+//                .startMultiImage(uris -> { // pick & send multiple images, too bad not yet implemented...
+//                    mMainActivity.runOnUiThread(() -> mBinding.sending.setVisibility(View.VISIBLE));
+//                    if (NetworkUtil.isConnectionAvailable(mMainActivity))
+//                        uris.forEach(this::uploadImageToServer);
+//                });
+        } else {
+            requestReadContactPermission();
+        }
     }
+
+
+    private boolean isReadContactPermissionGranted() {
+        return ContextCompat.checkSelfPermission(mMainActivity, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestReadContactPermission() {
+        String[] permissions = {Manifest.permission.CAMERA};
+        ActivityCompat.requestPermissions(mMainActivity, permissions, Constraints.CAMERA_PERMISSION_CODE);
+    }
+
 
     private void initPickFileLauncher() {
         filePickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(), result -> {
-                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                        if (result.getData().getData() != null) {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null)
+                        if (result.getData().getData() != null)
                             Database.dbExecutor.execute(() -> {
                                 try {
                                     uploadFileToServer(result.getData().getData());
@@ -193,8 +204,6 @@ public class ConversationFragment extends Fragment {
                                     Log.e(ConversationFragment.class.getName(), e.getLocalizedMessage());
                                 }
                             });
-                        }
-                    }
                 });
     }
 
@@ -245,12 +254,7 @@ public class ConversationFragment extends Fragment {
         messageAdapter.setGroup(conversation.getGroup());
 
         mBinding.rvConversation.setAdapter(messageAdapter);
-        messageAdapter.setOnItemTouchListener(new IOnItemTouchListener() {
-            @Override
-            public void longPress(Message message, View parent) {
-                showChatPopup(parent, message);
-            }
-        });
+        messageAdapter.setOnItemTouchListener((message, parent) -> showChatPopup(parent, message));
     }
 
     private void addToggleShowSendIcon() {
@@ -284,7 +288,7 @@ public class ConversationFragment extends Fragment {
         LayoutInflater inflater = (LayoutInflater)
                 mMainActivity.getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         LayoutChatPopupBinding popupBinding = LayoutChatPopupBinding.inflate(inflater, null, false);
-        popupMenu = new PopupWindow(popupBinding.getRoot(), 400, RelativeLayout.LayoutParams.WRAP_CONTENT, true);
+        popupMenu = new PopupWindow(popupBinding.getRoot(), 600, RelativeLayout.LayoutParams.WRAP_CONTENT, true);
 
         popupBinding.tvUnsent.setOnClickListener(view -> {
             unsentMessage(message);
@@ -516,13 +520,15 @@ public class ConversationFragment extends Fragment {
         Gson gson = new Gson();
 
         JsonObject emitMsg = new JsonObject();
+        emitMsg.addProperty("_id", message.getId());
         emitMsg.add("conversation", gson.toJsonTree(conversation));
         emitMsg.add("sender", gson.toJsonTree(LocalDataManager.getCurrentUserInfo()));
         emitMsg.addProperty("text", message.getText());
-        emitMsg.addProperty("type", message.getType());
-        emitMsg.addProperty("_id", message.getId());
         emitMsg.add("media", gson.toJsonTree(message.getMedia()));
+        emitMsg.addProperty("type", message.getType());
         emitMsg.addProperty("isDelete", true);
+        emitMsg.addProperty("createdAt", message.getCreatedAt());
+        emitMsg.addProperty("updatedAt", message.getUpdatedAt());
 
         mSocket.emit(Constraints.EVT_DELETE_MESSAGE, emitMsg);
 
@@ -553,7 +559,7 @@ public class ConversationFragment extends Fragment {
         if (mimeType.matches("jpg|jpeg|png|JPG|JPEG|PNG"))
             return "image/" + mimeType;
         else if (mimeType.matches("mp4|mov|wmv|avi|MP4|MOV|WMV|AVI"))
-            return "media/" + mimeType;
+            return "video/" + mimeType;
 
         return "application/" + mimeType;
     }
@@ -650,8 +656,14 @@ public class ConversationFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
                 if (response.isSuccessful() && response.code() == 200) {
-                    message.setDeleted(true);
-                    delete(message);
+
+                    Gson gson = new Gson();
+
+                    String json = gson.toJson(response.body());
+                    JsonObject obj = gson.fromJson(json, JsonObject.class);
+
+                    Message updatedMsg = gson.fromJson(obj.get("data"), Message.class);
+                    delete(updatedMsg);
                 }
             }
 
@@ -711,118 +723,6 @@ public class ConversationFragment extends Fragment {
                         e.printStackTrace();
                     }
                 });
-            }
-        }
-    };
-
-    private final Emitter.Listener onGroupDeleteMember = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-
-            JSONObject data = (JSONObject) args[0];
-            if (data != null) {
-                try {
-                    String deleteUserId = data.getString("id");
-
-                    if (LocalDataManager.getCurrentUserInfo().getId().equalsIgnoreCase(deleteUserId)) {
-
-                        repository.setDisbandGroup(conversation, "kick");
-                        messageRepository.deleteAllMessage(conversation.getId());
-
-                        mMainActivity.runOnUiThread(() -> {
-
-                            Toast toast = Toast.makeText(mMainActivity, mMainActivity.getString(R.string.use_removed), Toast.LENGTH_LONG);
-                            toast.setGravity(Gravity.CENTER, 0, 0);
-                            toast.show();
-
-                            mMainActivity.setBottomNavVisibility(View.VISIBLE);
-                            mMainActivity.getSupportFragmentManager().popBackStackImmediate();
-                        });
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
-    private final Emitter.Listener onDisbandGroup = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            JSONObject data = (JSONObject) args[0];
-
-            if (data != null) {
-                try {
-                    Gson gson = new Gson();
-                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
-                    repository.setDisbandGroup(conversation, "disband");
-                    messageRepository.deleteAllMessage(conversation.getId());
-                    mMainActivity.runOnUiThread(() -> {
-
-                        Toast toast = Toast.makeText(mMainActivity, mMainActivity.getString(R.string.group_disbanded), Toast.LENGTH_LONG);
-                        toast.setGravity(Gravity.CENTER, 0, 0);
-                        toast.show();
-
-                        mMainActivity.setBottomNavVisibility(View.VISIBLE);
-                        mMainActivity.getSupportFragmentManager().popBackStackImmediate();
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
-    private final Emitter.Listener onMessageReceive = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            JSONObject data = (JSONObject) args[0];
-            if (data != null) {
-                try {
-                    Gson gson = new Gson();
-
-                    Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
-
-                    User sender = gson.fromJson(data.getString("sender"), User.class);
-
-                    List<Media> media = gson.fromJson(data.get("media").toString(), new TypeToken<List<Media>>() {
-                    }.getType());
-
-                    Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
-                            data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, false);
-
-                    viewModel.insertOrUpdate(message);
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
-    private final Emitter.Listener onMessageDeleteReceive = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            JSONObject data = (JSONObject) args[0];
-            if (data != null) {
-                try {
-                    Gson gson = new Gson();
-
-                    Conversation conversation = gson.fromJson(data.getString("conversation"), Conversation.class);
-
-                    User sender = gson.fromJson(data.getString("sender"), User.class);
-
-                    List<Media> media = gson.fromJson(data.get("media").toString(), new TypeToken<List<Media>>() {
-                    }.getType());
-
-                    Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
-                            data.getString("type"), "", "", media, true);
-
-                    viewModel.unsent(message);
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
             }
         }
     };

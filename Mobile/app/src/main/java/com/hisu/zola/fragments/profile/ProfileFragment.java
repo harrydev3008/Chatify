@@ -81,7 +81,7 @@ public class ProfileFragment extends Fragment {
                             });
 
                 mBinding.tvGender.setText(user.isGender() ? mMainActivity.getString(R.string.gender_m) : mMainActivity.getString(R.string.gender_f));
-                Date date = Date.from(Instant.parse(currentUser.getDob()));
+                Date date = Date.from(Instant.parse(user.getDob()));
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
                 mBinding.tvDob.setText(dateFormat.format(date));
                 mBinding.tvDisplayName.setText(user.getUsername());

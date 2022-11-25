@@ -45,7 +45,8 @@ public class MessageRepository {
                 if (messageDAO.getMessageById(message.getId()) == null) {
                     messageDAO.insert(message);
                 } else {
-                    messageDAO.unsent(message.getId(), message.getDeleted());
+//                    messageDAO.unsent(message.getId(), message.getDeleted());
+                    messageDAO.updateMessage(message);
                 }
             });
         });
