@@ -284,6 +284,23 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 }
             }
 
+            if (!message.getDeleted()) {
+                receiveViewHolder.binding.msgWrapper.setOnLongClickListener(view -> {
+                    onItemTouchListener.longPress(message, receiveViewHolder.binding.msgWrapper);
+                    return true;
+                });
+
+                receiveViewHolder.binding.videoReceive.setOnLongClickListener(view -> {
+                    onItemTouchListener.longPress(message, receiveViewHolder.binding.videoReceive);
+                    return true;
+                });
+
+                receiveViewHolder.binding.groupImg.setOnLongClickListener(view -> {
+                    onItemTouchListener.longPress(message, receiveViewHolder.binding.groupImg);
+                    return true;
+                });
+            }
+
             receiveViewHolder.displayMessageContent(mContext, message);
         }
     }

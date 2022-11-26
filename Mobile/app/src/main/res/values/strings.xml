@@ -190,6 +190,8 @@
     <string name="unsent_friend_request">Huỷ lời mời kết bạn</string>
     <string name="unsent_message">Thu hồi</string>
     <string name="forward_message">Chuyển tiếp</string>
+    <string name="forward_message_desc">Chuyển tiếp tin nhắn đến:</string>
+    <string name="forward_message_done">Đã chuyển tiếp tin nhắn!</string>
     <string name="incoming_call">Cuộc gọi đến</string>
     <string name="out_going_call">Cuộc gọi</string>
     <string name="out_going_call_holder">[Cuộc gọi]</string>

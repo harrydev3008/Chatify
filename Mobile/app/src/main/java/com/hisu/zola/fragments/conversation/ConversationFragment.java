@@ -257,7 +257,9 @@ public class ConversationFragment extends Fragment {
         messageAdapter.setGroup(conversation.getGroup());
 
         mBinding.rvConversation.setAdapter(messageAdapter);
-        messageAdapter.setOnItemTouchListener((message, parent) -> showChatPopup(parent, message));
+        messageAdapter.setOnItemTouchListener((message, parent) -> {
+            showChatPopup(parent, message);
+        });
     }
 
     private void addToggleShowSendIcon() {
@@ -293,8 +295,16 @@ public class ConversationFragment extends Fragment {
         LayoutChatPopupBinding popupBinding = LayoutChatPopupBinding.inflate(inflater, null, false);
         popupMenu = new PopupWindow(popupBinding.getRoot(), 600, RelativeLayout.LayoutParams.WRAP_CONTENT, true);
 
-        popupBinding.tvUnsent.setOnClickListener(view -> {
-            unsentMessage(message);
+        if(message.getSender().getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId())) {
+            popupBinding.tvUnsent.setVisibility(View.VISIBLE);
+            popupBinding.tvUnsent.setOnClickListener(view -> {
+                unsentMessage(message);
+                popupMenu.dismiss();
+            });
+        }
+
+        popupBinding.tvForward.setOnClickListener(view -> {
+            forwardMessage(message);
             popupMenu.dismiss();
         });
 
@@ -684,7 +694,7 @@ public class ConversationFragment extends Fragment {
     }
 
     private void forwardMessage(Message message) {
-        //Todo: forward message
+        mMainActivity.addFragmentToBackStack(ForwardMessageFragment.newInstance(message));
     }
 
     private void emitTyping(String emit, boolean typing) {

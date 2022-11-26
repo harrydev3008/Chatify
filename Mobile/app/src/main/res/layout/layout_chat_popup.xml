@@ -23,6 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/unsent_message"
+        android:visibility="gone"
         android:textColor="@color/black"
         android:textSize="12sp"
         android:layout_marginStart="32dp"

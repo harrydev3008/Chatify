@@ -25,7 +25,7 @@ import java.util.List;
 public class AddGroupMemberAdapter extends RecyclerView.Adapter<AddGroupMemberAdapter.AddGroupMemberViewHolder> {
 
     private List<User> friends;
-    private Context context;
+    private final Context context;
     private IOnItemCheckedChangListener onItemCheckedChangListener;
 
     public AddGroupMemberAdapter(List<User> friends, Context context) {
