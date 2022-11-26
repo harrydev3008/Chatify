@@ -2,6 +2,7 @@ package com.hisu.zola.fragments.profile;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,7 +65,10 @@ public class ProfileFragment extends Fragment {
         repository.getUser(currentUser.getId()).observe(mMainActivity, new Observer<User>() {
             @Override
             public void onChanged(User user) {
-                if (user == null) return;
+                if (user == null) {
+                    repository.insertOrUpdate(currentUser);
+                    return;
+                }
 
                 if (user.getAvatarURL() == null || user.getAvatarURL().isEmpty())
                     mBinding.cimvUserAvatar.setImageBitmap(ImageConvertUtil.createImageFromText(mMainActivity, 150, 150, user.getUsername()));

@@ -35,6 +35,7 @@ import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.databinding.LayoutChatReceiveBinding;
 import com.hisu.zola.databinding.LayoutChatSendBinding;
+import com.hisu.zola.databinding.LayoutGroupNotificationBinding;
 import com.hisu.zola.listeners.IOnItemTouchListener;
 import com.hisu.zola.util.converter.TimeConverterUtil;
 import com.hisu.zola.util.local.LocalDataManager;
@@ -51,7 +52,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     public static final int MSG_SEND_TYPE = 0;
     public static final int MSG_RECEIVE_TYPE = 1;
-//    public static final int NOTY_RECEIVE_TYPE = 2;
+    public static final int NOTY_RECEIVE_TYPE = 2;
 
     private final List<Message> messages;
     private final Context mContext;
@@ -92,6 +93,12 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
+        if (viewType == NOTY_RECEIVE_TYPE)
+            return new MessageNotificationViewHolder(
+                    LayoutGroupNotificationBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false)
+            );
+
         if (viewType == MSG_SEND_TYPE)
             return new MessageSendViewHolder(LayoutChatSendBinding.inflate(
                     LayoutInflater.from(parent.getContext()), parent, false
@@ -136,7 +143,11 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         Message message = messages.get(position);
 
-        if (holder.getItemViewType() == MSG_SEND_TYPE) {
+        if (holder.getItemViewType() == NOTY_RECEIVE_TYPE) {
+            MessageNotificationViewHolder msgHolder = (MessageNotificationViewHolder) holder;
+            msgHolder.binding.tvChatNotification.setVisibility(View.VISIBLE);
+            msgHolder.binding.tvChatNotification.setText(message.getText());
+        } else if (holder.getItemViewType() == MSG_SEND_TYPE) {
 
             final MessageSendViewHolder sendViewHolder = ((MessageSendViewHolder) holder);
             sendViewHolder.displayMessageContent(mContext, message, onItemTouchListener);
@@ -219,25 +230,33 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 });
             }
 
-            if (position == 0)
-                receiveViewHolder.binding.ivUserPfp.setVisibility(View.VISIBLE);
-            else if (position == messages.size() - 1)
-                receiveViewHolder.binding.ivUserPfp.setVisibility(View.VISIBLE);
-            else if (messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
-                    && !messages.get(position + 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
-                receiveViewHolder.binding.ivUserPfp.setVisibility(View.VISIBLE);
-            else if (!messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
-                    && !messages.get(position + 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
-                receiveViewHolder.binding.ivUserPfp.setVisibility(View.VISIBLE);
-            else
-                receiveViewHolder.binding.ivUserPfp.setVisibility(View.INVISIBLE);
+//            if (position == 0)
+//                receiveViewHolder.binding.ivUserPfp.setVisibility(View.VISIBLE);
+//            else if (position == messages.size() - 1)
+//                receiveViewHolder.binding.ivUserPfp.setVisibility(View.VISIBLE);
+//            else if (messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
+//                    && !messages.get(position + 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
+//                receiveViewHolder.binding.ivUserPfp.setVisibility(View.VISIBLE);
+//            else if (!messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
+//                    && !messages.get(position + 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
+//                receiveViewHolder.binding.ivUserPfp.setVisibility(View.VISIBLE);
+//            else
+//                receiveViewHolder.binding.ivUserPfp.setVisibility(View.INVISIBLE);
 
             if (isGroup) {
                 receiveViewHolder.binding.tvMemberName.setVisibility(View.VISIBLE);
                 receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
 
 //                if (position == 0)
-//                    receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
+//                                receiveViewHolder.binding.tvMemberName.setVisibility(View.VISIBLE);
+//                else if(!messages.get(position - 1).getType().equalsIgnoreCase(Constraints.GROUP_NOTIFICATION_TYPE_GENERAL)
+//                && !messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))  {
+//                    receiveViewHolder.binding.tvMemberName.setVisibility(View.VISIBLE);
+//                } else if(messages.get(position - 1).getType().equalsIgnoreCase(Constraints.GROUP_NOTIFICATION_TYPE_GENERAL)
+//                        && !messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())) {
+//                    receiveViewHolder.binding.tvMemberName.setVisibility(View.VISIBLE);
+//                }
+
 //                else if (position == messages.size() - 1 && !messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
 //                    receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
 //                else if (!messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
@@ -246,7 +265,6 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 //                else if (!messages.get(position - 1).getSender().getId().equalsIgnoreCase(message.getSender().getId())
 //                        && !messages.get(position + 1).getSender().getId().equalsIgnoreCase(message.getSender().getId()))
 //                    receiveViewHolder.binding.tvMemberName.setText(message.getSender().getUsername());
-//
 //                else
 //                    receiveViewHolder.binding.tvMemberName.setVisibility(View.GONE);
             }
@@ -279,6 +297,10 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public int getItemViewType(int position) {
         User currentUser = LocalDataManager.getCurrentUserInfo();
         User sender = messages.get(position).getSender();
+
+        if (messages.get(position).getType().equalsIgnoreCase(Constraints.GROUP_NOTIFICATION_TYPE_GENERAL))
+            return NOTY_RECEIVE_TYPE;
+
         return currentUser.getId().equalsIgnoreCase(sender.getId()) ?
                 MSG_SEND_TYPE : MSG_RECEIVE_TYPE;
     }
@@ -333,7 +355,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 binding.groupImg.setVisibility(View.GONE);
 
                 binding.tvMsgSend.setCompoundDrawablesWithIntrinsicBounds(
-                        ContextCompat.getDrawable(context, R.drawable.ic_attach_file), null, null, null);
+                        ContextCompat.getDrawable(context, R.drawable.ic_files), null, null, null);
                 binding.tvMsgSend.setBackground(null);
                 binding.tvMsgSend.setTextColor(context.getColor(R.color.darkerBlue));
 
@@ -439,6 +461,16 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     binding.groupImg.setAdapter(new ImageGroupAdapter(media, context, ImageGroupAdapter.RECEIVE_MODE));
                 }
             }
+        }
+    }
+
+    public static class MessageNotificationViewHolder extends RecyclerView.ViewHolder {
+
+        private LayoutGroupNotificationBinding binding;
+
+        public MessageNotificationViewHolder(@NonNull LayoutGroupNotificationBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
         }
     }
 }

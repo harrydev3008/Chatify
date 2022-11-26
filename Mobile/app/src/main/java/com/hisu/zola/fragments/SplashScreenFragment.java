@@ -105,7 +105,7 @@ public class SplashScreenFragment extends Fragment {
                 if (response.isSuccessful() && response.code() == 200) {
                     User user = response.body();
                     LocalDataManager.setCurrentUserInfo(user);
-                    userRepository.update(user);
+                    userRepository.insertOrUpdate(user);
                 }
             }
 

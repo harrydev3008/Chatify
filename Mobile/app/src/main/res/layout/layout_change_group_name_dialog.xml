@@ -49,7 +49,6 @@
                 android:textAlignment="center"
                 android:layout_height="wrap_content"
                 android:textSize="18sp"
-                android:textAllCaps="true"
                 android:textColor="@color/primary_color"
                 android:text="@string/cancel"/>
 
@@ -65,7 +64,6 @@
                 android:textAlignment="center"
                 android:layout_height="wrap_content"
                 android:textSize="18sp"
-                android:textAllCaps="true"
                 android:textColor="@color/primary_color"
                 android:text="@string/confirm"/>
         </LinearLayout>

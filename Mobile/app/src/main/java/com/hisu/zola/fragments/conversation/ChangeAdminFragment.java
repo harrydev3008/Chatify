@@ -24,11 +24,12 @@ import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentChangeAdminBinding;
-import com.hisu.zola.util.socket.SocketIOHandler;
 import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.network.Constraints;
+import com.hisu.zola.util.socket.MessageHandler;
+import com.hisu.zola.util.socket.SocketIOHandler;
 
 import java.util.List;
 
@@ -132,9 +133,7 @@ public class ChangeAdminFragment extends Fragment {
         });
 
         mBinding.rvMembers.setAdapter(adapter);
-        mBinding.rvMembers.setLayoutManager(new
-
-                LinearLayoutManager(mainActivity));
+        mBinding.rvMembers.setLayoutManager(new LinearLayoutManager(mainActivity));
     }
 
     private void changeAdmin(User newAdmin) {
@@ -164,9 +163,13 @@ public class ChangeAdminFragment extends Fragment {
                                 .setPositiveListener(mainActivity.getString(R.string.confirm), dialog -> {
                                     dialog.dismiss();
                                     if (option.equalsIgnoreCase(CHANGE_ADMIN_OPTION_CHANGE_ARGS)) {
+                                        String holder = LocalDataManager.getCurrentUserInfo().getUsername() + " vừa chọn " + newAdmin.getUsername() + " làm trưởng nhóm mới.";
+                                        MessageHandler.sendMessageViaApi(mainActivity, conversation, holder, false);
                                         emitChangeAdmin(conversation);
                                         mainActivity.getSupportFragmentManager().popBackStackImmediate();
                                     } else if (option.equalsIgnoreCase(CHANGE_ADMIN_OPTION_DELETE_ARGS)) {
+                                        String holder = LocalDataManager.getCurrentUserInfo().getUsername() + "vừa rời nhóm và chọn " + newAdmin.getUsername() + " làm trưởng nhóm mới.";
+                                        MessageHandler.sendMessageViaApi(mainActivity, conversation, holder, false);
                                         outGroup();
                                     }
                                 })

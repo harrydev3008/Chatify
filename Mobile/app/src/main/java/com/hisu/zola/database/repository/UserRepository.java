@@ -22,7 +22,6 @@ public class UserRepository {
 
     public void insert(User user) {
         Database.dbExecutor.execute(() -> {
-//            if(userDAO.getUser(user.getId()) == null)
             userDAO.insert(user);
         });
     }
@@ -32,5 +31,15 @@ public class UserRepository {
             Database.dbExecutor.execute(() -> {
                 userDAO.update(user);
             });
+    }
+
+    public void insertOrUpdate(User user) {
+        Database.dbExecutor.execute(() -> {
+            if (userDAO.checkUser(user.getId()) == null) {
+                userDAO.insert(user);
+            } else {
+                userDAO.update(user);
+            }
+        });
     }
 }

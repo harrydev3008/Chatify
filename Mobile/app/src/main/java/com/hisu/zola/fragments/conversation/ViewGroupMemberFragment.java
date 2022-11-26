@@ -25,6 +25,7 @@ import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
 import com.hisu.zola.databinding.FragmentViewGroupMemberBinding;
 import com.hisu.zola.util.network.ApiService;
+import com.hisu.zola.util.socket.MessageHandler;
 import com.hisu.zola.util.socket.MessageSocketHandler;
 import com.hisu.zola.util.socket.SocketIOHandler;
 import com.hisu.zola.util.dialog.LoadingDialog;
@@ -148,7 +149,7 @@ public class ViewGroupMemberFragment extends Fragment {
                     repository.insertOrUpdate(conversation);
                     emitRemoveMember(memberID.getId());
 
-//                    MessageSocketHandler.sendMessageViaApi(mainActivity, conversation, getTextFromMember(memberID));
+                    MessageHandler.sendMessageViaApi(mainActivity, conversation, getTextFromMember(memberID), false);
                 }
             }
 

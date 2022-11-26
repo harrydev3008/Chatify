@@ -17,6 +17,9 @@ public interface UserDAO {
     @Query("select * from users where _id = :id")
     LiveData<User> getUser(String id);
 
+    @Query("select * from users where _id = :id")
+    User checkUser(String id);
+
     @Update
     void update(User user);
 

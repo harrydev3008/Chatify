@@ -241,7 +241,7 @@ public class RegisterFragment extends Fragment {
     }
 
     private String getDobFormat() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         return dateFormat.format(mCalendar.getTime()) + "T03:06:25.220Z";
     }
 

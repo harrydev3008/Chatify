@@ -160,7 +160,7 @@ public class ConversationFragment extends Fragment {
     }
 
     private void openBottomImagePicker() {
-        if (isReadContactPermissionGranted()) {
+        if (isCameraPermissionGranted()) {
             TedImagePicker.with(mMainActivity)
                     .title(mMainActivity.getString(R.string.pick_img))
                     .buttonText(mMainActivity.getString(R.string.send))
@@ -176,17 +176,17 @@ public class ConversationFragment extends Fragment {
 //                        uris.forEach(this::uploadImageToServer);
 //                });
         } else {
-            requestReadContactPermission();
+            requestCameraPermission();
         }
     }
 
 
-    private boolean isReadContactPermissionGranted() {
+    private boolean isCameraPermissionGranted() {
         return ContextCompat.checkSelfPermission(mMainActivity, Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void requestReadContactPermission() {
+    private void requestCameraPermission() {
         String[] permissions = {Manifest.permission.CAMERA};
         ActivityCompat.requestPermissions(mMainActivity, permissions, Constraints.CAMERA_PERMISSION_CODE);
     }
@@ -230,6 +230,8 @@ public class ConversationFragment extends Fragment {
             public void onChanged(List<Message> messages) {
 
                 if (messages == null || messages.isEmpty()) {
+                    messageAdapter.setMessages(new ArrayList<>());
+                    mBinding.rvConversation.setVisibility(View.INVISIBLE);
                     mBinding.emptyChatContainer.setVisibility(View.VISIBLE);
                     return;
                 }
@@ -238,7 +240,8 @@ public class ConversationFragment extends Fragment {
 
                 currentMessageList.clear();
                 currentMessageList.addAll(messages);
-                messageAdapter.setMessages(messages);
+                mBinding.rvConversation.setVisibility(View.VISIBLE);
+                messageAdapter.setMessages(currentMessageList);
                 if (!currentMessageList.isEmpty())
                     mBinding.rvConversation.smoothScrollToPosition(currentMessageList.size() - 1);
             }
@@ -491,7 +494,7 @@ public class ConversationFragment extends Fragment {
         mMainActivity.runOnUiThread(() -> {
             mBinding.sending.setVisibility(View.GONE);
         });
-
+        //todo: check
         Gson gson = new Gson();
         viewModel.insertOrUpdate(message);
         conversation.setLastMessage(message);

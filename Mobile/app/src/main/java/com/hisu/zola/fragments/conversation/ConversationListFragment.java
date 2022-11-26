@@ -153,7 +153,15 @@ public class ConversationListFragment extends Fragment {
                 conversationList.clear();
                 conversationList.addAll(conversations);
 
-                adapter.setConversations(conversations);
+                List<Conversation> curConversations = new ArrayList<>();
+                conversations.forEach(conversation -> {
+                    conversation.getMember().forEach(member -> {
+                        if (member.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId()))
+                            curConversations.add(conversation);
+                    });
+                });
+
+                adapter.setConversations(curConversations);
                 mBinding.rvConversationList.setAdapter(adapter);
             }
         });

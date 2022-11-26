@@ -1,7 +1,9 @@
 package com.hisu.zola.fragments.authenticate;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,11 +12,14 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.gdacciaro.iOSDialog.iOSDialog;
@@ -38,6 +43,7 @@ import com.hisu.zola.util.local.LocalDataManager;
 
 import java.io.File;
 
+import gun0912.tedimagepicker.builder.TedImagePicker;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -127,10 +133,29 @@ public class RegisterUserInfoFragment extends Fragment {
 
     private void addActionForChangeAvatarButton() {
         mBinding.cimvAvatar.setOnClickListener(view -> {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("image/*");
-            resultLauncher.launch(intent);
+            if(isCameraPermissionGranted()) {
+                TedImagePicker.with(mainActivity)
+                        .title(mainActivity.getString(R.string.pick_img))
+                        .buttonText(mainActivity.getString(R.string.choose_as_pfp))
+                        .image()
+                        .start(uri -> {
+                            mBinding.cimvAvatar.setImageURI(uri);
+                            avatarUri = uri;
+                        });
+            } else {
+                requestCameraPermission();
+            }
         });
+    }
+
+    private boolean isCameraPermissionGranted() {
+        return ContextCompat.checkSelfPermission(mainActivity, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestCameraPermission() {
+        String[] permissions = {Manifest.permission.CAMERA};
+        ActivityCompat.requestPermissions(mainActivity, permissions, Constraints.CAMERA_PERMISSION_CODE);
     }
 
     private void addActionForBtnSave() {
@@ -153,7 +178,7 @@ public class RegisterUserInfoFragment extends Fragment {
                 ApiService.apiService.postImage(part).enqueue(new Callback<Object>() {
                     @Override
                     public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
-                        if (response.isSuccessful()) {
+                        if (response.isSuccessful() && response.code() == 200) {
 
                             Gson gson = new Gson();
 
@@ -161,7 +186,6 @@ public class RegisterUserInfoFragment extends Fragment {
                             JsonObject obj = gson.fromJson(json, JsonObject.class);
                             String avatarURL = obj.get("data").toString().replaceAll("\"", "");
 
-                            User user = LocalDataManager.getCurrentUserInfo();
                             user.setGender(mBinding.rBtnGenderMale.isChecked());
                             user.setAvatarURL(avatarURL);
 
@@ -205,12 +229,20 @@ public class RegisterUserInfoFragment extends Fragment {
 
                     LocalDataManager.setUserLoginState(true);
                     LocalDataManager.setCurrentUserInfo(newUser);
-                    userRepository.insert(newUser);
+                    userRepository.insertOrUpdate(newUser);
 
                     mainActivity.runOnUiThread(() -> {
                         loadingDialog.dismissDialog();
                         mainActivity.setBottomNavVisibility(View.GONE);
                         mainActivity.addFragmentToBackStack(new WelcomeOnBoardingFragment());
+                    });
+                } else {
+                    mainActivity.runOnUiThread(() -> {
+                        loadingDialog.dismissDialog();
+                        new iOSDialogBuilder(mainActivity)
+                                .setTitle(getString(R.string.notification_warning))
+                                .setSubtitle(getString(R.string.notification_warning_msg))
+                                .setPositiveListener(getString(R.string.confirm), iOSDialog::dismiss).build().show();
                     });
                 }
             }

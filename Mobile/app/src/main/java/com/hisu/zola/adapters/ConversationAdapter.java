@@ -129,6 +129,8 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                             textPlaceHolder = lastMessage.getSender().getUsername() + ": " + mContext.getString(R.string.user_message_sent_video);
                         } else if (lastMessage.getType().contains(Constraints.CALL_TYPE_GENERAL)) {
                             textPlaceHolder = lastMessage.getSender().getUsername() + ": " + mContext.getString(R.string.out_going_call_holder);
+                        } else if (lastMessage.getType().contains(Constraints.GROUP_NOTIFICATION_TYPE_GENERAL)) {
+                            textPlaceHolder = mContext.getString(R.string.group_notification_holder);
                         } else {
                             textPlaceHolder = lastMessage.getSender().getUsername() + ": " + mContext.getString(R.string.user_message_sent_image);
                         }

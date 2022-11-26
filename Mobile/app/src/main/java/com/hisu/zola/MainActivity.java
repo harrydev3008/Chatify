@@ -1,7 +1,5 @@
 package com.hisu.zola;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -9,7 +7,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -17,11 +14,9 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.WanderingCubes;
-import com.google.android.material.badge.BadgeDrawable;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.hisu.zola.database.Database;
-import com.hisu.zola.database.entity.ContactUser;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ContactUserRepository;
 import com.hisu.zola.database.repository.UserRepository;
@@ -116,11 +111,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void messageBadge() {
-        BadgeDrawable badge = mainBinding.navigationMenu.getOrCreateBadge(R.id.action_message);
-        badge.setNumber(5);
-        badge.setBackgroundColor(ContextCompat.getColor(this, R.color.chat_badge_bg));
-        badge.setVerticalOffset(10);
-        badge.setHorizontalOffset(5);
+//        BadgeDrawable badge = mainBinding.navigationMenu.getOrCreateBadge(R.id.action_message);
+//        badge.setNumber(5);
+//        badge.setBackgroundColor(ContextCompat.getColor(this, R.color.chat_badge_bg));
+//        badge.setVerticalOffset(10);
+//        badge.setHorizontalOffset(5);
     }
 
     private void addSelectedActionForNavItem() {

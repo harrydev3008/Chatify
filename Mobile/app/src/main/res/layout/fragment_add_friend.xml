@@ -73,6 +73,7 @@
                 android:hint="@string/phone_no"
                 android:textSize="18sp"
                 android:inputType="phone"
+                android:textColor="@color/black"
                 android:maxLength="11"
                 android:importantForAutofill="no" />
 

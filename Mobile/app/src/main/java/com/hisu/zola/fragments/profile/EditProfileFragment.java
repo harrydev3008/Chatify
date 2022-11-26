@@ -173,9 +173,6 @@ public class EditProfileFragment extends Fragment {
         if (!mBinding.edtDisplayName.getText().toString().equalsIgnoreCase(currentUser.getUsername()))
             return true;
 
-        if (!mBinding.edtDob.getText().toString().equalsIgnoreCase(currentUser.getDob()))
-            return true;
-
         if (newAvatarUri != null)
             return true;
 

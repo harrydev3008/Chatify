@@ -26,7 +26,7 @@ import java.util.List;
 public class ViewFriendAdapter extends RecyclerView.Adapter<ViewFriendAdapter.ViewFriendViewHolder> {
 
     private List<User> members;
-    private Context context;
+    private final Context context;
     private IOnRemoveUserListener onRemoveUserListener;
     private boolean isAdmin;
     private User admin;

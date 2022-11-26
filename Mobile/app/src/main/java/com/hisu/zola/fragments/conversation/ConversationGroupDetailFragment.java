@@ -30,6 +30,7 @@ import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.network.Constraints;
+import com.hisu.zola.util.socket.MessageHandler;
 import com.hisu.zola.util.socket.MessageSocketHandler;
 import com.hisu.zola.util.socket.SocketIOHandler;
 
@@ -276,7 +277,7 @@ public class ConversationGroupDetailFragment extends Fragment {
                         .setSubtitle(mainActivity.getString(R.string.confirm_out_group))
                         .setPositiveListener(mainActivity.getString(R.string.yes), dialog -> {
                             dialog.dismiss();
-                            String holder = currentUser.getUsername() + " vừa rời khỏi nhóm";
+                            String holder = currentUser.getUsername() + " vừa rời khỏi nhóm.";
                             outGroup(conversation, holder);
                         })
                         .setNegativeListener(mainActivity.getString(R.string.no), iOSDialog::dismiss).build().show();
@@ -304,7 +305,7 @@ public class ConversationGroupDetailFragment extends Fragment {
                     }
 
                     conversationEmit.setMember(members);
-//                    MessageSocketHandler.sendMessageViaApi(mainActivity, conversation, msg);
+                    MessageHandler.sendMessageViaApi(mainActivity, conversation, msg, true);
                     emitOutGroup(conversationEmit);
 
                     mainActivity.setBottomNavVisibility(View.VISIBLE);

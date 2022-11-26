@@ -210,7 +210,7 @@ public class AddFriendDialog {
 
                         new iOSDialogBuilder(context)
                                 .setTitle(context.getString(R.string.notification_warning))
-                                .setTitle(context.getString(R.string.friend_request_sent_success))
+                                .setSubtitle(context.getString(R.string.friend_request_sent_success))
                                 .setCancelable(false)
                                 .setPositiveListener(context.getString(R.string.confirm), dialog1 -> {
                                     dialog1.dismiss();
@@ -267,6 +267,10 @@ public class AddFriendDialog {
     }
 
     private void emitAddFriend(User sender, String unsentUser) {
+
+        if(!mSocket.connected())
+            mSocket.connect();
+
         Gson gson = new Gson();
         JsonObject object = new JsonObject();
         object.add("sender", gson.toJsonTree(sender));
@@ -275,6 +279,10 @@ public class AddFriendDialog {
     }
 
     private void emitUnFriend(User sender, String unsentUser) {
+
+        if(!mSocket.connected())
+            mSocket.connect();
+
         Gson gson = new Gson();
         JsonObject object = new JsonObject();
         object.add("sender", gson.toJsonTree(sender));

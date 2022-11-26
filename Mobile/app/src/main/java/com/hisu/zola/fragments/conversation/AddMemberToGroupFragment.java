@@ -29,6 +29,7 @@ import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.network.Constraints;
 import com.hisu.zola.util.network.NetworkUtil;
+import com.hisu.zola.util.socket.MessageHandler;
 import com.hisu.zola.util.socket.MessageSocketHandler;
 import com.hisu.zola.util.socket.SocketIOHandler;
 
@@ -201,9 +202,9 @@ public class AddMemberToGroupFragment extends Fragment {
                     repository.insertOrUpdate(conversation);
                     emitAddMember();
 
-//                    for (User newMember : newMembers) {
-//                        MessageSocketHandler.sendMessageViaApi(mainActivity, conversation, getTextFromMember(newMember));
-//                    }
+                    for (User newMember : newMembers) {
+                        MessageHandler.sendMessageViaApi(mainActivity, conversation, getTextFromMember(newMember), false);
+                    }
 
                     mainActivity.getSupportFragmentManager().popBackStackImmediate();
                 }

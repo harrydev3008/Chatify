@@ -23,6 +23,7 @@
     <color name="dark_green">#38a3a5</color>
     <color name="no_connection">#38a3a5</color>
     <color name="connection">#04e762</color>
+    <color name="yellow">#fca311</color>
 
 <!-- chat ui colors   -->
     <color name="chat_bg">#e5e7f6</color>

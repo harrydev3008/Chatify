@@ -411,6 +411,10 @@ public class ConversationDetailFragment extends Fragment {
     }
 
     private void emitAddFriend(User sender, String unsentUser) {
+
+        if(!mSocket.connected())
+            mSocket.connect();
+
         Gson gson = new Gson();
         JsonObject object = new JsonObject();
         object.add("sender", gson.toJsonTree(sender));
@@ -419,6 +423,10 @@ public class ConversationDetailFragment extends Fragment {
     }
 
     private void emitUnFriend(User sender, String unsentUser) {
+
+        if(!mSocket.connected())
+            mSocket.connect();
+
         Gson gson = new Gson();
         JsonObject object = new JsonObject();
         object.add("sender", gson.toJsonTree(sender));
@@ -427,6 +435,10 @@ public class ConversationDetailFragment extends Fragment {
     }
 
     private void emitUnSendRequest(User sender, User unsentUser) {
+
+        if(!mSocket.connected())
+            mSocket.connect();
+
         Gson gson = new Gson();
         JsonObject object = new JsonObject();
         object.add("sender", gson.toJsonTree(sender));

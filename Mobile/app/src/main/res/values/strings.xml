@@ -98,6 +98,7 @@
     <string name="new_group">Tạo nhóm mới</string>
     <string name="create_group">Tạo nhóm</string>
     <string name="add_new_group_member">Thêm bạn vào nhóm</string>
+    <string name="create_new_group_member">Chọn bạn bè để tạo nhóm</string>
     <string name="add_new_group_done">Xong</string>
     <string name="friend_request">Lời mời kết bạn</string>
     <string name="friend_request_desc">Thu hồi hoặc từ chối lời mời kết bạn</string>
@@ -197,6 +198,8 @@
     <string name="friend_request_noty_message">vừa gửi lời mời kết bạn đến bạn!</string>
     <string name="turn_off_otp_verify">Tắt bảo mật 2 lớp?</string>
     <string name="turn_off_otp_verify_desc">Chatify sẽ ngừng yêu cầu mã xác thực khi bạn đăng nhập.</string>
+    <string name="choose_as_pfp">Chọn làm ảnh đại diện</string>
+    <string name="empty_conversation">Hãy bắt đầu cùng nhau chia sẻ những câu truyện đầy thú vị nào!</string>
 
 
     <!--Error Messages-->

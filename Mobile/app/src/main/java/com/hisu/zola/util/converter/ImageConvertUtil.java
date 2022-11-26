@@ -72,7 +72,7 @@ public class ImageConvertUtil {
         float density = context.getResources().getDisplayMetrics().density;
         float roundPx = 100 * density;
 
-        paintCircle.setColor(ContextCompat.getColor(context, R.color.darkerBlue));
+        paintCircle.setColor(ContextCompat.getColor(context, R.color.primary_color));
         paintCircle.setAntiAlias(true);
         canvas.drawARGB(0, 0, 0, 0);
 
