@@ -80,10 +80,10 @@ public class ResetPasswordFragment extends Fragment {
 
         userRepository = new UserRepository(mainActivity.getApplication());
 
-        if(arguments.equalsIgnoreCase(RESET_PWD_ARGS))
-            mBinding.linearLayout3.setVisibility(View.VISIBLE);
-        else
-            mBinding.linearLayout3.setVisibility(View.GONE);
+//        if(arguments.equalsIgnoreCase(RESET_PWD_ARGS))
+//            mBinding.linearLayout3.setVisibility(View.VISIBLE);
+//        else
+//            mBinding.linearLayout3.setVisibility(View.GONE);
 
         addChangeBackgroundColorOnFocusForPasswordEditText(mBinding.edtNewPwd, mBinding.linearLayout);
         addChangeBackgroundColorOnFocusForPasswordEditText(mBinding.edtConfirmNewPwd, mBinding.linearLayout2);

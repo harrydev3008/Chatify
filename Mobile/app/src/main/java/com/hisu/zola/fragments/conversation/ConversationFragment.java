@@ -155,8 +155,8 @@ public class ConversationFragment extends Fragment {
 
         mBinding.btnSendImg.setOnClickListener(imgView -> openBottomImagePicker());
 
-        if(NetworkUtil.isConnectionAvailable(mMainActivity))
-            loadConversationMessage(conversation.getId());
+//        if(NetworkUtil.isConnectionAvailable(mMainActivity))
+//            loadConversationMessage(conversation.getId());
     }
 
     private void addActionForBtnShowAttachFile() {
@@ -301,7 +301,7 @@ public class ConversationFragment extends Fragment {
         LayoutInflater inflater = (LayoutInflater)
                 mMainActivity.getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         LayoutChatPopupBinding popupBinding = LayoutChatPopupBinding.inflate(inflater, null, false);
-        popupMenu = new PopupWindow(popupBinding.getRoot(), 600, RelativeLayout.LayoutParams.WRAP_CONTENT, true);
+        popupMenu = new PopupWindow(popupBinding.getRoot(), 500, RelativeLayout.LayoutParams.WRAP_CONTENT, true);
 
         if (message.getSender().getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId())) {
             popupBinding.tvUnsent.setVisibility(View.VISIBLE);
@@ -316,7 +316,7 @@ public class ConversationFragment extends Fragment {
             popupMenu.dismiss();
         });
 
-        popupMenu.showAsDropDown(parent, -40, 10, Gravity.END);
+        popupMenu.showAsDropDown(parent, -20, 10, Gravity.END);
         View container = (View) popupMenu.getContentView().getParent();
         WindowManager wm = (WindowManager) mMainActivity.getSystemService(Context.WINDOW_SERVICE);
         WindowManager.LayoutParams p = (WindowManager.LayoutParams) container.getLayoutParams();

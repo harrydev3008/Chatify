@@ -69,7 +69,7 @@ public class ProfileFragment extends Fragment {
                     repository.insertOrUpdate(currentUser);
                     return;
                 }
-                Log.e("pfp", user.getAvatarURL());
+
                 if (user.getAvatarURL() == null || user.getAvatarURL().isEmpty())
                     mBinding.cimvUserAvatar.setImageBitmap(ImageConvertUtil.createImageFromText(mMainActivity, 150, 150, user.getUsername()));
                 else

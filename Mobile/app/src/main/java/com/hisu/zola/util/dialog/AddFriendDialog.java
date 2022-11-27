@@ -33,7 +33,11 @@ import com.hisu.zola.util.network.Constraints;
 import com.hisu.zola.util.network.NetworkUtil;
 import com.hisu.zola.util.socket.SocketIOHandler;
 
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import io.socket.client.Socket;
 import okhttp3.MediaType;
@@ -90,7 +94,9 @@ public class AddFriendDialog {
 
         binding.tvFriendName.setText(findUser.getUsername());
         binding.tvGender.setText(findUser.isGender() ? context.getString(R.string.gender_m) : context.getString(R.string.gender_f));
-        binding.tvDob.setText(findUser.getDob());
+        Date date = Date.from(Instant.parse(findUser.getDob()));
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
+        binding.tvDob.setText(dateFormat.format(date));
         Glide.with(context)
                 .asBitmap().load(findUser.getAvatarURL())
                 .diskCacheStrategy(DiskCacheStrategy.ALL).into(new SimpleTarget<Bitmap>() {

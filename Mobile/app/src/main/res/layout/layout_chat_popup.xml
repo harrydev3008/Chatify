@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:background="@drawable/bg_popup_menu"
     android:orientation="horizontal"
-    android:paddingVertical="10dp"
+    android:paddingVertical="4dp"
     android:gravity="center">
 
     <TextView

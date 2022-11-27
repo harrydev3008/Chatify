@@ -113,7 +113,7 @@
     <string name="friend_request_accept_success">Chúc mừng! Bạn vừa có thêm 1 người bạn mới! Giờ đây các bạn có thể trò chuyện với nhau bất cứ lúc nào!</string>
     <string name="friend_from_contact">Danh bạ máy</string>
     <string name="friend_from_contact_desc">Các liên hệ có dùng Chatify</string>
-    <string name="typing">Đang nhập</string>
+    <string name="typing">đang nhập</string>
     <string name="sending">Đang gửi</string>
     <string name="confirm_update_profile">Cập nhật thông tin tài khoản</string>
     <string name="confirm_update_profile_desc">Bạn có chắc chắn muốn cập nhật lại các thông tin này chứ?!</string>
@@ -121,7 +121,7 @@
     <string name="send">Gửi</string>
     <string name="pick_img">Chọn ảnh</string>
     <string name="change_friend_nick_name">Đổi tên gợi nhớ</string>
-    <string name="sent_file">Ảnh, file đã gửi</string>
+    <string name="sent_file">Ảnh đã gửi</string>
     <string name="unfriend">Huỷ kết bạn</string>
     <string name="delete_conversation">Xoá lịch sử cuộc trò chuyện</string>
     <string name="phone_contact">Danh bạ máy</string>

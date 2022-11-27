@@ -11,7 +11,7 @@ import java.util.List;
 public class ListUserConverter {
     @TypeConverter
     public String listToJson(List<User> users) {
-        return new Gson().toJson(users);
+        return new Gson().toJsonTree(users).toString();
     }
 
     @TypeConverter

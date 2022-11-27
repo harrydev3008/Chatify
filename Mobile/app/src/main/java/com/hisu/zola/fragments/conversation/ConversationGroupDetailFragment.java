@@ -53,6 +53,7 @@ public class ConversationGroupDetailFragment extends Fragment {
     private Conversation conversation;
     private User currentUser;
     private ConversationRepository repository;
+    private MessageRepository messageRepository;
     private ChangeGroupNameDialog groupNameDialog;
     private Socket mSocket;
     private LoadingDialog loadingDialog;
@@ -89,6 +90,7 @@ public class ConversationGroupDetailFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         loadingDialog = new LoadingDialog(mainActivity, Gravity.CENTER);
         repository = new ConversationRepository(mainActivity.getApplication());
+        messageRepository = new MessageRepository(mainActivity.getApplication());
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
         loadConversationInfo();
         backToPrevPage();
@@ -454,6 +456,7 @@ public class ConversationGroupDetailFragment extends Fragment {
         if (outGroup)
             outGroup(conversation);
         else {
+            messageRepository.insertOrUpdate(message);
             emitChangeLabel();
         }
     }
