@@ -140,7 +140,6 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                     if (lastMessage.getDeleted()) {
                         holder.binding.tvLastMsg.setText(mContext.getString(R.string.message_removed));
                     } else {
-//                        holder.binding.tvLastMsg.setText(lastMessage.getText());
                         if (lastMessage.getType().contains(Constraints.TEXT_TYPE_GENERAL)) {
                             String textPlaceHolder = lastMessage.getText();
                             holder.binding.tvLastMsg.setText(textPlaceHolder);
@@ -189,18 +188,18 @@ public class ConversationAdapter extends RecyclerView.Adapter<ConversationAdapte
                 holder.binding.tvLastMsg.setText(R.string.last_msg_disbaned);
         }
 
-        int unreadMsgQuantity = 0;
-
-        if (unreadMsgQuantity > 0) {
-            holder.binding.tvUnreadMsgQuantity.setVisibility(View.VISIBLE);
-            holder.binding.tvUnreadMsgQuantity.setText(String.valueOf(unreadMsgQuantity));
-            holder.binding.tvConversationActiveTime.setTextColor(
-                    ContextCompat.getColor(mContext, R.color.black)
-            );
-            holder.binding.tvLastMsg.setTextColor(
-                    ContextCompat.getColor(mContext, R.color.black)
-            );
-        }
+//        int unreadMsgQuantity = 0;
+//
+//        if (unreadMsgQuantity > 0) {
+//            holder.binding.tvUnreadMsgQuantity.setVisibility(View.VISIBLE);
+//            holder.binding.tvUnreadMsgQuantity.setText(String.valueOf(unreadMsgQuantity));
+//            holder.binding.tvConversationActiveTime.setTextColor(
+//                    ContextCompat.getColor(mContext, R.color.black)
+//            );
+//            holder.binding.tvLastMsg.setTextColor(
+//                    ContextCompat.getColor(mContext, R.color.black)
+//            );
+//        }
 
         holder.binding.conversationParent.setOnClickListener(view -> {
             if (conversation.getGroup())

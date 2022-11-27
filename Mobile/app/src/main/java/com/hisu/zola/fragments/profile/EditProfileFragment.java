@@ -1,8 +1,10 @@
 package com.hisu.zola.fragments.profile;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -20,6 +22,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
@@ -51,6 +55,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import gun0912.tedimagepicker.builder.TedImagePicker;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -190,12 +195,39 @@ public class EditProfileFragment extends Fragment {
         });
     }
 
+//    private void addActionForChangeAvatarButton() {
+//        mBinding.imvAvatar.setOnClickListener(view -> {
+//            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//            intent.setType("image/*");
+//            resultLauncher.launch(intent);
+//        });
+//    }
+
     private void addActionForChangeAvatarButton() {
         mBinding.imvAvatar.setOnClickListener(view -> {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("image/*");
-            resultLauncher.launch(intent);
+            if(isCameraPermissionGranted()) {
+                TedImagePicker.with(mainActivity)
+                        .title(mainActivity.getString(R.string.pick_img))
+                        .buttonText(mainActivity.getString(R.string.choose_as_pfp))
+                        .image()
+                        .start(uri -> {
+                            mBinding.imvAvatar.setImageURI(uri);
+                            newAvatarUri = uri;
+                        });
+            } else {
+                requestCameraPermission();
+            }
         });
+    }
+
+    private boolean isCameraPermissionGranted() {
+        return ContextCompat.checkSelfPermission(mainActivity, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestCameraPermission() {
+        String[] permissions = {Manifest.permission.CAMERA};
+        ActivityCompat.requestPermissions(mainActivity, permissions, Constraints.CAMERA_PERMISSION_CODE);
     }
 
     private void addActionForEditTextDateOfBirth() {

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Outline;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
@@ -13,6 +14,7 @@ import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -301,7 +303,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 });
             }
 
-            receiveViewHolder.displayMessageContent(mContext, message);
+            receiveViewHolder.displayMessageContent(mContext, message, onItemTouchListener);
         }
     }
 
@@ -394,7 +396,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 List<Media> media = message.getMedia();
 
                 int spanCount = media.size() < 2 ? 1 : 2;
-                ImageGroupAdapter imageGroupAdapter = new ImageGroupAdapter(media, context, ImageGroupAdapter.SEND_MODE);
+                ImageGroupAdapter imageGroupAdapter = new ImageGroupAdapter(message, context, ImageGroupAdapter.SEND_MODE);
                 imageGroupAdapter.setOnItemTouchListener((message1, view) -> {
                     onItemTouchListener.longPress(message, binding.groupImg);
                 });
@@ -415,7 +417,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             this.binding = binding;
         }
 
-        private void displayMessageContent(Context context, Message message) {
+        private void displayMessageContent(Context context, Message message, IOnItemTouchListener onItemTouchListener) {
             if (message.getDeleted()) {
                 binding.msgWrapper.setVisibility(View.VISIBLE);
                 binding.groupImg.setVisibility(View.GONE);
@@ -475,7 +477,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     int spanCount = media.size() < 2 ? 1 : 2;
 
                     binding.groupImg.setLayoutManager(new GridLayoutManager(context, spanCount));
-                    binding.groupImg.setAdapter(new ImageGroupAdapter(media, context, ImageGroupAdapter.RECEIVE_MODE));
+                    ImageGroupAdapter imageGroupAdapter = new ImageGroupAdapter(message, context, ImageGroupAdapter.RECEIVE_MODE);
+                    imageGroupAdapter.setOnItemTouchListener(onItemTouchListener);
+                    binding.groupImg.setAdapter(imageGroupAdapter);
                 }
             }
         }

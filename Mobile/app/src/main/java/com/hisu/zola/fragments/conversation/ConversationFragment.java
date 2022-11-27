@@ -35,8 +35,10 @@ import com.gdacciaro.iOSDialog.iOSDialogBuilder;
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.ThreeBounce;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.adapters.MessageAdapter;
@@ -45,6 +47,7 @@ import com.hisu.zola.database.entity.Conversation;
 import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
+import com.hisu.zola.database.repository.MessageRepository;
 import com.hisu.zola.databinding.FragmentConversationBinding;
 import com.hisu.zola.databinding.LayoutChatPopupBinding;
 import com.hisu.zola.util.RealPathUtil;
@@ -89,6 +92,7 @@ public class ConversationFragment extends Fragment {
     private MessageAdapter messageAdapter;
     private List<Message> currentMessageList;
     private ConversationRepository repository;
+    private MessageRepository messageRepository;
     private PopupWindow popupMenu;
     private ActivityResultLauncher<Intent> filePickerLauncher;
 
@@ -130,6 +134,7 @@ public class ConversationFragment extends Fragment {
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
 
         repository = new ConversationRepository(mMainActivity.getApplication());
+        messageRepository = new MessageRepository(mMainActivity.getApplication());
 
         mSocket.on(Constraints.EVT_ON_TYPING_RECEIVE, onTypingReceive);
         mSocket.on(Constraints.EVT_OFF_TYPING_RECEIVE, onTypingReceive);
@@ -149,6 +154,9 @@ public class ConversationFragment extends Fragment {
         addToggleShowSendIcon();
 
         mBinding.btnSendImg.setOnClickListener(imgView -> openBottomImagePicker());
+
+        if(NetworkUtil.isConnectionAvailable(mMainActivity))
+            loadConversationMessage(conversation.getId());
     }
 
     private void addActionForBtnShowAttachFile() {
@@ -295,7 +303,7 @@ public class ConversationFragment extends Fragment {
         LayoutChatPopupBinding popupBinding = LayoutChatPopupBinding.inflate(inflater, null, false);
         popupMenu = new PopupWindow(popupBinding.getRoot(), 600, RelativeLayout.LayoutParams.WRAP_CONTENT, true);
 
-        if(message.getSender().getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId())) {
+        if (message.getSender().getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId())) {
             popupBinding.tvUnsent.setVisibility(View.VISIBLE);
             popupBinding.tvUnsent.setOnClickListener(view -> {
                 unsentMessage(message);
@@ -321,17 +329,20 @@ public class ConversationFragment extends Fragment {
         if (viewModel == null) return;
         viewModel.getConversationInfo(conversation.getId()).observe(mMainActivity, new Observer<Conversation>() {
             @Override
-            public void onChanged(Conversation conversation) {
-                if (conversation == null) return;
-                if (conversation.getGroup()) {
-                    mBinding.tvUsername.setText(conversation.getLabel());
+            public void onChanged(Conversation conversationdb) {
+                if (conversationdb == null) return;
+
+                conversation = conversationdb;
+
+                if (conversationdb.getGroup()) {
+                    mBinding.tvUsername.setText(conversationdb.getLabel());
                     mBinding.tvLastActive.setText(mMainActivity.getString(R.string.group_active));
                 } else {
                     mBinding.tvUsername.setText(conversationName);
                     mBinding.tvLastActive.setText(mMainActivity.getString(R.string.user_active));
                 }
 
-                if (conversation.getDisband() != null) {
+                if (conversationdb.getDisband() != null) {
                     mBinding.btnAudioCall.setVisibility(View.GONE);
                     mBinding.btnVideoCall.setVisibility(View.GONE);
                     mBinding.btnConversationMenu.setVisibility(View.GONE);
@@ -341,10 +352,10 @@ public class ConversationFragment extends Fragment {
 
                     addActionForBtnRemoveConversation();
 
-                    if (conversation.getDisband().equalsIgnoreCase("disband")) {
+                    if (conversationdb.getDisband().equalsIgnoreCase("disband")) {
                         mBinding.groupStatusDesc.setText(mMainActivity.getText(R.string.group_status_disband));
                         mBinding.tvLastActive.setText(mMainActivity.getString(R.string.last_msg_disbaned));
-                    } else if (conversation.getDisband().equalsIgnoreCase("kick")) {
+                    } else if (conversationdb.getDisband().equalsIgnoreCase("kick")) {
                         mBinding.groupStatusDesc.setText(mMainActivity.getText(R.string.group_status_kick));
                         mBinding.tvLastActive.setText(mMainActivity.getString(R.string.last_msg_kicked));
                     }
@@ -438,6 +449,35 @@ public class ConversationFragment extends Fragment {
                         .setTitle(mMainActivity.getString(R.string.no_network_connection))
                         .setSubtitle(mMainActivity.getString(R.string.no_network_connection_desc))
                         .setPositiveListener(mMainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
+        });
+    }
+
+    private void loadConversationMessage(String conversationID) {
+        JsonObject object = new JsonObject();
+        object.addProperty("conversation", conversationID);
+
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
+
+        ApiService.apiService.getConversationMessages(body).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                Gson gson = new Gson();
+
+                JsonElement json = gson.toJsonTree(response.body());
+
+                JsonObject obj = gson.fromJson(json, JsonObject.class);
+                JsonArray array = obj.getAsJsonArray("data");
+
+                List<Message> messages = gson.fromJson(array, new TypeToken<List<Message>>() {
+                }.getType());
+
+                messageRepository.insertAll(messages);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
+            }
         });
     }
 

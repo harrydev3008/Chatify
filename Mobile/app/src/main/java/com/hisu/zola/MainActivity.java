@@ -15,15 +15,23 @@ import androidx.fragment.app.FragmentTransaction;
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.WanderingCubes;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.hisu.zola.database.Database;
+import com.hisu.zola.database.entity.Conversation;
+import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ContactUserRepository;
+import com.hisu.zola.database.repository.ConversationRepository;
+import com.hisu.zola.database.repository.MessageRepository;
 import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.ActivityMainBinding;
 import com.hisu.zola.fragments.SplashScreenFragment;
 import com.hisu.zola.fragments.StartScreenFragment;
 import com.hisu.zola.fragments.contact.ContactsFragment;
+import com.hisu.zola.fragments.conversation.ConversationFragment;
 import com.hisu.zola.fragments.conversation.ConversationListFragment;
 import com.hisu.zola.fragments.profile.ProfileFragment;
 import com.hisu.zola.util.NotificationUtil;
@@ -36,6 +44,8 @@ import com.hisu.zola.util.socket.SocketIOHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.List;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -54,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
     private Toast mExitToast;
     private UserRepository userRepository;
     private ContactUserRepository contactUserRepository;
+    private ConversationRepository conversationRepository;
+    private MessageRepository messageRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
             mSocketIO.on(Constraints.EVT_DELETE_FRIEND_RECEIVE, onRequestReceive);
 
             mSocketIO.on(Constraints.EVT_ADD_MEMBER_RECEIVE, ConversationSocketHandler.getINSTANCE(this.getApplication()).onAddMemberToGroupReceive);
-            mSocketIO.on(Constraints.EVT_REMOVE_MEMBER_RECEIVE, ConversationSocketHandler.getINSTANCE(this.getApplication()).onReceiveRemoveMember);
+            mSocketIO.on(Constraints.EVT_REMOVE_MEMBER_RECEIVE, onReceiveRemoveMember);
             mSocketIO.on(Constraints.EVT_CHANGE_GROUP_NAME_RECEIVE, ConversationSocketHandler.getINSTANCE(this.getApplication()).onReceiveChangeGroupName);
             mSocketIO.on(Constraints.EVT_OUT_GROUP_RECEIVE, ConversationSocketHandler.getINSTANCE(this.getApplication()).onReceiveOutGroup);
             mSocketIO.on(Constraints.EVT_CREATE_GROUP_RECEIVE, ConversationSocketHandler.getINSTANCE(this.getApplication()).onReceiveNewGroup);
@@ -86,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
         initProgressBar();
 
         addSelectedActionForNavItem();
-        messageBadge();
+//        messageBadge();
 
         setFragment(new SplashScreenFragment());
     }
@@ -94,6 +106,8 @@ public class MainActivity extends AppCompatActivity {
     private void init() {
         userRepository = new UserRepository(this.getApplication());
         contactUserRepository = new ContactUserRepository(this.getApplication());
+        conversationRepository = new ConversationRepository(this.getApplication());
+        messageRepository = new MessageRepository(this.getApplication());
     }
 
     private void initProgressBar() {
@@ -110,13 +124,13 @@ public class MainActivity extends AppCompatActivity {
         mainBinding.navigationMenu.setVisibility(hide);
     }
 
-    private void messageBadge() {
+//    private void messageBadge() {
 //        BadgeDrawable badge = mainBinding.navigationMenu.getOrCreateBadge(R.id.action_message);
 //        badge.setNumber(5);
 //        badge.setBackgroundColor(ContextCompat.getColor(this, R.color.chat_badge_bg));
 //        badge.setVerticalOffset(10);
 //        badge.setHorizontalOffset(5);
-    }
+//    }
 
     private void addSelectedActionForNavItem() {
         mainBinding.navigationMenu.setOnItemSelectedListener(item -> {
@@ -275,4 +289,66 @@ public class MainActivity extends AppCompatActivity {
             updateUserInfo();
         }
     };
+
+    public final Emitter.Listener onReceiveRemoveMember = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject data = (JSONObject) args[0];
+            if (data != null) {
+                try {
+                    boolean isKicked = true;
+                    Gson gson = new Gson();
+
+                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+
+                    for (User member : conversation.getMember()) {
+                        if (member.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId())) {
+                            isKicked = false;
+                            break;
+                        }
+                    }
+
+                    if (isKicked) {
+                        conversationRepository.setDisbandGroup(conversation, "kick");
+                        messageRepository.deleteAllMessage(conversation.getId());
+                    } else {
+                        conversationRepository.insertOrUpdate(conversation);
+                        loadConversationMessage(conversation.getId());
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
+    private void loadConversationMessage(String conversationID) {
+        JsonObject object = new JsonObject();
+        object.addProperty("conversation", conversationID);
+
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
+
+        ApiService.apiService.getConversationMessages(body).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                Gson gson = new Gson();
+
+                JsonElement json = gson.toJsonTree(response.body());
+
+                JsonObject obj = gson.fromJson(json, JsonObject.class);
+                JsonArray array = obj.getAsJsonArray("data");
+
+                List<Message> messages = gson.fromJson(array, new TypeToken<List<Message>>() {
+                }.getType());
+
+                messageRepository.insertAll(messages);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                Log.e(ConversationFragment.class.getName(), t.getLocalizedMessage());
+            }
+        });
+    }
 }

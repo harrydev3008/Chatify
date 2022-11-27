@@ -108,7 +108,7 @@ public class ContactFriendFragment extends Fragment {
                 conversations.forEach(conversation -> {
                     conversation.getMember().forEach(member -> {
                         if (member.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId()) &&
-                                (conversation.getLabel() == null || conversation.getLabel().isEmpty()))
+                                !conversation.getGroup())
                             friendConversations.add(conversation);
                     });
                 });

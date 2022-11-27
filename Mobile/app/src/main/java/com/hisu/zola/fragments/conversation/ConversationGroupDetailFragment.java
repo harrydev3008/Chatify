@@ -19,8 +19,10 @@ import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.Conversation;
+import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.ConversationRepository;
+import com.hisu.zola.database.repository.MessageRepository;
 import com.hisu.zola.databinding.FragmentConversationGroupDetailBinding;
 import com.hisu.zola.util.converter.ImageConvertUtil;
 import com.hisu.zola.util.dialog.ChangeGroupNameDialog;
@@ -30,10 +32,10 @@ import com.hisu.zola.util.dialog.LoadingDialog;
 import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.network.Constraints;
-import com.hisu.zola.util.socket.MessageHandler;
 import com.hisu.zola.util.socket.MessageSocketHandler;
 import com.hisu.zola.util.socket.SocketIOHandler;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.socket.client.Socket;
@@ -174,7 +176,8 @@ public class ConversationGroupDetailFragment extends Fragment {
                     conversation.setLabel(label);
                     repository.changeGroupName(conversation);
                     groupNameDialog.dismissDialog();
-                    emitChangeLabel();
+                    String holder = currentUser.getUsername() + " vừa đổi tên nhóm thành " + label;
+                    sendMessageViaApi(conversation, holder, false);
                 }
             }
 
@@ -278,14 +281,14 @@ public class ConversationGroupDetailFragment extends Fragment {
                         .setPositiveListener(mainActivity.getString(R.string.yes), dialog -> {
                             dialog.dismiss();
                             String holder = currentUser.getUsername() + " vừa rời khỏi nhóm.";
-                            outGroup(conversation, holder);
+                            sendMessageViaApi(conversation, holder, true);
                         })
                         .setNegativeListener(mainActivity.getString(R.string.no), iOSDialog::dismiss).build().show();
             }
         });
     }
 
-    private void outGroup(Conversation conversationEmit, String msg) {
+    private void outGroup(Conversation conversationEmit) {
         loadingDialog.showDialog();
 
         JsonObject object = new JsonObject();
@@ -305,12 +308,7 @@ public class ConversationGroupDetailFragment extends Fragment {
                     }
 
                     conversationEmit.setMember(members);
-                    MessageHandler.sendMessageViaApi(mainActivity, conversation, msg, true);
                     emitOutGroup(conversationEmit);
-
-                    mainActivity.setBottomNavVisibility(View.VISIBLE);
-                    mainActivity.getSupportFragmentManager().popBackStackImmediate();
-                    mainActivity.getSupportFragmentManager().popBackStackImmediate();
                 }
             }
 
@@ -356,8 +354,12 @@ public class ConversationGroupDetailFragment extends Fragment {
         JsonObject emitMsg = new JsonObject();
         emitMsg.add("conversation", gson.toJsonTree(conversation));
 
-        mSocket.emit(Constraints.EVT_OUT_GROUP, emitMsg);
         repository.delete(conversation.getId());
+        mSocket.emit(Constraints.EVT_OUT_GROUP, emitMsg);
+
+        mainActivity.getSupportFragmentManager().popBackStackImmediate();
+        mainActivity.getSupportFragmentManager().popBackStackImmediate();
+        mainActivity.setBottomNavVisibility(View.VISIBLE);
     }
 
     private void changeAdmin(User newAdmin) {
@@ -378,7 +380,7 @@ public class ConversationGroupDetailFragment extends Fragment {
                     conversation.setCreatedBy(newAdmin);
                     emitChangeAdmin(conversation);
                     String holder = currentUser.getUsername() + " vừa rời nhóm và chọn " + newAdmin.getUsername() + " làm trưởng nhóm mới.";
-                    outGroup(conversation, holder);
+                    sendMessageViaApi(conversation, holder, true);
                 }
             }
 
@@ -394,6 +396,66 @@ public class ConversationGroupDetailFragment extends Fragment {
                 Log.e(ChangeAdminFragment.class.getName(), t.getLocalizedMessage());
             }
         });
+    }
+
+    private void sendMessageViaApi(Conversation conversation, String text, boolean outGroup) {
+        Gson gson = new Gson();
+        JsonObject object = new JsonObject();
+
+        object.add("conversation", gson.toJsonTree(conversation));
+        object.addProperty("sender", LocalDataManager.getCurrentUserInfo().getId());
+        object.addProperty("text", text);
+        object.addProperty("type", "notification");
+        object.add("media", gson.toJsonTree(new ArrayList<>()));
+
+        RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
+
+        ApiService.apiService.sendMessage(body).enqueue(new Callback<Object>() {
+            @Override
+            public void onResponse(@NonNull Call<Object> call, @NonNull Response<Object> response) {
+                if (response.isSuccessful() && response.code() == 200) {
+                    String json = gson.toJson(response.body());
+
+                    JsonObject obj = gson.fromJson(json, JsonObject.class);
+
+                    Message message = gson.fromJson(obj.get("data"), Message.class);
+                    sendMessage(conversation, message, outGroup);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Object> call, @NonNull Throwable t) {
+                Log.e(MessageSocketHandler.class.getName(), t.getLocalizedMessage());
+            }
+        });
+    }
+
+    private void sendMessage(Conversation conversation, Message message, boolean outGroup) {
+        if (!mSocket.connected()) {
+            mSocket.connect();
+        }
+
+        Gson gson = new Gson();
+
+        JsonObject emitMsg = new JsonObject();
+        emitMsg.add("conversation", gson.toJsonTree(conversation));
+        emitMsg.add("sender", gson.toJsonTree(LocalDataManager.getCurrentUserInfo()));
+
+        emitMsg.addProperty("text", message.getText());
+        emitMsg.addProperty("type", message.getType());
+        emitMsg.add("media", gson.toJsonTree(message.getMedia()));
+        emitMsg.addProperty("isDelete", false);
+        emitMsg.addProperty("_id", message.getId());
+        emitMsg.addProperty("createdAt", message.getCreatedAt());
+        emitMsg.addProperty("updatedAt", message.getUpdatedAt());
+
+        mSocket.emit(Constraints.EVT_MESSAGE_SEND, emitMsg);
+
+        if (outGroup)
+            outGroup(conversation);
+        else {
+            emitChangeLabel();
+        }
     }
 
     private void emitChangeAdmin(Conversation conversation) {

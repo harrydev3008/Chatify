@@ -18,6 +18,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.hisu.zola.R;
 import com.hisu.zola.database.entity.Media;
+import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.databinding.LayoutImageGroupItemBinding;
 import com.hisu.zola.listeners.IOnItemTouchListener;
 import com.hisu.zola.util.dialog.ViewImageDialog;
@@ -26,6 +27,7 @@ import java.util.List;
 
 public class ImageGroupAdapter extends RecyclerView.Adapter<ImageGroupAdapter.ImageGroupViewHolder> {
 
+    private Message message;
     private List<Media> mediaList;
     private final Context context;
     private int mode;
@@ -37,8 +39,9 @@ public class ImageGroupAdapter extends RecyclerView.Adapter<ImageGroupAdapter.Im
         this.context = context;
     }
 
-    public ImageGroupAdapter(List<Media> mediaList, Context context, int mode) {
-        this.mediaList = mediaList;
+    public ImageGroupAdapter(Message message, Context context, int mode) {
+        this.message = message;
+        this.mediaList = message.getMedia();
         this.context = context;
         this.mode = mode;
         notifyDataSetChanged();
@@ -90,7 +93,7 @@ public class ImageGroupAdapter extends RecyclerView.Adapter<ImageGroupAdapter.Im
                 });
 
         holder.binding.rimvImageGroupItem.setOnLongClickListener(view -> {
-            onItemTouchListener.longPress(null, null);
+            onItemTouchListener.longPress(message, holder.binding.rimvImageGroupItem);
             return true;
         });
 

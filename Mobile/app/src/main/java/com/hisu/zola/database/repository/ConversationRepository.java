@@ -1,7 +1,6 @@
 package com.hisu.zola.database.repository;
 
 import android.app.Application;
-import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 
@@ -27,7 +26,7 @@ public class ConversationRepository {
 
     public void insertOrUpdate(Conversation conversation) {
         Database.dbExecutor.execute(() -> {
-            if(conversationDAO.getConversationById(conversation.getId()) == null)
+            if (conversationDAO.getConversationById(conversation.getId()) == null)
                 insert(conversation);
             else
                 update(conversation);

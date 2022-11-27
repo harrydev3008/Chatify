@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment;
 import com.google.gson.JsonObject;
 import com.hisu.zola.MainActivity;
 import com.hisu.zola.R;
+import com.hisu.zola.database.Database;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.UserRepository;
 import com.hisu.zola.databinding.FragmentSplashScreenBinding;
@@ -78,6 +79,11 @@ public class SplashScreenFragment extends Fragment {
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
 
             mMainActivity.setBottomNavVisibility(View.GONE);
+
+            Database database = Database.getDatabase(mMainActivity);
+            Database.dbExecutor.execute(() -> {
+                database.conversationDAO().dropConversationTable();
+            });
 
             if (isUserLoggedIn()) {
                 mMainActivity.setBottomNavVisibility(View.VISIBLE);

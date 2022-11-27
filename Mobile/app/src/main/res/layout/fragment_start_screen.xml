@@ -34,6 +34,7 @@
         android:fontFamily="@font/be_vietnam"
         android:padding="15dp"
         android:text="@string/login"
+        android:textColor="@color/white"
         android:textSize="20sp"
         android:textStyle="bold"
         app:cornerRadius="50dp"

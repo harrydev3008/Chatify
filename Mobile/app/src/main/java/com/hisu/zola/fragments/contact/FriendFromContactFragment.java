@@ -212,10 +212,13 @@ public class FriendFromContactFragment extends Fragment {
     }
 
     private boolean isFriend(User foundUser) {
+        if(foundUser.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId())) return false;
+
         for (User friend : currentUser.getFriends()) {
             if (friend.getPhoneNumber().equalsIgnoreCase(foundUser.getPhoneNumber()))
                 return true;
         }
+
         return false;
     }
 
@@ -254,6 +257,11 @@ public class FriendFromContactFragment extends Fragment {
     }
 
     private void addFriend(String friendID) {
+
+        mainActivity.runOnUiThread(() -> {
+            loadingDialog.showDialog();
+        });
+
         JsonObject object = new JsonObject();
         object.addProperty("userId", friendID);
         RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
@@ -268,6 +276,9 @@ public class FriendFromContactFragment extends Fragment {
                     emitAddFriend(addReqUser, friendID);
 
                     mainActivity.runOnUiThread(() -> {
+                        mainActivity.runOnUiThread(() -> {
+                            loadingDialog.dismissDialog();
+                        });
                         new iOSDialogBuilder(mainActivity)
                                 .setTitle(mainActivity.getString(R.string.notification_warning))
                                 .setSubtitle(mainActivity.getString(R.string.friend_request_sent_success))
@@ -280,6 +291,14 @@ public class FriendFromContactFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(mainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mainActivity.getString(R.string.notification_warning_msg))
+                            .setCancelable(false)
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
                 Log.e(ConversationDetailFragment.class.getName(), t.getLocalizedMessage());
             }
         });

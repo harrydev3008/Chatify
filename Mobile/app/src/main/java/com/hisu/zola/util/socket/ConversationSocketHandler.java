@@ -1,6 +1,7 @@
 package com.hisu.zola.util.socket;
 
 import android.app.Application;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.hisu.zola.database.entity.Conversation;
@@ -55,37 +56,37 @@ public class ConversationSocketHandler {
         }
     };
 
-    public final Emitter.Listener onReceiveRemoveMember = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            JSONObject data = (JSONObject) args[0];
-            if (data != null) {
-                try {
-                    boolean isKicked = true;
-                    Gson gson = new Gson();
-
-                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
-
-                    for (User member : conversation.getMember()) {
-                        if (member.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId())) {
-                            isKicked = false;
-                            break;
-                        }
-                    }
-
-                    if (isKicked) {
-                        conversationRepository.setDisbandGroup(conversation, "kick");
-                        messageRepository.deleteAllMessage(conversation.getId());
-                    } else {
-                        conversationRepository.insertOrUpdate(conversation);
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
+//    public final Emitter.Listener onReceiveRemoveMember = new Emitter.Listener() {
+//        @Override
+//        public void call(Object... args) {
+//            JSONObject data = (JSONObject) args[0];
+//            if (data != null) {
+//                try {
+//                    boolean isKicked = true;
+//                    Gson gson = new Gson();
+//
+//                    Conversation conversation = gson.fromJson(data.toString(), Conversation.class);
+//
+//                    for (User member : conversation.getMember()) {
+//                        if (member.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId())) {
+//                            isKicked = false;
+//                            break;
+//                        }
+//                    }
+//
+//                    if (isKicked) {
+//                        conversationRepository.setDisbandGroup(conversation, "kick");
+//                        messageRepository.deleteAllMessage(conversation.getId());
+//                    } else {
+//                        conversationRepository.insertOrUpdate(conversation);
+//                    }
+//
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//    };
 
     public final Emitter.Listener onReceiveOutGroup = new Emitter.Listener() {
         @Override

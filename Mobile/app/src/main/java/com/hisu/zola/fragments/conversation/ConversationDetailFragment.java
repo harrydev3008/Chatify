@@ -274,6 +274,11 @@ public class ConversationDetailFragment extends Fragment {
     }
 
     private void addFriend(String friendID) {
+
+        mainActivity.runOnUiThread(() -> {
+            loadingDialog.showDialog();
+        });
+
         JsonObject object = new JsonObject();
         object.addProperty("userId", friendID);
         RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
@@ -288,6 +293,7 @@ public class ConversationDetailFragment extends Fragment {
                     emitAddFriend(addReqUser, friendID);
 
                     mainActivity.runOnUiThread(() -> {
+                        loadingDialog.dismissDialog();
                         new iOSDialogBuilder(mainActivity)
                                 .setTitle(mainActivity.getString(R.string.notification_warning))
                                 .setSubtitle(mainActivity.getString(R.string.friend_request_sent_success))
@@ -300,12 +306,25 @@ public class ConversationDetailFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(mainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mainActivity.getString(R.string.notification_warning_msg))
+                            .setCancelable(false)
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
                 Log.e(ConversationDetailFragment.class.getName(), t.getLocalizedMessage());
             }
         });
     }
 
     private void unfriend() {
+
+        mainActivity.runOnUiThread(() -> {
+            loadingDialog.showDialog();
+        });
+
         JsonObject object = new JsonObject();
         object.addProperty("deleteFriendId", user.getId());
         RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
@@ -318,6 +337,7 @@ public class ConversationDetailFragment extends Fragment {
                     emitUnFriend(curUser, user.getId());
 
                     mainActivity.runOnUiThread(() -> {
+                        loadingDialog.dismissDialog();
                         new iOSDialogBuilder(mainActivity)
                                 .setTitle(mainActivity.getString(R.string.notification_warning))
                                 .setSubtitle(mainActivity.getString(R.string.unfriend_success))
@@ -329,12 +349,25 @@ public class ConversationDetailFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(mainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mainActivity.getString(R.string.notification_warning_msg))
+                            .setCancelable(false)
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
                 Log.e(ConversationDetailFragment.class.getName(), t.getLocalizedMessage());
             }
         });
     }
 
     private void unSentFriendRequest(User user) {
+
+        mainActivity.runOnUiThread(() -> {
+            loadingDialog.showDialog();
+        });
+
         JsonObject object = new JsonObject();
         object.addProperty("recallFriendRequestId", user.getId());
         RequestBody body = RequestBody.create(MediaType.parse(Constraints.JSON_TYPE), object.toString());
@@ -359,22 +392,38 @@ public class ConversationDetailFragment extends Fragment {
                     LocalDataManager.setCurrentUserInfo(currentUser);
                     emitUnSendRequest(currentUser, user);
 
-                    new iOSDialogBuilder(mainActivity)
-                            .setTitle(mainActivity.getString(R.string.notification_warning))
-                            .setCancelable(false)
-                            .setSubtitle(mainActivity.getString(R.string.friend_request_unsent))
-                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                    mainActivity.runOnUiThread(() -> {
+                        loadingDialog.dismissDialog();
+                        new iOSDialogBuilder(mainActivity)
+                                .setTitle(mainActivity.getString(R.string.notification_warning))
+                                .setCancelable(false)
+                                .setSubtitle(mainActivity.getString(R.string.friend_request_unsent))
+                                .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                    });
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<User> call, @NonNull Throwable t) {
+                mainActivity.runOnUiThread(() -> {
+                    loadingDialog.dismissDialog();
+                    new iOSDialogBuilder(mainActivity)
+                            .setTitle(mainActivity.getString(R.string.notification_warning))
+                            .setSubtitle(mainActivity.getString(R.string.notification_warning_msg))
+                            .setCancelable(false)
+                            .setPositiveListener(mainActivity.getString(R.string.confirm), iOSDialog::dismiss).build().show();
+                });
                 Log.e(FriendRequestSendFragment.class.getName(), t.getLocalizedMessage());
             }
         });
     }
 
     private void denyFriendRequest(String friendID) {
+
+        mainActivity.runOnUiThread(() -> {
+            loadingDialog.showDialog();
+        });
+
         JsonObject object = new JsonObject();
         object.addProperty("deniedFriendId", friendID);
         RequestBody body = RequestBody.create(MediaType.parse("application/json"), object.toString());

@@ -112,7 +112,7 @@ public class ConfirmOTPFragment extends Fragment {
         backToPrevPage();
         initOTPInput();
         addActionForBtnVerifyOTP();
-//        handleSendOTP();
+        handleSendOTP();
     }
 
     private void backToPrevPage() {
@@ -245,12 +245,11 @@ public class ConfirmOTPFragment extends Fragment {
 
     private void addActionForBtnVerifyOTP() {
         mBinding.btnVerifyOtp.setOnClickListener(view -> {
-            switchToNextPage();
-//            if (verifyOTP(getOtpInput())) {
-//                loadingDialog.showDialog();
-//                PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationID, getOtpInput());
-//                signInWithPhoneAuthCredential(credential);
-//            }
+            if (verifyOTP(getOtpInput())) {
+                loadingDialog.showDialog();
+                PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationID, getOtpInput());
+                signInWithPhoneAuthCredential(credential);
+            }
         });
     }
 

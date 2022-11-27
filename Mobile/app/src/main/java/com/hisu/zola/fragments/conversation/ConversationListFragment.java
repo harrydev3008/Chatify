@@ -31,7 +31,6 @@ import com.hisu.zola.R;
 import com.hisu.zola.adapters.ConversationAdapter;
 import com.hisu.zola.database.Database;
 import com.hisu.zola.database.entity.Conversation;
-import com.hisu.zola.database.entity.Media;
 import com.hisu.zola.database.entity.Message;
 import com.hisu.zola.database.entity.User;
 import com.hisu.zola.database.repository.MessageRepository;
@@ -47,14 +46,10 @@ import com.hisu.zola.util.network.NetworkUtil;
 import com.hisu.zola.util.socket.SocketIOHandler;
 import com.hisu.zola.view_model.ConversationListViewModel;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -96,7 +91,6 @@ public class ConversationListFragment extends Fragment {
 
         checkNetWorkConnection();
 
-        SocketIOHandler.getInstance();
         SocketIOHandler.getInstance().establishSocketConnection();
 
         mSocket = SocketIOHandler.getInstance().getSocketConnection();
