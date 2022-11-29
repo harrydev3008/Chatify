@@ -168,6 +168,8 @@ public class FriendFromContactFragment extends Fragment {
                 loadingDialog.showDialog();
             });
 
+            User currentUserInfo = LocalDataManager.getCurrentUserInfo();
+
             List<ContactData> contactDataList = new ContactsGetterBuilder(mainActivity)
                     .allFields()
                     .buildList();
@@ -191,9 +193,10 @@ public class FriendFromContactFragment extends Fragment {
                                     if (isFriend)
                                         avatar = user.getAvatarURL();
 
-                                    viewModel.insertOrUpdate(
-                                            new ContactUser(user.getId(), contactData.getCompositeName(), user.getUsername(), phoneNumber, avatar, "", true, isFriend)
-                                    );
+                                    if (!user.getId().equalsIgnoreCase(currentUserInfo.getId()))
+                                        viewModel.insertOrUpdate(
+                                                new ContactUser(user.getId(), contactData.getCompositeName(), user.getUsername(), phoneNumber, avatar, "", true, isFriend)
+                                        );
                                 }
                             }
                         }
@@ -212,8 +215,6 @@ public class FriendFromContactFragment extends Fragment {
     }
 
     private boolean isFriend(User foundUser) {
-        if(foundUser.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId())) return false;
-
         for (User friend : currentUser.getFriends()) {
             if (friend.getPhoneNumber().equalsIgnoreCase(foundUser.getPhoneNumber()))
                 return true;

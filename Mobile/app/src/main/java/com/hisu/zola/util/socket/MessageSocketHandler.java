@@ -75,24 +75,11 @@ public class MessageSocketHandler {
                     Message message = new Message(data.getString("_id"), conversation.getId(), sender, data.getString("text"),
                             data.getString("type"), data.getString("createdAt"), data.getString("updatedAt"), media, false);
 
-//                    conversation.setLastMessage(message);
-//                    conversationRepository.insertOrUpdate(conversation);
-//
-//                    messageRepository.insertOrUpdate(message);
+//                    Log.e("reci", message.toString());
 
-                    boolean check = false;
-                    for (User user : conversation.getMember()) {
-                        if (user.getId().equalsIgnoreCase(LocalDataManager.getCurrentUserInfo().getId())) {
-                            check = true;
-                            break;
-                        }
-                    }
-
-                    if(check) {
-                        conversation.setLastMessage(message);
-                        conversationRepository.insertOrUpdate(conversation);
-                        messageRepository.insertOrUpdate(message);
-                    }
+                    conversation.setLastMessage(message);
+                    conversationRepository.insertOrUpdate(conversation);
+                    messageRepository.insertOrUpdate(message);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -128,7 +115,7 @@ public class MessageSocketHandler {
                         }
                     }
 
-                    if(check) {
+                    if (check) {
                         conversation.setLastMessage(message);
                         conversationRepository.insertOrUpdate(conversation);
                         messageRepository.insertOrUpdate(message);

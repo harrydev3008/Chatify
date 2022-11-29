@@ -55,6 +55,7 @@ import com.hisu.zola.util.local.LocalDataManager;
 import com.hisu.zola.util.network.ApiService;
 import com.hisu.zola.util.network.Constraints;
 import com.hisu.zola.util.network.NetworkUtil;
+import com.hisu.zola.util.socket.MessageSocketHandler;
 import com.hisu.zola.util.socket.SocketIOHandler;
 import com.hisu.zola.view_model.ConversationViewModel;
 
@@ -112,6 +113,8 @@ public class ConversationFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         mMainActivity = (MainActivity) getActivity();
+        Socket mSocketIO = SocketIOHandler.getInstance().getSocketConnection();
+        mSocketIO.on(Constraints.EVT_MESSAGE_RECEIVE, MessageSocketHandler.getINSTANCE(mMainActivity.getApplication()).onMessageReceive);
 
         if (getArguments() != null) {
             conversation = (Conversation) getArguments().getSerializable(CONVERSATION_ARGS);

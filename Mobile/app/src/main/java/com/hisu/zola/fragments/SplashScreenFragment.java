@@ -80,10 +80,12 @@ public class SplashScreenFragment extends Fragment {
 
             mMainActivity.setBottomNavVisibility(View.GONE);
 
-            Database database = Database.getDatabase(mMainActivity);
-            Database.dbExecutor.execute(() -> {
-                database.conversationDAO().dropConversationTable();
-            });
+            if (NetworkUtil.isConnectionAvailable(mMainActivity)) {
+                Database database = Database.getDatabase(mMainActivity);
+                Database.dbExecutor.execute(() -> {
+                    database.conversationDAO().dropConversationTable();
+                });
+            }
 
             if (isUserLoggedIn()) {
                 mMainActivity.setBottomNavVisibility(View.VISIBLE);
